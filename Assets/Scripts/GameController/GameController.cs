@@ -427,7 +427,7 @@ public class GameController : MonoBehaviour
             else
             {
                 //time to check the winner
-                CheckForWinner();
+                CheckForWinner(coin);
             }
         }
     } 
@@ -523,11 +523,48 @@ public class GameController : MonoBehaviour
 
     }
     #endregion
-    
+
     #region Win lose
-    void CheckForWinner()
+    private List<int> winnersList=new List<int>();
+
+    void CheckForWinner(Coin coin)
     {
-        Debug.Log("time to find out who is the winner!");
+        int count=0;
+        for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+        {
+            if(generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().atHome)
+            {
+                count++;
+            }
+        }
+
+        if(count==noOfCoins)
+        {
+            Debug.Log("winner!");
+            winnersList.Add(coin.id);
+            //remove player from the list
+            gamePlayersList.Remove(coin.id);
+            //show win ui and give options for continue
+
+            if(gamePlayersList.Count<2)
+            {
+                //show final win lose ui
+                ShowPlayerRank();
+            }
+            else
+            {
+                UpdateTurn();
+            }
+        }
+        else
+        {
+            HandleDiceRoll(turnCounter);
+        }
+    }
+
+    void ShowPlayerRank()
+    {
+        Debug.Log("Congratulations ,"+players[winnersList[0]].colorName+" won the game");
     }
     #endregion
 
