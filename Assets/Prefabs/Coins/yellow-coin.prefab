@@ -11,8 +11,10 @@ GameObject:
   - component: {fileID: 791956182272476057}
   - component: {fileID: 8444804072328674450}
   - component: {fileID: 7486379800804852386}
-  m_Layer: 0
-  m_Name: coinYellow0
+  - component: {fileID: 789540230012214191}
+  - component: {fileID: 2022078906799918}
+  m_Layer: 7
+  m_Name: yellow-coin
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59,8 +61,8 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1c0b6272e51d1476db8d57dcc7ae54e9, type: 2}
-  - {fileID: -8848810374240701247, guid: 8d66d77e9b0c94f698cf9f4cb4bc803a, type: 3}
+  - {fileID: 2100000, guid: 40122ee7b58264941815fe976cdbd8d4, type: 2}
+  - {fileID: 2100000, guid: 217ecbb55cd6d4fc88c439cef75b08bc, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -82,3 +84,32 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &789540230012214191
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5531670995685356076}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b95c724e846a4968ac7918ef3296831, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  id: 0
+  stepCounter: 0
+  atBase: 1
+--- !u!64 &2022078906799918
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5531670995685356076}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -3678517459796426184, guid: 8d66d77e9b0c94f698cf9f4cb4bc803a, type: 3}
