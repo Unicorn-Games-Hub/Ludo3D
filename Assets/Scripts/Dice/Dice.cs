@@ -29,7 +29,7 @@ public class Dice : MonoBehaviour
     public bool canRollDice=false;
 
    //array for dice face rotation
-   private Vector2[] diceFaceArray={new Vector2(180f,0f),new Vector2(90f,0f),new Vector2(0f,270f),new Vector2(0f,90f),new Vector2(270f,0f),new Vector2(0f,0f)};
+   private Vector2[] diceFaceArray={new Vector2(180f,0f),new Vector2(270f,0f),new Vector2(0f,90f),new Vector2(0f,270f),new Vector2(90f,0f),new Vector2(0f,0f)};
    [Range(1,6)]
    public int currentDiceValue=1;
 
@@ -130,7 +130,7 @@ public class Dice : MonoBehaviour
    int GetRandomDiceValue()
    {
         return Random.Range(1,7);
-        //return Random.Range(6,7);
+        //return Random.Range(1,2);
    }
 
    void RotateDiceToCorrectFace()

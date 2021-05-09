@@ -14,6 +14,14 @@ public class Coin : MonoBehaviour
     public bool atHome=false;
     public bool isSafe=false;
 
+    public Vector3 initialPosInfo;
+
+    public void HandleCoinInfo(int Id,Vector3 coinPos)
+    {
+        id=Id;
+        initialPosInfo=coinPos;
+    }
+
     public void SetClickable(bool clickValue)
     {
         isClickable=clickValue;
