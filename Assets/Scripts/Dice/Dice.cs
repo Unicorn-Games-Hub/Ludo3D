@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Dice : MonoBehaviour
 {
+    public static Dice instance;
    private Rigidbody rb;
    private RaycastHit hit;
 
@@ -24,8 +25,11 @@ public class Dice : MonoBehaviour
     private float x;
     private float diceRollMultiplier=10f;
 
+    [Header("Dice Roll Controller")]
+    public bool canRollDice=false;
+
    //array for dice face rotation
-   private Vector2[] diceFaceArray={new Vector2(180f,0f),new Vector2(90f,0f),new Vector2(0f,270f),new Vector2(0f,90f),new Vector2(270f,0f),new Vector2(0f,0f)};
+   private Vector2[] diceFaceArray={new Vector2(180f,0f),new Vector2(270f,0f),new Vector2(0f,90f),new Vector2(0f,270f),new Vector2(90f,0f),new Vector2(0f,0f)};
    [Range(1,6)]
    public int currentDiceValue=1;
 
@@ -36,6 +40,18 @@ public class Dice : MonoBehaviour
        rolling
    }
    public states diceStates;
+
+   void Awake()
+   {
+       if(instance!=null)
+       {
+           return;
+       }
+       else
+       {
+           instance=this;
+       }
+   }
 
 
    void Start()
@@ -50,7 +66,7 @@ public class Dice : MonoBehaviour
    {
        if(diceStates!=states.rolling)
        {
-            if(Input.GetMouseButtonDown(0))
+            if(Input.GetMouseButtonDown(0)&&canRollDice)
             {
                 Ray ray=Camera.main.ScreenPointToRay(Input.mousePosition);
                 if(Physics.Raycast(ray,out hit))
@@ -97,7 +113,7 @@ public class Dice : MonoBehaviour
         }
    }
 
-   IEnumerator RolltheDice()
+   public IEnumerator RolltheDice()
    {
        currentDiceValue=GetRandomDiceValue();
         startDiceAnimation=true;
@@ -107,11 +123,14 @@ public class Dice : MonoBehaviour
         RotateDiceToCorrectFace();
         diceStates=states.idle;
         rb.drag=40f;
+        canRollDice=false;
+        GameController.instance.HandleObtainedDiceValue(currentDiceValue);
    }
 
    int GetRandomDiceValue()
    {
-       return Random.Range(1,7);
+        return Random.Range(1,7);
+        //return Random.Range(1,2);
    }
 
    void RotateDiceToCorrectFace()
