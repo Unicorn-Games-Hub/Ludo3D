@@ -111,6 +111,8 @@ public class Dice : MonoBehaviour
             x+=diceRollMultiplier;
            transform.rotation=Quaternion.Euler(x,0f,x);
         }
+
+
    }
 
    public IEnumerator RolltheDice()
@@ -130,7 +132,18 @@ public class Dice : MonoBehaviour
    int GetRandomDiceValue()
    {
         return Random.Range(1,7);
+        /*
+        //for testing only
         //return Random.Range(1,2);
+        if(Random.Range(0,2)==0)
+        {
+            return 1;
+        }
+        else 
+        {
+            return 6;
+        }
+        */
    }
 
    void RotateDiceToCorrectFace()

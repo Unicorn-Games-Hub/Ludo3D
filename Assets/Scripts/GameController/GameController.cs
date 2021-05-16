@@ -51,6 +51,16 @@ public class GameController : MonoBehaviour
     public List<infoHolder> players=new List<infoHolder>();
     public List<int> gamePlayersList=new List<int>();
 
+    //bot behaviour selector
+    public enum BotType
+    {
+        Normal,
+        Easy,
+        Aggressive
+    }
+
+    public BotType gameBotType;
+
     private int currentDiceValue;
 
     [Header("Game Rules")]
@@ -149,29 +159,23 @@ public class GameController : MonoBehaviour
         if(diceValue==coinOutAt)
         {
             gameMove=Moves.TakeOut;
-            for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+            if(players[turnCounter].player==playerType.Human)
             {
-                generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().SetClickable(true);
+                for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+                {
+                    generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().SetClickable(true);
+                }
             }
-            Debug.Log("Hello "+players[turnCounter].colorName+" its time to take your coins from base.");
+            else if(players[turnCounter].player==playerType.Bot)
+            {
+                StartCoroutine(CoinOutBotBehaviour());
+            }
         }
         else if(diceValue==rollChanceAt)
         {
-            Debug.Log("Congrats you got a chance to roll again..");
             if(players[turnCounter].outCoins.Count>0)
             {
-                if(players[turnCounter].outCoins.Count==1)
-                {
-                    HanldeAutoMoveOfSingleCoin();
-                }
-                else
-                {
-                    gameMove=Moves.Move;
-                    for(int i=0;i<players[turnCounter].outCoins.Count;i++)
-                    {
-                        players[turnCounter].outCoins[i].GetComponent<Coin>().isClickable=true;
-                    }
-                }
+                ChooseCoinForMovement();
             }
             else
             {
@@ -181,76 +185,8 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            if(players[turnCounter].outCoins.Count>0)
-            {
-                int count=0;
-                for(int i=0;i<players[turnCounter].outCoins.Count;i++)
-                {
-                    Coin outCoin=players[turnCounter].outCoins[i].GetComponent<Coin>();
-                    if(!outCoin.onWayToHome)
-                    {
-                        count++;
-                        outCoin.SetClickable(true);
-                    }
-                    else
-                    {
-                        if(outCoin.stepCounter<homePaths[turnCounter].childCount)
-                        {
-                            if((outCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
-                            {
-                                count++;
-                                outCoin.SetClickable(true);
-                            }
-                        }
-                    }
-                }
-
-                if(count==1)
-                {
-                    players[turnCounter].outCoins[0].GetComponent<Coin>().SetClickable(false);
-                    HanldeAutoMoveOfSingleCoin();
-                }
-                else if(count==0)
-                {
-                    gameMove=Moves.None;
-                   UpdateTurn();
-                }
-                else
-                {
-                    gameMove=Moves.Move;
-                    for(int i=0;i< players[turnCounter].outCoins.Count;i++)
-                    {
-                        players[turnCounter].outCoins[i].GetComponent<Coin>().isClickable=true;
-                    }
-                }
-            }
-            else
-            {
-                gameMove=Moves.None;
-                UpdateTurn();  
-            }
-        }
-    }
-
-    //called only when single coin is out
-    void HanldeAutoMoveOfSingleCoin()
-    {
-        Coin tempCoin=players[turnCounter].outCoins[0].GetComponent<Coin>();
-        if(!tempCoin.onWayToHome)
-        {
-            StartCoroutine(UpdateCoinPosition(tempCoin)); 
-        }
-        else
-        {
-           if((tempCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
-            {
-                StartCoroutine(UpdateCoinPosition(tempCoin));
-            }
-            else
-            {
-                UpdateTurn();  
-            }
-        }
+            ChooseCoinForMovement();
+        }  
     }
 
     void HandleDiceRoll(int turnValue)
@@ -262,6 +198,7 @@ public class GameController : MonoBehaviour
         else if(players[turnValue].player==playerType.Bot)
         {
             Dice.instance.canRollDice=false;
+            StartCoroutine(HandleBotTurn());
         }
         diceMat.color=players[turnCounter].coinColor;
     }
@@ -366,6 +303,9 @@ public class GameController : MonoBehaviour
                             {
                                 coin.isClickable=false;
                                 coin.atHome=true;
+                                coin.onWayToHome=false;
+                                coin.canGoHome=false;
+                                coin.isReadyForHome=false;
                                 players[turnCounter].outCoins.Remove(coin.transform);
                                 HandleDiceRoll(turnCounter);
                             }
@@ -569,6 +509,282 @@ public class GameController : MonoBehaviour
     #endregion
 
     #region BOT Behaviour
+    IEnumerator HandleBotTurn()
+    {
+        yield return new WaitForSeconds(1f);
+        StartCoroutine(Dice.instance.RolltheDice());
+    }
 
+    IEnumerator CoinOutBotBehaviour()
+    {
+        yield return new WaitForSeconds(1f);
+        if(players[turnCounter].outCoins.Count<1)
+        {
+            HandleNewCoinOutBehaviour();
+        }
+        else
+        {
+            ChooseCoinForMovement();
+        }
+    }
+
+    void HandleBotBehaviour()
+    {
+    }
+
+    #region  Bringing coin out of the base 
+    void HandleNewCoinOutBehaviour()
+    {
+        List<Transform> coinsAtBase=new List<Transform>();
+        for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+        {
+            if(!players[turnCounter].outCoins.Contains(generatedCoinsHolder.GetChild(turnCounter).GetChild(i).transform)&&!generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().atHome)
+            {
+                coinsAtBase.Add(generatedCoinsHolder.GetChild(turnCounter).GetChild(i).transform);
+            }
+        }
+        int newOutCoinIndex=Random.Range(0,coinsAtBase.Count);
+        Transform coinToBringOut=coinsAtBase[newOutCoinIndex].transform;
+        StartCoroutine(UpdateCoinPosition(coinToBringOut.GetComponent<Coin>()));
+        if(!players[turnCounter].outCoins.Contains(coinToBringOut))
+        {
+            players[turnCounter].outCoins.Add(coinToBringOut);
+        }
+    }
+    #endregion
+
+    #region Moving the coin which can cut the opponents coin
+    void HandleCutCoinMovement()
+    {
+        Coin coinNeedToBeCut=avalibleCutCoinList[0].coinThatCanBeCut;
+        Coin coinThatWillCut=avalibleCutCoinList[0].coinThatCuts;
+        for(int i=0;i<avalibleCutCoinList.Count;i++)
+        {
+            if(avalibleCutCoinList[i].coinThatCanBeCut.stepCounter>coinNeedToBeCut.stepCounter)
+            {
+                coinNeedToBeCut=avalibleCutCoinList[i].coinThatCanBeCut;
+                coinThatWillCut=avalibleCutCoinList[i].coinThatCuts;
+            }
+        }
+        StartCoroutine(UpdateCoinPosition(coinThatWillCut));
+    }
+    #endregion
+    
+    void ChooseCoinForMovement()
+    {
+        List<Coin> tempPublicLaneCoinList=new List<Coin>();
+        List<Coin> tempHomeLaneCoinList=new List<Coin>();
+
+        if(players[turnCounter].outCoins.Count>0)
+        {
+            int coinCount=0;
+            Coin outCoin=null;
+            for(int i=0;i<players[turnCounter].outCoins.Count;i++)
+            {
+                outCoin=players[turnCounter].outCoins[i].GetComponent<Coin>();
+                if(!outCoin.onWayToHome)
+                {
+                    tempPublicLaneCoinList.Add(outCoin);
+                    coinCount++;
+                }
+                else
+                {
+                    if(outCoin.stepCounter<homePaths[turnCounter].childCount)
+                    {
+                        if((outCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
+                        {
+                            tempHomeLaneCoinList.Add(outCoin);
+                            coinCount++;
+                        }
+                    }
+                }
+            }
+            
+            if(coinCount==0)
+            {
+                gameMove=Moves.None;
+                UpdateTurn();
+            }
+            else if(coinCount==1)
+            {
+                StartCoroutine(UpdateCoinPosition(outCoin));
+            }
+            else
+            {
+                //multiple coins avaliable for moving
+                if(players[turnCounter].player==playerType.Human)
+                {
+                    gameMove=Moves.Move;
+                    for(int i=0;i< players[turnCounter].outCoins.Count;i++)
+                    {
+                        players[turnCounter].outCoins[i].GetComponent<Coin>().isClickable=true;
+                    }
+                }
+                else if(players[turnCounter].player==playerType.Bot)
+                {
+                    //from here we can change behaviour of bot according to its type
+                    //lets check if we can cut any other coin or can move to the safe zone
+                    if(IsCoinCutAvaliable()==true)
+                    {
+                        HandleCutCoinMovement();
+                    }
+                    else
+                    {
+                        if(tempHomeLaneCoinList.Count>0)
+                        {
+                            Coin movaleHomeCoin=null;
+                            for(int i=0;i<tempHomeLaneCoinList.Count;i++)
+                            {
+                                int homeCoinStepCount=tempHomeLaneCoinList[i].stepCounter+currentDiceValue;
+                                if(homeCoinStepCount<homePaths[turnCounter].childCount)
+                                {
+                                   movaleHomeCoin=tempHomeLaneCoinList[i];
+                                }
+                            }
+
+                            if(movaleHomeCoin!=null)
+                            {
+                                StartCoroutine(UpdateCoinPosition(movaleHomeCoin));
+                            }
+                            else
+                            {
+                               HandleMovalbeCoinBehaviour(tempPublicLaneCoinList);
+                            }
+                        }
+                        else 
+                        {
+                           HandleMovalbeCoinBehaviour(tempPublicLaneCoinList);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            gameMove=Moves.None;
+            UpdateTurn(); 
+        }
+    }
+
+    public class CoinCutInfo
+    {
+        public Coin coinThatCuts;
+        public Coin coinThatCanBeCut;
+        //here 0 is for human and 1 for bot
+        public int coinPlayID;
+    }
+
+    private List<CoinCutInfo> avalibleCutCoinList=new List<CoinCutInfo>();
+
+    private bool IsCoinCutAvaliable()
+    {
+        if(avalibleCutCoinList.Count>0)
+        {
+            avalibleCutCoinList.Clear();
+        }
+
+        for(int i=0;i<gamePlayersList.Count;i++)
+        {
+            for(int j=0;j<players[gamePlayersList[i]].outCoins.Count;j++)
+            {
+                if(turnCounter!=players[gamePlayersList[i]].playerID)
+                {
+                    Coin opponentsCoin=players[gamePlayersList[i]].outCoins[j].GetComponent<Coin>();
+                    Coin myCoin=players[turnCounter].outCoins[j].GetComponent<Coin>();
+                    
+                    int opponentCoinPosIndex=opponentsCoin.stepCounter+players[gamePlayersList[i]].initialPosIndex;
+                    int myCoinNextPosIndex=myCoin.stepCounter+players[turnCounter].initialPosIndex+currentDiceValue;
+
+                    if(opponentCoinPosIndex>coinPathContainer.childCount)
+                    {
+                        opponentCoinPosIndex=opponentCoinPosIndex-coinPathContainer.childCount;
+                    }
+
+                    if(myCoinNextPosIndex>coinPathContainer.childCount)
+                    {
+                        myCoinNextPosIndex=myCoinNextPosIndex-coinPathContainer.childCount;
+                    }
+                   
+                    if(myCoinNextPosIndex==opponentCoinPosIndex&&!opponentsCoin.isSafe&&!opponentsCoin.onWayToHome&&!opponentsCoin.atHome)
+                    {
+                        CoinCutInfo coinInfo=new CoinCutInfo();
+                        coinInfo.coinThatCuts=myCoin;
+                        coinInfo.coinThatCanBeCut=opponentsCoin;
+                        //so that we can choose to cut player coin or bot coin
+                        if(players[gamePlayersList[i]].player==playerType.Human)
+                        {
+                            coinInfo.coinPlayID=0;
+                        }
+                        else if(players[gamePlayersList[i]].player==playerType.Bot)
+                        {
+                            coinInfo.coinPlayID=1;
+                        }
+                        avalibleCutCoinList.Add(coinInfo);
+                    }
+                }
+            }
+        }
+
+       if(avalibleCutCoinList.Count>0)
+       {
+           return true;
+       }
+       else
+       {
+           return false;
+       }
+    }
+
+
+    void HandleMovalbeCoinBehaviour(List<Coin> tempPublicLaneCoinList)
+    {
+        if(tempPublicLaneCoinList.Count>0)
+        {
+            Coin coinThatWillBeSafe=null;
+            Coin coinThatMovedFarthest=tempPublicLaneCoinList[0];
+            //lets check any of the coin could be moved to the safe position on adding current dice vale
+            for(int i=0;i<tempPublicLaneCoinList.Count;i++)
+            {
+                int tempCoinStepValue=tempPublicLaneCoinList[i].stepCounter+currentDiceValue;
+                if(IsCoinSafe(tempCoinStepValue))
+                {
+                    coinThatWillBeSafe=tempPublicLaneCoinList[i];
+                }
+
+                if(coinThatMovedFarthest.stepCounter>tempPublicLaneCoinList[i].stepCounter)
+                {
+                    coinThatMovedFarthest=tempPublicLaneCoinList[i];
+                }
+            }
+
+            if(coinThatWillBeSafe!=null)
+            {
+                StartCoroutine(UpdateCoinPosition(coinThatWillBeSafe));
+            }
+            else
+            {
+                if(currentDiceValue==coinOutAt)
+                {
+                   HandleNewCoinOutBehaviour(); 
+                }
+                else
+                {
+                    //check if there are any max moved coin
+                    //if yes move the max moved coin else move random coin
+                    float coinpp=(float)((coinThatMovedFarthest.stepCounter*100)/coinPathContainer.childCount);
+                    if(coinpp>50f)
+                    {
+                        StartCoroutine(UpdateCoinPosition(coinThatMovedFarthest));
+                    }
+                    else
+                    {
+                        //choose random coin for movement
+                        int randomMovableCoinIndex=Random.Range(0,tempPublicLaneCoinList.Count);
+                        StartCoroutine(UpdateCoinPosition(tempPublicLaneCoinList[randomMovableCoinIndex]));
+                    }
+                }
+            }
+        }
+    }
     #endregion
 }
