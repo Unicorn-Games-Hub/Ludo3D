@@ -435,7 +435,7 @@ public class GameController : MonoBehaviour
                         newTempCount1=(newTempCount1-coinPathContainer.childCount);
                     }
                     
-                    if(newTempCount==newTempCount1&&!newTempCoin.isSafe&&!newTempCoin.onWayToHome)
+                    if(newTempCount==newTempCount1&&!newTempCoin.isSafe&&!newTempCoin.onWayToHome&&!newTempCoin.atHome)
                     {
                         iTween.MoveTo(newTempCoin.gameObject, iTween.Hash("position", 
                         newTempCoin.initialPosInfo, 
@@ -538,13 +538,17 @@ public class GameController : MonoBehaviour
         List<Transform> coinsAtBase=new List<Transform>();
         for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
         {
-            if(!players[turnCounter].outCoins.Contains(generatedCoinsHolder.GetChild(turnCounter).GetChild(i).transform)&&!generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().atHome)
+            Transform baseCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).transform;
+            if(baseCoin.GetComponent<Coin>().atBase)
             {
-                coinsAtBase.Add(generatedCoinsHolder.GetChild(turnCounter).GetChild(i).transform);
+                if(!players[turnCounter].outCoins.Contains(baseCoin))
+                {
+                    coinsAtBase.Add(baseCoin);
+                }
             }
         }
         int newOutCoinIndex=Random.Range(0,coinsAtBase.Count);
-        Transform coinToBringOut=coinsAtBase[newOutCoinIndex].transform;
+        Transform coinToBringOut=coinsAtBase[newOutCoinIndex];
         StartCoroutine(UpdateCoinPosition(coinToBringOut.GetComponent<Coin>()));
         if(!players[turnCounter].outCoins.Contains(coinToBringOut))
         {
@@ -607,7 +611,16 @@ public class GameController : MonoBehaviour
             }
             else if(coinCount==1)
             {
-                StartCoroutine(UpdateCoinPosition(outCoin));
+                //single coin then??
+                if(players[turnCounter].player==playerType.Human)
+                {
+                    StartCoroutine(UpdateCoinPosition(outCoin));
+                }
+                else if(players[turnCounter].player==playerType.Bot)
+                {
+                    //check
+                    HandleMovalbeCoinBehaviour(tempPublicLaneCoinList);
+                }
             }
             else
             {
@@ -632,19 +645,19 @@ public class GameController : MonoBehaviour
                     {
                         if(tempHomeLaneCoinList.Count>0)
                         {
-                            Coin movaleHomeCoin=null;
+                            Coin movableHomeCoin=null;
                             for(int i=0;i<tempHomeLaneCoinList.Count;i++)
                             {
                                 int homeCoinStepCount=tempHomeLaneCoinList[i].stepCounter+currentDiceValue;
                                 if(homeCoinStepCount<homePaths[turnCounter].childCount)
                                 {
-                                   movaleHomeCoin=tempHomeLaneCoinList[i];
+                                   movableHomeCoin=tempHomeLaneCoinList[i];
                                 }
                             }
 
-                            if(movaleHomeCoin!=null)
+                            if(movableHomeCoin!=null)
                             {
-                                StartCoroutine(UpdateCoinPosition(movaleHomeCoin));
+                                StartCoroutine(UpdateCoinPosition(movableHomeCoin));
                             }
                             else
                             {
@@ -765,25 +778,64 @@ public class GameController : MonoBehaviour
             {
                 if(currentDiceValue==coinOutAt)
                 {
-                   HandleNewCoinOutBehaviour(); 
+                   //check if there are any coins inside base which can be taken out if yes take that out else move other coins
+                    List<Transform> avaliableCoins=new List<Transform>();
+                    for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+                    {
+                        Coin tempBaseCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>();
+                        if(tempBaseCoin.atBase)
+                        {
+                            if(!avaliableCoins.Contains(tempBaseCoin.transform))
+                            {
+                                avaliableCoins.Add(tempBaseCoin.transform);
+                            }
+                        }
+                    }
+
+                   if(avaliableCoins.Count>0)
+                   {
+                        HandleNewCoinOutBehaviour(); 
+                   }
+                   else
+                   {
+                        HandlingMaxMovedCoinBehaviour(coinThatMovedFarthest,tempPublicLaneCoinList);
+                   }
                 }
                 else
                 {
                     //check if there are any max moved coin
                     //if yes move the max moved coin else move random coin
-                    float coinpp=(float)((coinThatMovedFarthest.stepCounter*100)/coinPathContainer.childCount);
-                    if(coinpp>50f)
-                    {
-                        StartCoroutine(UpdateCoinPosition(coinThatMovedFarthest));
-                    }
-                    else
-                    {
-                        //choose random coin for movement
-                        int randomMovableCoinIndex=Random.Range(0,tempPublicLaneCoinList.Count);
-                        StartCoroutine(UpdateCoinPosition(tempPublicLaneCoinList[randomMovableCoinIndex]));
-                    }
+                    HandlingMaxMovedCoinBehaviour(coinThatMovedFarthest,tempPublicLaneCoinList);
                 }
             }
+        }
+    }
+
+    void HandlingMaxMovedCoinBehaviour(Coin coinThatMovedFarthest,List<Coin> tempPublicLaneCoinList)
+    {
+        float coinpp=(float)((coinThatMovedFarthest.stepCounter*100)/coinPathContainer.childCount);
+        float targetPP=0f;
+        bool checkProgress=false;
+        if(gameBotType==BotType.Normal)
+        {
+            checkProgress=true;
+            targetPP=50f;
+        }
+        else if(gameBotType==BotType.Easy)
+        {
+            checkProgress=true;
+            targetPP=75f;
+        }
+
+        if(coinpp>=targetPP&&checkProgress)
+        {
+            StartCoroutine(UpdateCoinPosition(coinThatMovedFarthest));
+        }
+        else
+        {
+            //choose random coin for movement
+            int randomMovableCoinIndex=Random.Range(0,tempPublicLaneCoinList.Count);
+            StartCoroutine(UpdateCoinPosition(tempPublicLaneCoinList[randomMovableCoinIndex]));
         }
     }
     #endregion
