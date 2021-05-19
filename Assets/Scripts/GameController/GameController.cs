@@ -104,6 +104,20 @@ public class GameController : MonoBehaviour
 
     void Start()
     {
+        if(GameDataHolder.instance!=null)
+        {
+            for(int i=0;i<GameDataHolder.instance.playerIndex.Length;i++)
+            {
+                if(GameDataHolder.instance.playerIndex[i]==0)
+                {
+                    players[i].player=playerType.Human;
+                }
+                else
+                {
+                    players[i].player=playerType.Bot;
+                }
+            }
+        }
         GenerateCoins();
     }
 
