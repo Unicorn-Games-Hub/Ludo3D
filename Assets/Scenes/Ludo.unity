@@ -3571,25 +3571,26 @@ MonoBehaviour:
   - colorName: Red
     playerID: 1
     coinPrefab: {fileID: 4720550230745011477, guid: c893462792944430ba1dab80b7e0e556, type: 3}
-    player: 0
+    player: 2
     initialPosIndex: 13
     coinColor: {r: 1, g: 0.47058827, b: 0.4901961, a: 1}
     outCoins: []
   - colorName: Blue
     playerID: 2
     coinPrefab: {fileID: 1377974154913160156, guid: c175e551ecd7248e0bb4ce42b564fa89, type: 3}
-    player: 0
+    player: 1
     initialPosIndex: 26
     coinColor: {r: 0.35686275, g: 0.6, b: 1, a: 1}
     outCoins: []
   - colorName: Yellow
     playerID: 3
     coinPrefab: {fileID: 791956182272476057, guid: 4de52d1c1a3ec4421856d6e1983ecfea, type: 3}
-    player: 0
+    player: 2
     initialPosIndex: 39
     coinColor: {r: 1, g: 0.83921576, b: 0.4901961, a: 1}
     outCoins: []
   gamePlayersList: 
+  gameBotType: 0
   enterHomeWithOutCutting: 1
   coinLayer:
     serializedVersion: 2
