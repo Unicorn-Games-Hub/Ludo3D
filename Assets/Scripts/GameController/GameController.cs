@@ -112,9 +112,13 @@ public class GameController : MonoBehaviour
                 {
                     players[i].player=playerType.Human;
                 }
-                else
+                else if(GameDataHolder.instance.playerIndex[i]==1)
                 {
                     players[i].player=playerType.Bot;
+                }
+                else
+                {
+                    players[i].player=playerType.None;
                 }
             }
         }
