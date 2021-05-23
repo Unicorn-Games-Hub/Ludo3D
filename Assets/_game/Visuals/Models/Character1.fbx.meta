@@ -1,44 +1,50 @@
 fileFormatVersion: 2
-guid: 0dd7d6e80b9d6473995b76ac070d329c
+guid: 5e4fa2f1c08414f29b607655d0281bd5
 ModelImporter:
   serializedVersion: 20200
   internalIDToNameTable:
   - first:
-      74: 61795412230292609
-    second: Armature_Character_Red|Die_1
+      74: 1930346668771619352
+    second: Idle_Normal
   - first:
-      74: -6499662122030066332
-    second: Armature_Character_Red|Get_Defensive
+      74: 317687835186510438
+    second: Get_Normal
   - first:
-      74: 298926297395019609
-    second: Armature_Character_Red|Get_Normal_From_Defensive
+      74: -8484178510313548586
+    second: Idle_Defensive
   - first:
-      74: -4190699063283261696
-    second: Armature_Character_Red|Idle_Defensive
+      74: 1187231150818041822
+    second: Get_Defensive
   - first:
-      74: 1302266031270840812
-    second: Armature_Character_Red|Idle_Normal
+      74: 6720303635017113406
+    second: Attack
   - first:
-      74: -3657366739398478787
-    second: Armature_Character_Red|Kill_1
+      74: 8925044659521273951
+    second: Defend
   - first:
-      74: -1538295179942082849
-    second: Armature_Character_Red|Walk_1_Step
+      74: 2996450741573297445
+    second: Kill
   - first:
-      74: -2200690959944414091
-    second: Armature_Character_Red|Walk_2_Steps
+      74: -4630339522487117836
+    second: Die
   - first:
-      74: -5658227776476359574
-    second: Armature_Character_Red|Walk_3_Steps
+      74: -3373246037501338762
+    second: Walk_1_Step
   - first:
-      74: -6329337346583288730
-    second: Armature_Character_Red|Walk_4_Steps
+      74: -8007501117075067343
+    second: Walk_2_Steps
   - first:
-      74: 2734002091887200563
-    second: Armature_Character_Red|Walk_5_Steps
+      74: 6984723254811540569
+    second: Walk_3_Steps
   - first:
-      74: 5869740769377246426
-    second: Armature_Character_Red|Walk_6_Steps
+      74: -5601378860157984288
+    second: Walk_4_Steps
+  - first:
+      74: 2988303016287812708
+    second: Walk_5_Steps
+  - first:
+      74: -1421681510147665163
+    second: Walk_6_Steps
   externalObjects: {}
   materials:
     materialImportMode: 2
@@ -124,11 +130,11 @@ ModelImporter:
     globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
-    hasExtraRoot: 1
+    hasExtraRoot: 0
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   autoGenerateAvatarMappingIfUnspecified: 1
-  animationType: 1
+  animationType: 2
   humanoidOversampling: 1
   avatarSetup: 0
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1

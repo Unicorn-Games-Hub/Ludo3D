@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class PlayerSelector : MonoBehaviour
 {
-    public int playerID=0;
+    public int colorIndex=0;
 
+    public int playerID=0;
+    
     public void UpdatePlayerType()
     {
         if(playerID==0)
@@ -16,6 +18,6 @@ public class PlayerSelector : MonoBehaviour
         {
             playerID=0;
         }
-        GameModeSelectionHandler.instance.ChangePlayerIcon();
+        GameModeSelectionHandler.instance.ChangePlayerIcon(this.gameObject);
     }
 }
