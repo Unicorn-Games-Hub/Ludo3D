@@ -45,6 +45,9 @@ ModelImporter:
   - first:
       74: -1421681510147665163
     second: Walk_6_Steps
+  - first:
+      74: 5539831331247536789
+    second: Jump
   externalObjects: {}
   materials:
     materialImportMode: 2

@@ -28,6 +28,7 @@ public class PlayerTurnTimer : MonoBehaviour
             if(pIndex==1)
             {
                 playerImage.sprite=playerIcon[1];
+                playerNameText.text="Bot";
             }
         }
     }

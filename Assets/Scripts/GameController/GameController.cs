@@ -88,6 +88,16 @@ public class GameController : MonoBehaviour
 
     //Refrence to the dice material
     public Material diceMat;
+
+    [Header("Ingame player indicator")]
+    public Transform playerIndicators;
+
+    [Header("Dice Position During Roll")]
+    public Transform ludoDice;
+    public Vector3[] diceInitialPos;
+    private float diceMoveSpeed=15f;
+    private Vector3 newDicePosition=Vector3.zero;
+    private bool moveDice=false;
  
 
     void Awake()
@@ -119,6 +129,7 @@ public class GameController : MonoBehaviour
                 else
                 {
                     players[i].player=playerType.None;
+                    playerIndicators.GetChild(i).gameObject.SetActive(false);
                 }
             }
         }
@@ -153,10 +164,18 @@ public class GameController : MonoBehaviour
         curTurn=randomTurn;
         turnCounter=gamePlayersList[randomTurn];
         HandleDiceRoll(turnCounter);
+        //updating dice position inside board
+       UpdateDicePositionOnBoard();
     }
 
     void UpdateTurn()
     {
+        StartCoroutine(WaitBeforeUpdatingTurn());
+    }
+
+    IEnumerator WaitBeforeUpdatingTurn()
+    {
+        yield return new WaitForSeconds(1f);
         if(currentDiceValue!=rollChanceAt)
         {
             curTurn++;
@@ -166,6 +185,9 @@ public class GameController : MonoBehaviour
             }
         }
         turnCounter=gamePlayersList[curTurn];
+        // HandleDiceRoll(turnCounter);
+        UpdateDicePositionOnBoard();
+        yield return new WaitForSeconds(0.5f);
         HandleDiceRoll(turnCounter);
     }
     #endregion
@@ -174,6 +196,7 @@ public class GameController : MonoBehaviour
     public void HandleObtainedDiceValue(int diceValue)
     {
         currentDiceValue=diceValue;
+        /* 
         if(diceValue==coinOutAt)
         {
             gameMove=Moves.TakeOut;
@@ -204,7 +227,72 @@ public class GameController : MonoBehaviour
         else
         {
             ChooseCoinForMovement();
-        }  
+        }*/
+
+        if(diceValue==coinOutAt)
+        {
+            if(players[turnCounter].outCoins.Count>0)
+            {
+                if(players[turnCounter].player==playerType.Human)
+                {
+                    List<Coin> clickableCoinsList=new List<Coin>();
+                    //lets check if there are some coins inside base or not if yes make base coin clickable
+                    for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+                    {
+                        Coin tempCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>();
+                        if(tempCoin.atBase||!tempCoin.onWayToHome)
+                        {
+                            clickableCoinsList.Add(tempCoin);
+                        }
+                        else
+                        {
+                           if(tempCoin.onWayToHome)
+                           {
+                                if((tempCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
+                                {
+                                    clickableCoinsList.Add(tempCoin);
+                                }
+                           }
+                        }
+                    }
+
+                    if(clickableCoinsList.Count>0)
+                    {
+                        foreach (Coin c in clickableCoinsList)
+                        {
+                            c.SetClickable(true);
+                        }
+                    }
+                    else
+                    {
+                        UpdateTurn();
+                    }
+                }
+                else if(players[turnCounter].player==playerType.Bot)
+                {
+                    ChooseCoinForMovement();
+                }
+            }
+            else
+            {
+                if(players[turnCounter].player==playerType.Human)
+                {
+                    gameMove=Moves.TakeOut;
+                    for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+                    {
+                        generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().SetClickable(true);
+                    }
+                }
+                else if(players[turnCounter].player==playerType.Bot)
+                {
+                    StartCoroutine(CoinOutBotBehaviour());
+                }
+            }
+        }
+        else
+        {
+            ChooseCoinForMovement();
+        }
     }
 
     void HandleDiceRoll(int turnValue)
@@ -264,6 +352,15 @@ public class GameController : MonoBehaviour
                         }
                     }
                 }
+            }
+        }
+
+        if(moveDice)
+        {   
+            ludoDice.transform.position=Vector3.MoveTowards(ludoDice.transform.position,newDicePosition,Time.deltaTime*diceMoveSpeed);
+            if(Vector3.Distance(ludoDice.transform.position,newDicePosition)<0.1f)
+            {
+                moveDice=false;
             }
         }
     }
@@ -855,6 +952,15 @@ public class GameController : MonoBehaviour
             int randomMovableCoinIndex=Random.Range(0,tempPublicLaneCoinList.Count);
             StartCoroutine(UpdateCoinPosition(tempPublicLaneCoinList[randomMovableCoinIndex]));
         }
+    }
+    #endregion
+
+
+    #region Dice poisition
+    void UpdateDicePositionOnBoard()
+    {
+        newDicePosition=diceInitialPos[turnCounter];
+        moveDice=true;
     }
     #endregion
 }
