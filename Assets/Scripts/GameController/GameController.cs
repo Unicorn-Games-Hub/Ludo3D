@@ -18,6 +18,9 @@ public class GameController : MonoBehaviour
     [Header("Start Position")]
     public Transform[] startPoints;
 
+    [Header("Start Rotation")]
+    public Vector3[] startRotations;
+
     [Range(2,4)]
     public int noOfCoins=4;
 
@@ -147,6 +150,8 @@ public class GameController : MonoBehaviour
                     Transform newCoin=Instantiate(players[i].coinPrefab,coinContainer.GetChild(i).GetChild(j).position,players[i].coinPrefab.transform.rotation);
                     newCoin.SetParent(generatedCoinsHolder.GetChild(i).transform);
                     newCoin.GetComponent<Coin>().HandleCoinInfo(players[i].playerID,newCoin.transform.localPosition);
+                    //
+                    newCoin.transform.localRotation=Quaternion.Euler(0f,startRotations[i].y,0f);
                     if(!gamePlayersList.Contains(players[i].playerID))
                     {
                         gamePlayersList.Add(players[i].playerID);
@@ -370,7 +375,7 @@ public class GameController : MonoBehaviour
         if(coin.atBase)
         {
             int startingIndex=players[turnCounter].initialPosIndex;
-            iTween.MoveTo(coin.gameObject, iTween.Hash("position", new Vector3(coinPathContainer.GetChild(startingIndex).position.x,coin.transform.position.y,coinPathContainer.GetChild(startingIndex).position.z), 
+            iTween.MoveTo(coin.gameObject, iTween.Hash("position", new Vector3(coinPathContainer.GetChild(startingIndex).position.x,-0.01f/*coin.transform.position.y*/,coinPathContainer.GetChild(startingIndex).position.z), 
             "speed", coinMoveSpeed, 
             "easetype", iTween.EaseType.linear,
             "oncomplete", "UpdateTurnAfterFirstMove", 
@@ -378,6 +383,7 @@ public class GameController : MonoBehaviour
             ));
             coin.isSafe=true;
             coin.atBase=false;
+            charFromHome=coin.transform;
         }
         else
         {
@@ -457,6 +463,7 @@ public class GameController : MonoBehaviour
                 yield return new WaitUntil(() => isStepCompleted);
                 yield return new WaitForSeconds(0.1f);
                 isStepCompleted = false;
+                UpdateCharacterRotation(coin.transform);
             }
 
             //lets check if the current coin is safe or not
@@ -487,8 +494,11 @@ public class GameController : MonoBehaviour
         }
     } 
 
+    Transform charFromHome=null;
     void UpdateTurnAfterFirstMove()
     {
+        //for updating character rotation on the board
+        UpdateCharacterRotation(charFromHome);
         UpdateTurn();
     }
 
@@ -961,6 +971,22 @@ public class GameController : MonoBehaviour
     {
         newDicePosition=diceInitialPos[turnCounter];
         moveDice=true;
+    }
+    #endregion
+
+    #region Character Rotation
+    void UpdateCharacterRotation(Transform ludoChar)
+    {
+        Coin charCoin=ludoChar.GetComponent<Coin>();
+        int stepsToMove=charCoin.stepCounter+players[turnCounter].initialPosIndex+1;
+        if(stepsToMove>coinPathContainer.childCount-1)
+        {
+            stepsToMove=stepsToMove-coinPathContainer.childCount;
+        }
+        if(!charCoin.onWayToHome)
+        {
+            ludoChar.rotation = Quaternion.LookRotation(ludoChar.position - coinPathContainer.GetChild(stepsToMove).transform.position);
+        }
     }
     #endregion
 }
