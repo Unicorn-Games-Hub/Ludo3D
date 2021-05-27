@@ -978,14 +978,20 @@ public class GameController : MonoBehaviour
     void UpdateCharacterRotation(Transform ludoChar)
     {
         Coin charCoin=ludoChar.GetComponent<Coin>();
-        int stepsToMove=charCoin.stepCounter+players[turnCounter].initialPosIndex+1;
-        if(stepsToMove>coinPathContainer.childCount-1)
-        {
-            stepsToMove=stepsToMove-coinPathContainer.childCount;
-        }
+        
         if(!charCoin.onWayToHome)
         {
+            int stepsToMove=charCoin.stepCounter+players[turnCounter].initialPosIndex+1;
+            if(stepsToMove>coinPathContainer.childCount-1)
+            {
+                stepsToMove=stepsToMove-coinPathContainer.childCount;
+            }
             ludoChar.rotation = Quaternion.LookRotation(ludoChar.position - coinPathContainer.GetChild(stepsToMove).transform.position);
+        }
+        else
+        {
+            int homeLastCount=homePaths[turnCounter].childCount-1;
+            ludoChar.rotation = Quaternion.LookRotation(ludoChar.position - homePaths[turnCounter].GetChild(homeLastCount).transform.position);
         }
     }
     #endregion
