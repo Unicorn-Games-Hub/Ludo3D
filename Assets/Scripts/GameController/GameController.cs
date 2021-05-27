@@ -357,14 +357,17 @@ public class GameController : MonoBehaviour
         {
             int startingIndex=players[turnCounter].initialPosIndex;
             iTween.MoveTo(coin.gameObject, iTween.Hash("position", new Vector3(coinPathContainer.GetChild(startingIndex).position.x,-0.01f/*coin.transform.position.y*/,coinPathContainer.GetChild(startingIndex).position.z), 
-            "speed", coinMoveSpeed, 
+            "speed",coinMoveSpeed, 
             "easetype", iTween.EaseType.linear,
             "oncomplete", "UpdateTurnAfterFirstMove", 
             "oncompletetarget", this.gameObject
             ));
+
+            //lets play walk animation
             coin.isSafe=true;
             coin.atBase=false;
             charFromHome=coin.transform;
+            Walk(charFromHome);
         }
         else
         {
@@ -441,6 +444,8 @@ public class GameController : MonoBehaviour
                 "oncompletetarget", this.gameObject
                 ));
 
+                Walk(coin.transform);
+
                 yield return new WaitUntil(() => isStepCompleted);
                 yield return new WaitForSeconds(0.1f);
                 isStepCompleted = false;
@@ -449,6 +454,15 @@ public class GameController : MonoBehaviour
 
             //lets check if the current coin is safe or not
             coin.isSafe=IsCoinSafe(newTargetCount);
+
+            if(coin.isSafe)
+            {
+                Defensive(coin.transform);
+            }
+            else
+            {
+                Idle(coin.transform);
+            }
 
             //checking if coin is safe or can be cut
             if(!coin.onWayToHome)
@@ -481,6 +495,7 @@ public class GameController : MonoBehaviour
         //for updating character rotation on the board
         UpdateCharacterRotation(charFromHome);
         UpdateTurn();
+        Defensive(charFromHome);
     }
 
     private bool isStepCompleted=false;
@@ -488,12 +503,13 @@ public class GameController : MonoBehaviour
     void TargetReached()
     {
         isStepCompleted=true;
+
     }
 
     private float curTimer=0f;
     private float waitTime=0.3f;
 
-    private float coinMoveSpeed=3f;
+    private float coinMoveSpeed=0.8f;
 
     private bool move=false;
     private int targetIndexValue;
@@ -972,5 +988,33 @@ public class GameController : MonoBehaviour
             ludoChar.rotation = Quaternion.LookRotation(ludoChar.position - homePaths[turnCounter].GetChild(homeLastCount).transform.position);
         }
     }
+    #endregion
+
+    #region Character Animation
+
+    void Idle(Transform currentChar)
+    {
+        if(CharAnimationHandler.instance!=null)
+        {
+            CharAnimationHandler.instance.PlayIdleAnimation(currentChar);
+        }
+    }
+
+    void Walk(Transform currentChar)
+    {
+        if(CharAnimationHandler.instance!=null)
+        {
+            CharAnimationHandler.instance.PlayWalkAnimation(currentChar);
+        }
+    }
+
+    void Defensive(Transform currentChar)
+    {
+       if(CharAnimationHandler.instance!=null)
+        {
+            CharAnimationHandler.instance.PlayDefensiveAnimation(currentChar);
+        } 
+    }
+    
     #endregion
 }

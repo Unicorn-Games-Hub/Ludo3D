@@ -621,6 +621,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 199194804}
   m_CullTransparentMesh: 1
+--- !u!1 &205835703
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 205835705}
+  - component: {fileID: 205835704}
+  m_Layer: 0
+  m_Name: charAnimationHandler
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &205835704
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 205835703}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 092b059960589471d81b9c22affe503f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  idleAnim: {fileID: 1930346668771619352, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
+  walkAnim: {fileID: -8007501117075067343, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
+  defensiveAnim: {fileID: -8484178510313548586, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
+  jumpAnim: {fileID: 5539831331247536789, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
+  attackAnim: {fileID: 6720303635017113406, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
+  killAnim: {fileID: 2996450741573297445, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
+  deathAnim: {fileID: -4630339522487117836, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
+--- !u!4 &205835705
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 205835703}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &254389071
 GameObject:
   m_ObjectHideFlags: 0
@@ -3506,7 +3556,6 @@ MonoBehaviour:
   coinLayer:
     serializedVersion: 2
     m_Bits: 128
-  gameMove: 0
   safePosIndexList: 00000000080000000d000000150000001a00000022000000270000002f000000
   diceMat: {fileID: 2100000, guid: 568f858d82b0a41da93b98d3b19f536b, type: 2}
   playerIndicators: {fileID: 186344612}
