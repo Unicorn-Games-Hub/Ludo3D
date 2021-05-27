@@ -77,15 +77,6 @@ public class GameController : MonoBehaviour
     private Ray ray;
     private RaycastHit hit;
 
-    public enum Moves
-    {
-        None,
-        TakeOut,
-        Move
-    }
-
-    public Moves gameMove;
-
     [Header("Coin Safe Pos Index")]
     public List<int> safePosIndexList=new List<int>();
 
@@ -204,7 +195,6 @@ public class GameController : MonoBehaviour
         /* 
         if(diceValue==coinOutAt)
         {
-            gameMove=Moves.TakeOut;
             if(players[turnCounter].player==playerType.Human)
             {
                 for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
@@ -225,7 +215,6 @@ public class GameController : MonoBehaviour
             }
             else
             {
-                gameMove=Moves.None;
                 HandleDiceRoll(turnCounter);
             }
         }
@@ -282,7 +271,6 @@ public class GameController : MonoBehaviour
             {
                 if(players[turnCounter].player==playerType.Human)
                 {
-                    gameMove=Moves.TakeOut;
                     for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
                     {
                         generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().SetClickable(true);
@@ -330,22 +318,15 @@ public class GameController : MonoBehaviour
                     if(clickedCoin.GetComponent<Coin>().id==turnCounter&&clickedCoin.GetComponent<Coin>().isClickable)
                     {
                         Coin newCoin=clickedCoin.GetComponent<Coin>();
-                        if(gameMove==Moves.TakeOut)
+                        if(clickedCoin.GetComponent<Coin>().atBase)
                         {
-                            if(clickedCoin.GetComponent<Coin>().atBase)
+                            if(!players[turnCounter].outCoins.Contains(clickedCoin))
                             {
-                                if(!players[turnCounter].outCoins.Contains(clickedCoin))
-                                {
-                                    players[turnCounter].outCoins.Add(clickedCoin);
-                                }
-                                StartCoroutine(UpdateCoinPosition(newCoin));
+                                players[turnCounter].outCoins.Add(clickedCoin);
                             }
-                            else
-                            {
-                                StartCoroutine(UpdateCoinPosition(newCoin));
-                            }
+                            StartCoroutine(UpdateCoinPosition(newCoin));
                         }
-                        else if(gameMove==Moves.Move)
+                        else
                         {
                             StartCoroutine(UpdateCoinPosition(newCoin));
                         }
@@ -731,7 +712,6 @@ public class GameController : MonoBehaviour
             
             if(coinCount==0)
             {
-                gameMove=Moves.None;
                 UpdateTurn();
             }
             else if(coinCount==1)
@@ -752,7 +732,6 @@ public class GameController : MonoBehaviour
                 //multiple coins avaliable for moving
                 if(players[turnCounter].player==playerType.Human)
                 {
-                    gameMove=Moves.Move;
                     for(int i=0;i< players[turnCounter].outCoins.Count;i++)
                     {
                         players[turnCounter].outCoins[i].GetComponent<Coin>().isClickable=true;
@@ -799,7 +778,6 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            gameMove=Moves.None;
             UpdateTurn(); 
         }
     }
