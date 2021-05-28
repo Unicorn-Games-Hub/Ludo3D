@@ -71,7 +71,7 @@ public class GameController : MonoBehaviour
 
     //clickable layerMask
     public LayerMask coinLayer;
-    private Vector3 newCoinPos;
+    private Vector3 newCoinPos=Vector3.zero;
 
     //Raycasting
     private Ray ray;
@@ -230,6 +230,7 @@ public class GameController : MonoBehaviour
                 if(players[turnCounter].player==playerType.Human)
                 {
                     List<Coin> clickableCoinsList=new List<Coin>();
+
                     //lets check if there are some coins inside base or not if yes make base coin clickable
                     for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
                     {
@@ -261,6 +262,7 @@ public class GameController : MonoBehaviour
                     {
                         UpdateTurn();
                     }
+                  
                 }
                 else if(players[turnCounter].player==playerType.Bot)
                 {
@@ -408,7 +410,7 @@ public class GameController : MonoBehaviour
                             {
                                 coin.isClickable=false;
                                 coin.atHome=true;
-                                coin.onWayToHome=false;
+                                // coin.onWayToHome=false;
                                 coin.canGoHome=false;
                                 coin.isReadyForHome=false;
                                 players[turnCounter].outCoins.Remove(coin.transform);
@@ -430,6 +432,9 @@ public class GameController : MonoBehaviour
                     }
                 }
 
+                //
+                UpdateCharacterRotation(coin.transform);
+
                 int curCoinPosIndex=(coin.stepCounter+players[turnCounter].initialPosIndex)%(coinPathContainer.childCount);
                 if(!coin.onWayToHome)
                 {
@@ -444,12 +449,12 @@ public class GameController : MonoBehaviour
                 "oncompletetarget", this.gameObject
                 ));
 
+                //play walk animation
                 Walk(coin.transform);
 
                 yield return new WaitUntil(() => isStepCompleted);
                 yield return new WaitForSeconds(0.1f);
                 isStepCompleted = false;
-                UpdateCharacterRotation(coin.transform);
             }
 
             //lets check if the current coin is safe or not
@@ -536,6 +541,8 @@ public class GameController : MonoBehaviour
     public bool CutTheCoin(int coinPositionIndex)
     {
         bool canCut=false;
+        List<Coin> cuttableCoins=new List<Coin>();
+
         for(int i=0;i<gamePlayersList.Count;i++)
         {
             for(int j=0;j<players[gamePlayersList[i]].outCoins.Count;j++)
@@ -543,37 +550,52 @@ public class GameController : MonoBehaviour
                 if(turnCounter!=players[gamePlayersList[i]].playerID)
                 {
                     Coin newTempCoin=players[gamePlayersList[i]].outCoins[j].GetComponent<Coin>();
-
-                    int newTempCount=newTempCoin.stepCounter+players[gamePlayersList[i]].initialPosIndex;
-                    int newTempCount1=coinPositionIndex;
-
-                    if(newTempCount>coinPathContainer.childCount)
+                    if(!newTempCoin.isSafe&&!newTempCoin.onWayToHome)
                     {
-                        newTempCount=(newTempCount-coinPathContainer.childCount);
-                    }
-
-                    if(newTempCount1>coinPathContainer.childCount)
-                    {
-                        newTempCount1=(newTempCount1-coinPathContainer.childCount);
-                    }
-                    
-                    if(newTempCount==newTempCount1&&!newTempCoin.isSafe&&!newTempCoin.onWayToHome&&!newTempCoin.atHome)
-                    {
-                        iTween.MoveTo(newTempCoin.gameObject, iTween.Hash("position", 
-                        newTempCoin.initialPosInfo, 
-                        "speed", coinMoveSpeed, 
-                        "easetype", iTween.EaseType.linear,
-                        "oncomplete", "CutCoinReset", 
-                        "oncompletetarget", this.gameObject
-                        ));
-                        newTempCoin.stepCounter=0;
-                        newTempCoin.atBase=true;
-                        if(players[gamePlayersList[i]].outCoins.Contains(newTempCoin.gameObject.transform))
+                        if(!cuttableCoins.Contains(newTempCoin))
                         {
-                            players[gamePlayersList[i]].outCoins.Remove(newTempCoin.gameObject.transform);
+                            cuttableCoins.Add(newTempCoin); 
                         }
-                        canCut=true;
-                    }   
+                    }
+                }
+            }
+        }
+
+        if(cuttableCoins.Count>0)
+        {
+            for(int i=0;i<cuttableCoins.Count;i++)
+            {
+                int newTempCount=cuttableCoins[i].stepCounter+players[cuttableCoins[i].id].initialPosIndex;
+                int newTempCount1=coinPositionIndex;
+
+                if(newTempCount>coinPathContainer.childCount)
+                {
+                    newTempCount=(newTempCount-coinPathContainer.childCount);
+                }
+
+                if(newTempCount1>coinPathContainer.childCount)
+                {
+                    newTempCount1=(newTempCount1-coinPathContainer.childCount);
+                }
+
+                if(newTempCount==newTempCount1)
+                {
+                    iTween.MoveTo(cuttableCoins[i].gameObject, iTween.Hash("position", 
+                    cuttableCoins[i].initialPosInfo, 
+                    "speed", coinMoveSpeed, 
+                    "easetype", iTween.EaseType.linear,
+                    "oncomplete", "CutCoinReset", 
+                    "oncompletetarget", this.gameObject
+                    ));
+                  
+                    cuttableCoins[i].stepCounter=0;
+                    cuttableCoins[i].atBase=true;
+
+                    if(players[gamePlayersList[i]].outCoins.Contains(cuttableCoins[i].gameObject.transform))
+                    {
+                        players[gamePlayersList[i]].outCoins.Remove(cuttableCoins[i].gameObject.transform);
+                    }
+                    canCut=true;
                 }
             }
         }
@@ -700,6 +722,7 @@ public class GameController : MonoBehaviour
     {
         List<Coin> tempPublicLaneCoinList=new List<Coin>();
         List<Coin> tempHomeLaneCoinList=new List<Coin>();
+        List<Coin> movableCoins=new List<Coin>();
 
         if(players[turnCounter].outCoins.Count>0)
         {
@@ -711,6 +734,7 @@ public class GameController : MonoBehaviour
                 if(!outCoin.onWayToHome)
                 {
                     tempPublicLaneCoinList.Add(outCoin);
+                    movableCoins.Add(outCoin);
                     coinCount++;
                 }
                 else
@@ -720,6 +744,7 @@ public class GameController : MonoBehaviour
                         if((outCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
                         {
                             tempHomeLaneCoinList.Add(outCoin);
+                            movableCoins.Add(outCoin);
                             coinCount++;
                         }
                     }
@@ -748,9 +773,12 @@ public class GameController : MonoBehaviour
                 //multiple coins avaliable for moving
                 if(players[turnCounter].player==playerType.Human)
                 {
-                    for(int i=0;i< players[turnCounter].outCoins.Count;i++)
+                    for(int i=0;i<movableCoins.Count;i++)
                     {
-                        players[turnCounter].outCoins[i].GetComponent<Coin>().isClickable=true;
+                        if(!movableCoins[i].atHome)
+                        {
+                            movableCoins[i].GetComponent<Coin>().isClickable=true;
+                        }
                     }
                 }
                 else if(players[turnCounter].player==playerType.Bot)

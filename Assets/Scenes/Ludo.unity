@@ -145,6 +145,9 @@ MonoBehaviour:
   canRollDice: 0
   currentDiceValue: 2
   diceStates: 0
+  enableDebugging: 0
+  minDebugVal: 5
+  maxDebugVal: 7
 --- !u!54 &24529192
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -41,6 +41,11 @@ public class Dice : MonoBehaviour
    }
    public states diceStates;
 
+   [Header("Debug Mode")]
+   public bool enableDebugging=false;
+   public int minDebugVal;
+   public int maxDebugVal;
+
    void Awake()
    {
        if(instance!=null)
@@ -129,18 +134,14 @@ public class Dice : MonoBehaviour
 
    int GetRandomDiceValue()
    {
-        return Random.Range(1,7);
-      
-        //for testing only
-        //return Random.Range(1,2);
-        // if(Random.Range(0,2)==0)
-        // {
-        //     return 6;
-        // }
-        // else 
-        // {
-        //     return 5;
-        // }
+       if(!enableDebugging)
+       {
+            return Random.Range(1,7);
+       }
+       else
+       {
+            return Random.Range(minDebugVal,maxDebugVal);
+       }
    }
 
    void RotateDiceToCorrectFace()

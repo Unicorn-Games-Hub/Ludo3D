@@ -51,5 +51,19 @@ public class CharAnimationHandler : MonoBehaviour
         anim.Play();
     }
 
+    public void PlayAttackAnimation(Transform t)
+    {
+        anim=t.GetComponent<Animation>();
+        anim.clip=attackAnim;
+        anim.Play();
+    }
+
+    public void PlayKillAnimation(Transform t)
+    {
+        anim=t.GetComponent<Animation>();
+        anim.clip=killAnim;
+        anim.Play();
+    }
+
     #endregion
 }
