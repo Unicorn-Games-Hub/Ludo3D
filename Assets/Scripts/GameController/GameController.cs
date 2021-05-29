@@ -192,36 +192,6 @@ public class GameController : MonoBehaviour
     public void HandleObtainedDiceValue(int diceValue)
     {
         currentDiceValue=diceValue;
-        /* 
-        if(diceValue==coinOutAt)
-        {
-            if(players[turnCounter].player==playerType.Human)
-            {
-                for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
-                {
-                    generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().SetClickable(true);
-                }
-            }
-            else if(players[turnCounter].player==playerType.Bot)
-            {
-                StartCoroutine(CoinOutBotBehaviour());
-            }
-        }
-        else if(diceValue==rollChanceAt)
-        {
-            if(players[turnCounter].outCoins.Count>0)
-            {
-                ChooseCoinForMovement();
-            }
-            else
-            {
-                HandleDiceRoll(turnCounter);
-            }
-        }
-        else
-        {
-            ChooseCoinForMovement();
-        }*/
 
         if(diceValue==coinOutAt)
         {
@@ -235,7 +205,7 @@ public class GameController : MonoBehaviour
                     for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
                     {
                         Coin tempCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>();
-                        if(tempCoin.atBase||!tempCoin.onWayToHome)
+                        if(tempCoin.atBase||!tempCoin.onWayToHome||!tempCoin.atHome)
                         {
                             clickableCoinsList.Add(tempCoin);
                         }
@@ -432,7 +402,7 @@ public class GameController : MonoBehaviour
                     }
                 }
 
-                //
+                //adjusting character rotation
                 UpdateCharacterRotation(coin.transform);
 
                 int curCoinPosIndex=(coin.stepCounter+players[turnCounter].initialPosIndex)%(coinPathContainer.childCount);
@@ -472,7 +442,7 @@ public class GameController : MonoBehaviour
             //checking if coin is safe or can be cut
             if(!coin.onWayToHome)
             {
-                if(CutTheCoin(newTargetCount))
+                if(CutTheCoin(newTargetCount)==true)
                 {
                     //give turn as a cut bonus
                     HandleDiceRoll(turnCounter);
@@ -523,7 +493,6 @@ public class GameController : MonoBehaviour
     #region Safe
     public bool IsCoinSafe(int curCoinPosValue)
     {
-        bool safe=false;
         int tempPosValue=curCoinPosValue;
         if(tempPosValue>coinPathContainer.childCount)
         {
@@ -531,16 +500,15 @@ public class GameController : MonoBehaviour
         }
         if(safePosIndexList.Contains(tempPosValue))
         {
-            safe=true;
+           return true;
         }
-        return safe;
+        return false;
     }
     #endregion
 
     #region Cutting
     public bool CutTheCoin(int coinPositionIndex)
     {
-        bool canCut=false;
         List<Coin> cuttableCoins=new List<Coin>();
 
         for(int i=0;i<gamePlayersList.Count;i++)
@@ -550,7 +518,7 @@ public class GameController : MonoBehaviour
                 if(turnCounter!=players[gamePlayersList[i]].playerID)
                 {
                     Coin newTempCoin=players[gamePlayersList[i]].outCoins[j].GetComponent<Coin>();
-                    if(!newTempCoin.isSafe&&!newTempCoin.onWayToHome)
+                    if(!newTempCoin.isSafe&&!newTempCoin.onWayToHome&&!newTempCoin.atHome)
                     {
                         if(!cuttableCoins.Contains(newTempCoin))
                         {
@@ -590,16 +558,21 @@ public class GameController : MonoBehaviour
                   
                     cuttableCoins[i].stepCounter=0;
                     cuttableCoins[i].atBase=true;
+                    cuttableCoins[i].isReadyForHome=false;
+                    cuttableCoins[i].canGoHome=false;
+                    cuttableCoins[i].onWayToHome=false;
+                    cuttableCoins[i].atHome=false;
+                    cuttableCoins[i].isSafe=false;
 
-                    if(players[gamePlayersList[i]].outCoins.Contains(cuttableCoins[i].gameObject.transform))
+                    if(players[gamePlayersList[i]].outCoins.Contains(cuttableCoins[i].transform))
                     {
-                        players[gamePlayersList[i]].outCoins.Remove(cuttableCoins[i].gameObject.transform);
+                        players[gamePlayersList[i]].outCoins.Remove(cuttableCoins[i].transform);
                     }
-                    canCut=true;
+                    return true;
                 }
             }
         }
-        return canCut;
+        return false;
     }
 
     void CutCoinReset()
@@ -757,14 +730,12 @@ public class GameController : MonoBehaviour
             }
             else if(coinCount==1)
             {
-                //single coin then??
                 if(players[turnCounter].player==playerType.Human)
                 {
                     StartCoroutine(UpdateCoinPosition(outCoin));
                 }
                 else if(players[turnCounter].player==playerType.Bot)
                 {
-                    //check
                     HandleMovalbeCoinBehaviour(tempPublicLaneCoinList);
                 }
             }
@@ -775,10 +746,7 @@ public class GameController : MonoBehaviour
                 {
                     for(int i=0;i<movableCoins.Count;i++)
                     {
-                        if(!movableCoins[i].atHome)
-                        {
-                            movableCoins[i].GetComponent<Coin>().isClickable=true;
-                        }
+                        movableCoins[i].GetComponent<Coin>().isClickable=true;
                     }
                 }
                 else if(players[turnCounter].player==playerType.Bot)
@@ -826,6 +794,7 @@ public class GameController : MonoBehaviour
         }
     }
 
+    [System.Serializable]
     public class CoinCutInfo
     {
         public Coin coinThatCuts;
@@ -838,61 +807,73 @@ public class GameController : MonoBehaviour
 
     private bool IsCoinCutAvaliable()
     {
-        if(avalibleCutCoinList.Count>0)
-        {
-            avalibleCutCoinList.Clear();
-        }
+        Debug.Log("Searching for cut coin!");
+      avalibleCutCoinList.Clear();
 
+      List<Coin> coinsOutsideBase=new List<Coin>();
+    
         for(int i=0;i<gamePlayersList.Count;i++)
         {
             for(int j=0;j<players[gamePlayersList[i]].outCoins.Count;j++)
             {
                 if(turnCounter!=players[gamePlayersList[i]].playerID)
                 {
-                    Coin opponentsCoin=players[gamePlayersList[i]].outCoins[j].GetComponent<Coin>();
-                    Coin myCoin=players[turnCounter].outCoins[j].GetComponent<Coin>();
-                    
-                    int opponentCoinPosIndex=opponentsCoin.stepCounter+players[gamePlayersList[i]].initialPosIndex;
-                    int myCoinNextPosIndex=myCoin.stepCounter+players[turnCounter].initialPosIndex+currentDiceValue;
-
-                    if(opponentCoinPosIndex>coinPathContainer.childCount)
+                    Coin opponentCoin=players[gamePlayersList[i]].outCoins[j].GetComponent<Coin>();
+                    if(!opponentCoin.isSafe&&!opponentCoin.onWayToHome)
                     {
-                        opponentCoinPosIndex=opponentCoinPosIndex-coinPathContainer.childCount;
-                    }
-
-                    if(myCoinNextPosIndex>coinPathContainer.childCount)
-                    {
-                        myCoinNextPosIndex=myCoinNextPosIndex-coinPathContainer.childCount;
-                    }
-                   
-                    if(myCoinNextPosIndex==opponentCoinPosIndex&&!opponentsCoin.isSafe&&!opponentsCoin.onWayToHome&&!opponentsCoin.atHome)
-                    {
-                        CoinCutInfo coinInfo=new CoinCutInfo();
-                        coinInfo.coinThatCuts=myCoin;
-                        coinInfo.coinThatCanBeCut=opponentsCoin;
-                        //so that we can choose to cut player coin or bot coin
-                        if(players[gamePlayersList[i]].player==playerType.Human)
-                        {
-                            coinInfo.coinPlayID=0;
-                        }
-                        else if(players[gamePlayersList[i]].player==playerType.Bot)
-                        {
-                            coinInfo.coinPlayID=1;
-                        }
-                        avalibleCutCoinList.Add(coinInfo);
+                        coinsOutsideBase.Add(opponentCoin);
                     }
                 }
             }
         }
 
-       if(avalibleCutCoinList.Count>0)
-       {
-           return true;
-       }
-       else
-       {
-           return false;
-       }
+        //now lets check wether the out coins can be cut or not
+        for(int i=0;i<players[turnCounter].outCoins.Count;i++)
+        {
+            for(int j=0;j<coinsOutsideBase.Count;j++)
+            {
+                Coin myCoin=players[turnCounter].outCoins[i].GetComponent<Coin>(); 
+                int opponentCoinPosIndex=coinsOutsideBase[j].stepCounter+players[coinsOutsideBase[j].id].initialPosIndex;
+                int myCoinNextPosIndex=myCoin.stepCounter+players[turnCounter].initialPosIndex+currentDiceValue;
+
+                if(opponentCoinPosIndex>coinPathContainer.childCount)
+                {
+                    opponentCoinPosIndex=opponentCoinPosIndex-coinPathContainer.childCount;
+                }
+
+                if(myCoinNextPosIndex>coinPathContainer.childCount)
+                {
+                    myCoinNextPosIndex=myCoinNextPosIndex-coinPathContainer.childCount;
+                }
+
+                if(myCoinNextPosIndex==opponentCoinPosIndex)
+                {
+                    CoinCutInfo coinInfo=new CoinCutInfo();
+                    coinInfo.coinThatCuts=myCoin;
+                    coinInfo.coinThatCanBeCut=coinsOutsideBase[j];
+
+                    //so that we can choose to cut player coin or bot coin
+                    if(players[coinsOutsideBase[j].id].player==playerType.Human)
+                    {
+                        coinInfo.coinPlayID=0;
+                    }
+                    else if(players[coinsOutsideBase[j].id].player==playerType.Bot)
+                    {
+                        coinInfo.coinPlayID=1;
+                    }
+                    avalibleCutCoinList.Add(coinInfo);
+                }
+            }
+        }
+
+        if(avalibleCutCoinList.Count>0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
 
@@ -925,33 +906,27 @@ public class GameController : MonoBehaviour
             {
                 if(currentDiceValue==coinOutAt)
                 {
-                   //check if there are any coins inside base which can be taken out if yes take that out else move other coins
-                    List<Transform> avaliableCoins=new List<Transform>();
+                    List<Transform> coinsInsideBase=new List<Transform>();
                     for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
                     {
-                        Coin tempBaseCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>();
-                        if(tempBaseCoin.atBase)
+                        Transform tempChar=generatedCoinsHolder.GetChild(turnCounter).GetChild(i);
+                        if(!players[turnCounter].outCoins.Contains(tempChar))
                         {
-                            if(!avaliableCoins.Contains(tempBaseCoin.transform))
-                            {
-                                avaliableCoins.Add(tempBaseCoin.transform);
-                            }
+                            coinsInsideBase.Add(tempChar);
                         }
                     }
 
-                   if(avaliableCoins.Count>0)
-                   {
+                    if(coinsInsideBase.Count>0)
+                    {
                         HandleNewCoinOutBehaviour(); 
-                   }
-                   else
-                   {
+                    }
+                    else
+                    {
                         HandlingMaxMovedCoinBehaviour(coinThatMovedFarthest,tempPublicLaneCoinList);
-                   }
+                    }
                 }
                 else
                 {
-                    //check if there are any max moved coin
-                    //if yes move the max moved coin else move random coin
                     HandlingMaxMovedCoinBehaviour(coinThatMovedFarthest,tempPublicLaneCoinList);
                 }
             }
@@ -980,7 +955,6 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            //choose random coin for movement
             int randomMovableCoinIndex=Random.Range(0,tempPublicLaneCoinList.Count);
             StartCoroutine(UpdateCoinPosition(tempPublicLaneCoinList[randomMovableCoinIndex]));
         }

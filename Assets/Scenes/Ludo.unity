@@ -3528,7 +3528,7 @@ MonoBehaviour:
   - colorName: Green
     playerID: 0
     coinPrefab: {fileID: 3970057363857400681, guid: 5704da5175a5047bf8da57e8df333930, type: 3}
-    player: 2
+    player: 1
     initialPosIndex: 0
     coinColor: {r: 0.44705886, g: 0.8352942, b: 0.49411768, a: 1}
     outCoins: []
@@ -3542,7 +3542,7 @@ MonoBehaviour:
   - colorName: Blue
     playerID: 2
     coinPrefab: {fileID: 4224728455472447539, guid: 29b1e329957e940d49c5909c6f387230, type: 3}
-    player: 2
+    player: 1
     initialPosIndex: 26
     coinColor: {r: 0.35686275, g: 0.6, b: 1, a: 1}
     outCoins: []
