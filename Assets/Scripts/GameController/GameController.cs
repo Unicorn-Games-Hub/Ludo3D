@@ -217,7 +217,7 @@ public class GameController : MonoBehaviour
                         {
                            if(tempCoin.onWayToHome)
                            {
-                                if((tempCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
+                                if((tempCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount-1)
                                 {
                                     clickableCoinsList.Add(tempCoin);
                                 }
@@ -446,7 +446,7 @@ public class GameController : MonoBehaviour
             //checking if coin is safe or can be cut
             if(!coin.onWayToHome)
             {
-                if(CutTheCoin(newTargetCount)==true)
+                if(CutTheCoin(coin))
                 {
                     //give turn as a cut bonus
                     HandleDiceRoll(turnCounter);
@@ -511,10 +511,10 @@ public class GameController : MonoBehaviour
     #endregion
 
     #region Cutting
-    public bool CutTheCoin(int coinPositionIndex)
+    private Coin lastCuttedCoin=null;
+    public bool CutTheCoin(Coin myChar)
     {
         List<Coin> cuttableCoins=new List<Coin>();
-
         for(int i=0;i<gamePlayersList.Count;i++)
         {
             for(int j=0;j<players[gamePlayersList[i]].outCoins.Count;j++)
@@ -537,21 +537,22 @@ public class GameController : MonoBehaviour
         {
             for(int i=0;i<cuttableCoins.Count;i++)
             {
-                int newTempCount=cuttableCoins[i].stepCounter+players[cuttableCoins[i].id].initialPosIndex;
-                int newTempCount1=coinPositionIndex;
+                int tempCoinPosIndex=cuttableCoins[i].stepCounter+players[cuttableCoins[i].id].initialPosIndex;
+                int tempMyCharPosIndex=myChar.stepCounter+players[myChar.id].initialPosIndex;
 
-                if(newTempCount>coinPathContainer.childCount)
+                if(tempCoinPosIndex>coinPathContainer.childCount-1)
                 {
-                    newTempCount=(newTempCount-coinPathContainer.childCount);
+                    tempCoinPosIndex=tempCoinPosIndex-coinPathContainer.childCount;
                 }
 
-                if(newTempCount1>coinPathContainer.childCount)
+                if(tempMyCharPosIndex>coinPathContainer.childCount-1)
                 {
-                    newTempCount1=(newTempCount1-coinPathContainer.childCount);
+                    tempMyCharPosIndex=tempMyCharPosIndex-coinPathContainer.childCount;
                 }
-
-                if(newTempCount==newTempCount1)
+                
+                if(tempCoinPosIndex==tempMyCharPosIndex)
                 {
+                    lastCuttedCoin=cuttableCoins[i];
                     iTween.MoveTo(cuttableCoins[i].gameObject, iTween.Hash("position", 
                     cuttableCoins[i].initialPosInfo, 
                     "speed", coinMoveSpeed, 
@@ -559,27 +560,6 @@ public class GameController : MonoBehaviour
                     "oncomplete", "CutCoinReset", 
                     "oncompletetarget", this.gameObject
                     ));
-                  
-                    cuttableCoins[i].stepCounter=0;
-                    cuttableCoins[i].atBase=true;
-                    cuttableCoins[i].canGoHome=false;
-                    cuttableCoins[i].onWayToHome=false;
-                    cuttableCoins[i].atHome=false;
-                    cuttableCoins[i].isSafe=false;
-
-                    if(players[gamePlayersList[i]].outCoins.Contains(cuttableCoins[i].transform))
-                    {
-                        players[gamePlayersList[i]].outCoins.Remove(cuttableCoins[i].transform);
-                    }
-
-                    //now let coins to walk inside home lane
-                    if(!enterHomeWithOutCutting)
-                    {
-                        for(int j=0;j<generatedCoinsHolder.GetChild(turnCounter).childCount;j++)
-                        {
-                            generatedCoinsHolder.GetChild(turnCounter).GetChild(j).GetComponent<Coin>().isReadyForHome=true;
-                        }
-                    }
                     return true;
                 }
             }
@@ -589,7 +569,27 @@ public class GameController : MonoBehaviour
 
     void CutCoinReset()
     {
+        lastCuttedCoin.stepCounter=0;
+        lastCuttedCoin.atBase=true;
+        lastCuttedCoin.canGoHome=false;
+        lastCuttedCoin.onWayToHome=false;
+        lastCuttedCoin.atHome=false;
+        lastCuttedCoin.isSafe=false;
+        Transform tempCoinTransform=lastCuttedCoin.gameObject.transform;
 
+        if(players[lastCuttedCoin.id].outCoins.Contains(tempCoinTransform))
+        {
+            players[lastCuttedCoin.id].outCoins.Remove(tempCoinTransform);
+        }
+
+        //now let coins to walk inside home lane
+        if(!enterHomeWithOutCutting)
+        {
+            for(int j=0;j<generatedCoinsHolder.GetChild(turnCounter).childCount;j++)
+            {
+                generatedCoinsHolder.GetChild(turnCounter).GetChild(j).GetComponent<Coin>().isReadyForHome=true;
+            }
+        }
     }
     #endregion
 
@@ -724,14 +724,11 @@ public class GameController : MonoBehaviour
                 }
                 else
                 {
-                    if(outCoin.stepCounter<homePaths[turnCounter].childCount)
+                    if((outCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
                     {
-                        if((outCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
-                        {
-                            tempHomeLaneCoinList.Add(outCoin);
-                            movableCoins.Add(outCoin);
-                            coinCount++;
-                        }
+                        tempHomeLaneCoinList.Add(outCoin);
+                        movableCoins.Add(outCoin);
+                        coinCount++;
                     }
                 }
             }
@@ -819,10 +816,12 @@ public class GameController : MonoBehaviour
 
     private bool IsCoinCutAvaliable()
     {
-        Debug.Log("Searching for cut coin!");
-      avalibleCutCoinList.Clear();
+        if(avalibleCutCoinList.Count>0)
+        {
+            avalibleCutCoinList.Clear();
+        }
 
-      List<Coin> coinsOutsideBase=new List<Coin>();
+        List<Coin> coinsOutsideBase=new List<Coin>();
     
         for(int i=0;i<gamePlayersList.Count;i++)
         {
@@ -845,26 +844,28 @@ public class GameController : MonoBehaviour
             for(int j=0;j<coinsOutsideBase.Count;j++)
             {
                 Coin myCoin=players[turnCounter].outCoins[i].GetComponent<Coin>(); 
-                int opponentCoinPosIndex=coinsOutsideBase[j].stepCounter+players[coinsOutsideBase[j].id].initialPosIndex;
-                int myCoinNextPosIndex=myCoin.stepCounter+players[turnCounter].initialPosIndex+currentDiceValue;
 
-                if(opponentCoinPosIndex>coinPathContainer.childCount)
+                int opponentCoinPosIndex=coinsOutsideBase[j].stepCounter+players[coinsOutsideBase[j].id].initialPosIndex;
+                int myCoinNextPosIndex=myCoin.stepCounter+players[myCoin.id].initialPosIndex+currentDiceValue;
+
+                if(opponentCoinPosIndex>coinPathContainer.childCount-1)
                 {
                     opponentCoinPosIndex=opponentCoinPosIndex-coinPathContainer.childCount;
                 }
 
-                if(myCoinNextPosIndex>coinPathContainer.childCount)
+                if(myCoinNextPosIndex>coinPathContainer.childCount-1)
                 {
                     myCoinNextPosIndex=myCoinNextPosIndex-coinPathContainer.childCount;
                 }
 
                 if(myCoinNextPosIndex==opponentCoinPosIndex)
                 {
+                    Debug.Log("Coin avaliable for cutting..");
                     CoinCutInfo coinInfo=new CoinCutInfo();
                     coinInfo.coinThatCuts=myCoin;
                     coinInfo.coinThatCanBeCut=coinsOutsideBase[j];
 
-                    //so that we can choose to cut player coin or bot coin
+                    // //so that we can choose to cut player coin or bot coin
                     if(players[coinsOutsideBase[j].id].player==playerType.Human)
                     {
                         coinInfo.coinPlayID=0;
