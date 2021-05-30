@@ -141,11 +141,15 @@ public class GameController : MonoBehaviour
                     Transform newCoin=Instantiate(players[i].coinPrefab,coinContainer.GetChild(i).GetChild(j).position,players[i].coinPrefab.transform.rotation);
                     newCoin.SetParent(generatedCoinsHolder.GetChild(i).transform);
                     newCoin.GetComponent<Coin>().HandleCoinInfo(players[i].playerID,newCoin.transform.localPosition);
-                    //
                     newCoin.transform.localRotation=Quaternion.Euler(0f,startRotations[i].y,0f);
                     if(!gamePlayersList.Contains(players[i].playerID))
                     {
                         gamePlayersList.Add(players[i].playerID);
+                    }
+
+                    if(enterHomeWithOutCutting)
+                    {
+                        newCoin.GetComponent<Coin>().isReadyForHome=true;
                     }
                }
            }
@@ -484,7 +488,7 @@ public class GameController : MonoBehaviour
     private float curTimer=0f;
     private float waitTime=0.3f;
 
-    private float coinMoveSpeed=0.8f;
+    private float coinMoveSpeed=1f;
 
     private bool move=false;
     private int targetIndexValue;
@@ -558,7 +562,6 @@ public class GameController : MonoBehaviour
                   
                     cuttableCoins[i].stepCounter=0;
                     cuttableCoins[i].atBase=true;
-                    cuttableCoins[i].isReadyForHome=false;
                     cuttableCoins[i].canGoHome=false;
                     cuttableCoins[i].onWayToHome=false;
                     cuttableCoins[i].atHome=false;
@@ -567,6 +570,15 @@ public class GameController : MonoBehaviour
                     if(players[gamePlayersList[i]].outCoins.Contains(cuttableCoins[i].transform))
                     {
                         players[gamePlayersList[i]].outCoins.Remove(cuttableCoins[i].transform);
+                    }
+
+                    //now let coins to walk inside home lane
+                    if(!enterHomeWithOutCutting)
+                    {
+                        for(int j=0;j<generatedCoinsHolder.GetChild(turnCounter).childCount;j++)
+                        {
+                            generatedCoinsHolder.GetChild(turnCounter).GetChild(j).GetComponent<Coin>().isReadyForHome=true;
+                        }
                     }
                     return true;
                 }

@@ -20,6 +20,7 @@ public class Coin : MonoBehaviour
     {
         id=Id;
         initialPosInfo=coinPos;
+        atBase=true;
     }
 
     public void SetClickable(bool clickValue)

@@ -1742,8 +1742,8 @@ MonoBehaviour:
   id: 0
   stepCounter: 0
   isClickable: 0
-  atBase: 1
-  isReadyForHome: 1
+  atBase: 0
+  isReadyForHome: 0
   canGoHome: 0
   onWayToHome: 0
   atHome: 0
