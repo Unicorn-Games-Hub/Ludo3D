@@ -120,6 +120,8 @@ public class Dice : MonoBehaviour
 
    public IEnumerator RolltheDice()
    {
+       //from here we will stop blinking animation
+       GameController.instance.StopBlinkingAnimation();
        currentDiceValue=GetRandomDiceValue();
         startDiceAnimation=true;
         yield return new WaitForSeconds(1f);

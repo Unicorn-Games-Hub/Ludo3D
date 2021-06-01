@@ -92,6 +92,9 @@ public class GameController : MonoBehaviour
     private float diceMoveSpeed=15f;
     private Vector3 newDicePosition=Vector3.zero;
     private bool moveDice=false;
+
+    [Header("Highlight Animation")]
+    public HighLightAnimation[] highLights;
  
 
     void Awake()
@@ -175,6 +178,7 @@ public class GameController : MonoBehaviour
 
     IEnumerator WaitBeforeUpdatingTurn()
     {
+        highLights[turnCounter].StopAnimation();
         yield return new WaitForSeconds(1f);
         if(currentDiceValue!=rollChanceAt)
         {
@@ -276,6 +280,12 @@ public class GameController : MonoBehaviour
             StartCoroutine(HandleBotTurn());
         }
         diceMat.color=players[turnCounter].coinColor;
+        highLights[turnCounter].HighLight();
+    }
+
+    public void StopBlinkingAnimation()
+    {
+        highLights[turnCounter].StopAnimation();
     }
     #endregion
 
