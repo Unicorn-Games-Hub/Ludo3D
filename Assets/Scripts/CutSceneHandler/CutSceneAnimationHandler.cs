@@ -35,8 +35,8 @@ public class CutSceneAnimationHandler : MonoBehaviour
     private int aId=0;
 
     [Header("Background Color")]
-    public Material bgMat;
-    public Color initialBgColor;
+    public Image bgImage;
+
 
     void Awake()
     {
@@ -64,7 +64,7 @@ public class CutSceneAnimationHandler : MonoBehaviour
         aId=attackerID;
         isStarted=true;
         fadeIn=true;
-        bgMat.color=new Color(0f,0f,0f,1f);
+        bgImage.color=new Color(1f,1f,1f,1f);
     }
 
     void Update()
@@ -147,7 +147,7 @@ public class CutSceneAnimationHandler : MonoBehaviour
         animHandler.PlayDeathAnimation(defender);
         yield return new WaitForSeconds(1f);
         fadeIn=true;
-        bgMat.color=initialBgColor;
+        bgImage.color=new Color(1f,1f,1f,1f);
         if(GameController.instance!=null)
         {
             StartCoroutine(GameController.instance.UpdateCutCoinPosition());
