@@ -65,5 +65,12 @@ public class CharAnimationHandler : MonoBehaviour
         anim.Play();
     }
 
+    public void PlayDeathAnimation(Transform t)
+    {
+        anim=t.GetComponent<Animation>();
+        anim.clip=deathAnim;
+        anim.Play();
+    }
+
     #endregion
 }

@@ -68,6 +68,7 @@ public class GameController : MonoBehaviour
 
     [Header("Game Rules")]
     public bool enterHomeWithOutCutting=true;
+    public bool showCutSceneAnimation=true;
 
     //clickable layerMask
     public LayerMask coinLayer;
@@ -458,8 +459,9 @@ public class GameController : MonoBehaviour
             {
                 if(CutTheCoin(coin))
                 {
+                    //lets make game wait until the cut scene finishes
                     //give turn as a cut bonus
-                    HandleDiceRoll(turnCounter);
+                    // HandleDiceRoll(turnCounter);
                 }
                 else
                 {
@@ -492,7 +494,6 @@ public class GameController : MonoBehaviour
     void TargetReached()
     {
         isStepCompleted=true;
-
     }
 
     private float curTimer=0f;
@@ -563,18 +564,37 @@ public class GameController : MonoBehaviour
                 if(tempCoinPosIndex==tempMyCharPosIndex)
                 {
                     lastCuttedCoin=cuttableCoins[i];
-                    iTween.MoveTo(cuttableCoins[i].gameObject, iTween.Hash("position", 
-                    cuttableCoins[i].initialPosInfo, 
-                    "speed", coinMoveSpeed, 
-                    "easetype", iTween.EaseType.linear,
-                    "oncomplete", "CutCoinReset", 
-                    "oncompletetarget", this.gameObject
-                    ));
+
+                    if(showCutSceneAnimation)
+                    {
+                        if(CutSceneAnimationHandler.instance!=null)
+                        {
+                            CutSceneAnimationHandler.instance.StartCutSceneAnimation(lastCuttedCoin.id,myChar.id);
+                        }
+                    }
+                    else
+                    {
+                        iTween.MoveTo(cuttableCoins[i].gameObject, iTween.Hash("position", 
+                        cuttableCoins[i].initialPosInfo, 
+                        "speed", coinMoveSpeed, 
+                        "easetype", iTween.EaseType.linear,
+                        "oncomplete", "CutCoinReset", 
+                        "oncompletetarget", this.gameObject
+                        ));
+                    }
                     return true;
                 }
             }
         }
         return false;
+    }
+
+    public IEnumerator UpdateCutCoinPosition()
+    {
+        lastCuttedCoin.transform.position=lastCuttedCoin.initialPosInfo;
+        CutCoinReset();
+        yield return new WaitForSeconds(0.5f);
+        HandleDiceRoll(turnCounter);
     }
 
     void CutCoinReset()
