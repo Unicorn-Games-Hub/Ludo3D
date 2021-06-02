@@ -775,7 +775,9 @@ public class GameController : MonoBehaviour
                 }
                 else if(players[turnCounter].player==playerType.Bot)
                 {
-                    HandleMovalbeCoinBehaviour(tempPublicLaneCoinList);
+                    //check if the coin can be moved or not
+                    HandleBotMovement(tempHomeLaneCoinList,tempPublicLaneCoinList);
+                    //HandleMovalbeCoinBehaviour(tempPublicLaneCoinList);
                 }
             }
             else
@@ -790,46 +792,51 @@ public class GameController : MonoBehaviour
                 }
                 else if(players[turnCounter].player==playerType.Bot)
                 {
-                    //from here we can change behaviour of bot according to its type
-                    //lets check if we can cut any other coin or can move to the safe zone
-                    if(IsCoinCutAvaliable()==true)
-                    {
-                        HandleCutCoinMovement();
-                    }
-                    else
-                    {
-                        if(tempHomeLaneCoinList.Count>0)
-                        {
-                            Coin movableHomeCoin=null;
-                            for(int i=0;i<tempHomeLaneCoinList.Count;i++)
-                            {
-                                int homeCoinStepCount=tempHomeLaneCoinList[i].stepCounter+currentDiceValue;
-                                if(homeCoinStepCount<homePaths[turnCounter].childCount)
-                                {
-                                   movableHomeCoin=tempHomeLaneCoinList[i];
-                                }
-                            }
-
-                            if(movableHomeCoin!=null)
-                            {
-                                StartCoroutine(UpdateCoinPosition(movableHomeCoin));
-                            }
-                            else
-                            {
-                               HandleMovalbeCoinBehaviour(tempPublicLaneCoinList);
-                            }
-                        }
-                        else 
-                        {
-                           HandleMovalbeCoinBehaviour(tempPublicLaneCoinList);
-                        }
-                    }
+                    HandleBotMovement(tempHomeLaneCoinList,tempPublicLaneCoinList);
                 }
             }
         }
         else
         {
             UpdateTurn(); 
+        }
+    }
+
+
+    void HandleBotMovement(List<Coin> tempHomeLaneCoinList,List<Coin> tempPublicLaneCoinList)
+    {
+        //lets check if we can cut any other coin or can move to the safe zone
+        if(IsCoinCutAvaliable()==true)
+        {
+            HandleCutCoinMovement();
+        }
+        else
+        {
+            if(tempHomeLaneCoinList.Count>0)
+            {
+                Coin movableHomeCoin=null;
+                for(int i=0;i<tempHomeLaneCoinList.Count;i++)
+                {
+                    int homeCoinStepCount=tempHomeLaneCoinList[i].stepCounter+currentDiceValue;
+                    if(homeCoinStepCount<homePaths[turnCounter].childCount)
+                    {
+                        movableHomeCoin=tempHomeLaneCoinList[i];
+                    }
+                }
+
+                if(movableHomeCoin!=null)
+                {
+                    StartCoroutine(UpdateCoinPosition(movableHomeCoin));
+                }
+                else
+                {
+                    HandleMovalbeCoinBehaviour(tempPublicLaneCoinList);
+                }
+            }
+            else 
+            {
+                HandleMovalbeCoinBehaviour(tempPublicLaneCoinList);
+            }
         }
     }
 

@@ -146,7 +146,7 @@ MonoBehaviour:
   currentDiceValue: 2
   diceStates: 0
   enableDebugging: 0
-  minDebugVal: 6
+  minDebugVal: 5
   maxDebugVal: 7
 --- !u!54 &24529192
 Rigidbody:
@@ -3673,6 +3673,7 @@ MonoBehaviour:
   gamePlayersList: 
   gameBotType: 0
   enterHomeWithOutCutting: 1
+  showCutSceneAnimation: 1
   coinLayer:
     serializedVersion: 2
     m_Bits: 128
