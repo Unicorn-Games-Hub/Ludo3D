@@ -2901,7 +2901,7 @@ MonoBehaviour:
   fadeIn: 0
   fadeOut: 0
   fadeSpeed: 2
-  bgImage: {fileID: 0}
+  bgImage: {fileID: 1536334721}
 --- !u!4 &1181957454
 Transform:
   m_ObjectHideFlags: 0

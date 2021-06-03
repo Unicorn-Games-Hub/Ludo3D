@@ -64,7 +64,7 @@ public class CutSceneAnimationHandler : MonoBehaviour
         aId=attackerID;
         isStarted=true;
         fadeIn=true;
-        bgImage.color=new Color(1f,1f,1f,1f);
+        bgImage.color=new Color(0f,0f,0f,1f);
     }
 
     void Update()
@@ -107,6 +107,7 @@ public class CutSceneAnimationHandler : MonoBehaviour
         else
         {
             HideCharacters();
+            bgImage.color=new Color(1f,1f,1f,1f);
             HandleCutSceneEssentials(true);
             fadeOut=true;
         }
@@ -147,10 +148,9 @@ public class CutSceneAnimationHandler : MonoBehaviour
         animHandler.PlayDeathAnimation(defender);
         yield return new WaitForSeconds(1f);
         fadeIn=true;
-        bgImage.color=new Color(1f,1f,1f,1f);
         if(GameController.instance!=null)
         {
-            StartCoroutine(GameController.instance.UpdateCutCoinPosition());
+            GameController.instance.UpdateCutCoinPosition();
         }
     }
 

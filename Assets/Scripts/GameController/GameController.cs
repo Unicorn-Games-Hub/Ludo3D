@@ -589,12 +589,11 @@ public class GameController : MonoBehaviour
         return false;
     }
 
-    public IEnumerator UpdateCutCoinPosition()
+    public void UpdateCutCoinPosition()
     {
         lastCuttedCoin.transform.position=lastCuttedCoin.initialPosInfo;
+        lastCuttedCoin.transform.localRotation=Quaternion.Euler(0f,startRotations[lastCuttedCoin.id].y,0f);
         CutCoinReset();
-        yield return new WaitForSeconds(0.5f);
-        HandleDiceRoll(turnCounter);
     }
 
     void CutCoinReset()
@@ -620,6 +619,13 @@ public class GameController : MonoBehaviour
                 generatedCoinsHolder.GetChild(turnCounter).GetChild(j).GetComponent<Coin>().isReadyForHome=true;
             }
         }
+        StartCoroutine(UpdateTurnAfterCutting());
+    }
+
+    IEnumerator UpdateTurnAfterCutting()
+    {
+        yield return new WaitForSeconds(0.5f);
+        HandleDiceRoll(turnCounter);
     }
     #endregion
 

@@ -94,7 +94,10 @@ public class Dice : MonoBehaviour
             else if(Input.GetMouseButtonUp(0)&&isDragging)
             {
                 differenceVector=finalDicePos-initialDicePos;
-                rb.AddForce(differenceVector.normalized * diceThrowForce, ForceMode.Impulse);
+                if(differenceVector.magnitude>0f)
+                {
+                    rb.AddForce(differenceVector.normalized * diceThrowForce, ForceMode.Impulse);
+                }
                 StartCoroutine(RolltheDice());
                 isDragging=false;
                 diceStates=states.rolling;
