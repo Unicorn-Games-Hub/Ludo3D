@@ -121,6 +121,8 @@ public class CutSceneAnimationHandler : MonoBehaviour
         attacker.position=attackerPos;
         defender.gameObject.SetActive(true);
         attacker.gameObject.SetActive(true);
+        //make defender idle
+        animHandler.PlayIdleAnimation(defender);
         MoveAttacker();
     }
     
