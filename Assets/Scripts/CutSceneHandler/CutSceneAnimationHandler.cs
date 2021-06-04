@@ -152,7 +152,7 @@ public class CutSceneAnimationHandler : MonoBehaviour
         fadeIn=true;
         if(GameController.instance!=null)
         {
-            GameController.instance.UpdateCutCoinPosition();
+            GameController.instance.ResetCutCoin();
         }
     }
 

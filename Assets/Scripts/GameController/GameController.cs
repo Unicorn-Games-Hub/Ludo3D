@@ -201,71 +201,80 @@ public class GameController : MonoBehaviour
     public void HandleObtainedDiceValue(int diceValue)
     {
         currentDiceValue=diceValue;
-
-        if(diceValue==coinOutAt)
+        //lets check consecutive roll of 6
+        if(!IsItThreeConsecutiveRoll(turnCounter))
         {
-            if(players[turnCounter].outCoins.Count>0)
+            if(diceValue==coinOutAt)
             {
-                if(players[turnCounter].player==playerType.Human)
+                if(players[turnCounter].outCoins.Count>0)
                 {
-                    List<Coin> clickableCoinsList=new List<Coin>();
-
-                    //lets check if there are some coins inside base or not if yes make base coin clickable
-                    for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+                    if(players[turnCounter].player==playerType.Human)
                     {
-                        Coin tempCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>();
-                        if(tempCoin.atBase||!tempCoin.onWayToHome||!tempCoin.atHome)
+                        List<Coin> clickableCoinsList=new List<Coin>();
+
+                        //lets check if there are some coins inside base or not if yes make base coin clickable
+                        for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
                         {
-                            clickableCoinsList.Add(tempCoin);
+                            Coin tempCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>();
+                            if(tempCoin.atBase||!tempCoin.onWayToHome||!tempCoin.atHome)
+                            {
+                                clickableCoinsList.Add(tempCoin);
+                            }
+                            else
+                            {
+                            if(tempCoin.onWayToHome)
+                            {
+                                    if((tempCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount-1)
+                                    {
+                                        clickableCoinsList.Add(tempCoin);
+                                    }
+                            }
+                            }
+                        }
+
+                        if(clickableCoinsList.Count>0)
+                        {
+                            foreach (Coin c in clickableCoinsList)
+                            {
+                                c.SetClickable(true);
+                            }
                         }
                         else
                         {
-                           if(tempCoin.onWayToHome)
-                           {
-                                if((tempCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount-1)
-                                {
-                                    clickableCoinsList.Add(tempCoin);
-                                }
-                           }
+                            UpdateTurn();
                         }
+                    
                     }
-
-                    if(clickableCoinsList.Count>0)
+                    else if(players[turnCounter].player==playerType.Bot)
                     {
-                        foreach (Coin c in clickableCoinsList)
-                        {
-                            c.SetClickable(true);
-                        }
+                        ChooseCoinForMovement();
                     }
-                    else
-                    {
-                        UpdateTurn();
-                    }
-                  
                 }
-                else if(players[turnCounter].player==playerType.Bot)
+                else
                 {
-                    ChooseCoinForMovement();
+                    if(players[turnCounter].player==playerType.Human)
+                    {
+                        for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+                        {
+                            generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().SetClickable(true);
+                        }
+                    }
+                    else if(players[turnCounter].player==playerType.Bot)
+                    {
+                        StartCoroutine(CoinOutBotBehaviour());
+                    }
                 }
             }
             else
             {
-                if(players[turnCounter].player==playerType.Human)
-                {
-                    for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
-                    {
-                        generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().SetClickable(true);
-                    }
-                }
-                else if(players[turnCounter].player==playerType.Bot)
-                {
-                    StartCoroutine(CoinOutBotBehaviour());
-                }
+                ChooseCoinForMovement();
             }
         }
         else
         {
-            ChooseCoinForMovement();
+            //reseting the current dice value
+            currentDiceValue=0;
+            UpdateTurn();
         }
     }
 
@@ -578,7 +587,7 @@ public class GameController : MonoBehaviour
                         cuttableCoins[i].initialPosInfo, 
                         "speed", coinMoveSpeed, 
                         "easetype", iTween.EaseType.linear,
-                        "oncomplete", "CutCoinReset", 
+                        "oncomplete", "ResetCutCoin", 
                         "oncompletetarget", this.gameObject
                         ));
                     }
@@ -589,29 +598,9 @@ public class GameController : MonoBehaviour
         return false;
     }
 
-    public void UpdateCutCoinPosition()
+    public void ResetCutCoin()
     {
-        lastCuttedCoin.transform.position=lastCuttedCoin.initialPosInfo;
-        lastCuttedCoin.transform.localRotation=Quaternion.Euler(0f,startRotations[lastCuttedCoin.id].y,0f);
-        CutCoinReset();
-    }
-
-    void CutCoinReset()
-    {
-        lastCuttedCoin.stepCounter=0;
-        lastCuttedCoin.atBase=true;
-        lastCuttedCoin.canGoHome=false;
-        lastCuttedCoin.onWayToHome=false;
-        lastCuttedCoin.atHome=false;
-        lastCuttedCoin.isSafe=false;
-        Transform tempCoinTransform=lastCuttedCoin.gameObject.transform;
-
-        if(players[lastCuttedCoin.id].outCoins.Contains(tempCoinTransform))
-        {
-            players[lastCuttedCoin.id].outCoins.Remove(tempCoinTransform);
-        }
-
-        //now let coins to walk inside home lane
+        ResetThisCoin(lastCuttedCoin);
         if(!enterHomeWithOutCutting)
         {
             for(int j=0;j<generatedCoinsHolder.GetChild(turnCounter).childCount;j++)
@@ -620,6 +609,24 @@ public class GameController : MonoBehaviour
             }
         }
         StartCoroutine(UpdateTurnAfterCutting());
+    }
+
+    void ResetThisCoin(Coin coinToReset)
+    {
+        coinToReset.stepCounter=0;
+        coinToReset.atBase=true;
+        coinToReset.canGoHome=false;
+        coinToReset.onWayToHome=false;
+        coinToReset.atHome=false;
+        coinToReset.isSafe=false;
+        coinToReset.transform.position=coinToReset.initialPosInfo;
+        coinToReset.transform.localRotation=Quaternion.Euler(0f,startRotations[coinToReset.id].y,0f);
+
+        Transform tempCoinTransform=coinToReset.gameObject.transform;
+        if(players[coinToReset.id].outCoins.Contains(tempCoinTransform))
+        {
+            players[coinToReset.id].outCoins.Remove(tempCoinTransform);
+        }
     }
 
     IEnumerator UpdateTurnAfterCutting()
@@ -1017,6 +1024,59 @@ public class GameController : MonoBehaviour
     }
     #endregion
 
+    #region Consecutive roll of 6
+    private List<int> consecutiveRollList=new List<int>();
+
+    bool IsItThreeConsecutiveRoll(int curPlayerID)
+    {
+        if(currentDiceValue!=6)
+        {
+            consecutiveRollList.Clear();
+            return false;
+        }
+
+        if(consecutiveRollList.Count==0)
+        {
+            consecutiveRollList.Add(curPlayerID); 
+        }
+        else
+        {
+            if(consecutiveRollList[consecutiveRollList.Count-1]==curPlayerID)
+            {
+                consecutiveRollList.Add(curPlayerID);
+                if(consecutiveRollList.Count==3)
+                {
+                    if(players[curPlayerID].outCoins.Count==0)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        Coin maxTravelledCoin=players[curPlayerID].outCoins[0].GetComponent<Coin>();
+                        for(int i=0;i<players[curPlayerID].outCoins.Count;i++)
+                        {
+                            Coin tempTravelledCoin=players[curPlayerID].outCoins[i].GetComponent<Coin>();
+                            if(tempTravelledCoin.stepCounter>maxTravelledCoin.stepCounter)
+                            {
+                                maxTravelledCoin=tempTravelledCoin;
+                            }
+                        }
+                        //reset the coin
+                        ResetThisCoin(maxTravelledCoin);
+                        consecutiveRollList.Clear();
+                        return true;
+                    }
+                }
+            }
+            else
+            {
+                consecutiveRollList.Clear();
+                consecutiveRollList.Add(curPlayerID);
+            }
+        }
+        return false;
+    }
+    #endregion
 
     #region Dice poisition
     void UpdateDicePositionOnBoard()
