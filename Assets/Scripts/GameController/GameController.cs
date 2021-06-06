@@ -69,6 +69,7 @@ public class GameController : MonoBehaviour
     [Header("Game Rules")]
     public bool enterHomeWithOutCutting=true;
     public bool showCutSceneAnimation=true;
+    public bool punishPlayerOnConsecutiveRoll=false;
 
     //clickable layerMask
     public LayerMask coinLayer;
@@ -402,11 +403,13 @@ public class GameController : MonoBehaviour
                             newCoinPos=new Vector3(homePaths[turnCounter].GetChild(coin.stepCounter).position.x,coin.transform.position.y,homePaths[turnCounter].GetChild(coin.stepCounter).position.z);
                             if(coin.stepCounter==5)
                             {
-                                coin.isClickable=false;
                                 coin.atHome=true;
-                                // coin.onWayToHome=false;
+                                coin.isClickable=false;
+                                coin.onWayToHome=false;
+                                coin.atBase=false;
                                 coin.canGoHome=false;
                                 coin.isReadyForHome=false;
+                                //remove out coins
                                 players[turnCounter].outCoins.Remove(coin.transform);
                                 HandleDiceRoll(turnCounter);
                             }
@@ -641,6 +644,7 @@ public class GameController : MonoBehaviour
 
     void CheckForWinner(Coin coin)
     {
+        Debug.Log("Time to check Winner!!!");
         int count=0;
         for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
         {
@@ -713,7 +717,7 @@ public class GameController : MonoBehaviour
             Transform baseCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).transform;
             if(baseCoin.GetComponent<Coin>().atBase)
             {
-                if(!players[turnCounter].outCoins.Contains(baseCoin))
+                if(!coinsAtBase.Contains(baseCoin))
                 {
                     coinsAtBase.Add(baseCoin);
                 }
@@ -973,9 +977,12 @@ public class GameController : MonoBehaviour
                     for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
                     {
                         Transform tempChar=generatedCoinsHolder.GetChild(turnCounter).GetChild(i);
-                        if(!players[turnCounter].outCoins.Contains(tempChar))
+                        if(tempChar.GetComponent<Coin>().atBase)
                         {
-                            coinsInsideBase.Add(tempChar);
+                            if(!coinsInsideBase.Contains(tempChar))
+                            {
+                                coinsInsideBase.Add(tempChar);
+                            }
                         }
                     }
 
@@ -1062,7 +1069,10 @@ public class GameController : MonoBehaviour
                             }
                         }
                         //reset the coin
-                        ResetThisCoin(maxTravelledCoin);
+                        if(punishPlayerOnConsecutiveRoll)
+                        {
+                            ResetThisCoin(maxTravelledCoin);
+                        }
                         consecutiveRollList.Clear();
                         return true;
                     }
