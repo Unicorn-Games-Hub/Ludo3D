@@ -26,7 +26,6 @@ public class HomeMenuHandler : MonoBehaviour
     public Button startButton;
     private int modeIndex=0;
     private int totalPlayers=0;
-    private bool isGameStartValid=false;
 
 
     void Start()
