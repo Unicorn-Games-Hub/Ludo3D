@@ -46,6 +46,15 @@ public class Dice : MonoBehaviour
    public int minDebugVal;
    public int maxDebugVal;
 
+   public enum DiceProbablity
+   {
+       sixteenPercent,
+       twentyFivePercent,
+       thirtyThreePercent,
+       fiftyPercent
+   }
+   public DiceProbablity diceProbablity;
+
    void Awake()
    {
        if(instance!=null)
@@ -57,7 +66,6 @@ public class Dice : MonoBehaviour
            instance=this;
        }
    }
-
 
    void Start()
    {
@@ -141,7 +149,24 @@ public class Dice : MonoBehaviour
    {
        if(!enableDebugging)
        {
-            return Random.Range(1,7);
+           switch (diceProbablity)
+           {
+                case DiceProbablity.sixteenPercent:
+                return Random.Range(1,7);
+                break;
+                case DiceProbablity.twentyFivePercent:
+                return Random.Range(3,7);
+                break;
+                case DiceProbablity.thirtyThreePercent:
+                return Random.Range(4,7);
+                break;
+                case DiceProbablity.fiftyPercent:
+                return Random.Range(5,7);
+                break;
+                default:
+                return Random.Range(1,7);
+                break;
+           }
        }
        else
        {

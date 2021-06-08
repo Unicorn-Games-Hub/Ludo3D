@@ -49,6 +49,7 @@ public class GameController : MonoBehaviour
         public int initialPosIndex=0;
         public Color coinColor;
         public List<Transform> outCoins=new List<Transform>();
+        public int noOfRoundsWithoutCoinOut=0;
     }
 
     public List<infoHolder> players=new List<infoHolder>();
@@ -70,6 +71,7 @@ public class GameController : MonoBehaviour
     public bool enterHomeWithOutCutting=true;
     public bool showCutSceneAnimation=true;
     public bool punishPlayerOnConsecutiveRoll=false;
+    public bool autoBringSingleCoinOut=true;
 
     //clickable layerMask
     public LayerMask coinLayer;
@@ -229,16 +231,33 @@ public class GameController : MonoBehaviour
 
                     if(clickableCoinsList.Count>0)
                     {
-                        foreach(Coin c in clickableCoinsList)
-                        {
-                            c.SetClickable(true);
-                        }
+                       if(players[turnCounter].outCoins.Count==0&&autoBringSingleCoinOut)
+                       {
+                            int randomCoinIndex=Random.Range(0,generatedCoinsHolder.GetChild(turnCounter).childCount);
+                            Transform baseCoinTransform=generatedCoinsHolder.GetChild(turnCounter).GetChild(randomCoinIndex).transform;
+                            Coin tempBaseCoin=baseCoinTransform.GetComponent<Coin>();
+                            if(!players[turnCounter].outCoins.Contains(baseCoinTransform))
+                            {
+                                players[turnCounter].outCoins.Add(baseCoinTransform);
+                            }
+                            StartCoroutine(UpdateCoinPosition(tempBaseCoin));
+                       }
+                       else
+                       {
+                           foreach(Coin c in clickableCoinsList)
+                            {
+                                c.SetClickable(true);
+                            }
+                       }
                     }
                     else
                     {
                         UpdateTurn();
                     }
                 }
+                
+                //for increasing the probablity of 6
+                players[turnCounter].noOfRoundsWithoutCoinOut=0;
             }
             else
             {
@@ -305,6 +324,12 @@ public class GameController : MonoBehaviour
                 {
                     UpdateTurn();
                 }
+
+                //for increasing the probablity of 6
+                if(players[turnCounter].outCoins.Count==0)
+                {
+                    players[turnCounter].noOfRoundsWithoutCoinOut++;
+                }
             }   
 
             if(players[turnCounter].player==playerType.Bot)
@@ -321,6 +346,9 @@ public class GameController : MonoBehaviour
 
     void HandleDiceRoll(int turnValue)
     {
+        //handling 6 probablity from here
+        HandleProbablity();
+        
         if(players[turnValue].player==playerType.Human)
         {
             Dice.instance.canRollDice=true;
@@ -337,6 +365,31 @@ public class GameController : MonoBehaviour
     public void StopBlinkingAnimation()
     {
         highLights[turnCounter].StopAnimation();
+    }
+    #endregion
+
+    #region Handling probablity of six
+    void HandleProbablity()
+    {
+        if(players[turnCounter].noOfRoundsWithoutCoinOut==3)
+        {
+            Dice.instance.diceProbablity=Dice.DiceProbablity.thirtyThreePercent;
+        }
+        else if(players[turnCounter].noOfRoundsWithoutCoinOut>=4)
+        {
+            Dice.instance.diceProbablity=Dice.DiceProbablity.fiftyPercent;
+        }
+        else
+        {
+            if(players[turnCounter].outCoins.Count==0)
+            {
+                Dice.instance.diceProbablity=Dice.DiceProbablity.twentyFivePercent;
+            }
+            else
+            {
+                Dice.instance.diceProbablity=Dice.DiceProbablity.sixteenPercent;
+            }
+        }
     }
     #endregion
 

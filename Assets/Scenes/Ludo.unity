@@ -147,7 +147,8 @@ MonoBehaviour:
   diceStates: 0
   enableDebugging: 0
   minDebugVal: 1
-  maxDebugVal: 7
+  maxDebugVal: 5
+  diceProbablity: 0
 --- !u!54 &24529192
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3836,6 +3837,7 @@ MonoBehaviour:
     initialPosIndex: 0
     coinColor: {r: 0.44705886, g: 0.8352942, b: 0.49411768, a: 1}
     outCoins: []
+    noOfRoundsWithoutCoinOut: 0
   - colorName: Red
     playerID: 1
     coinPrefab: {fileID: 882979536779078947, guid: b9bc804e647e84130aa2647ed22815a6, type: 3}
@@ -3843,6 +3845,7 @@ MonoBehaviour:
     initialPosIndex: 13
     coinColor: {r: 1, g: 0.47058827, b: 0.4901961, a: 1}
     outCoins: []
+    noOfRoundsWithoutCoinOut: 0
   - colorName: Blue
     playerID: 2
     coinPrefab: {fileID: 4224728455472447539, guid: 29b1e329957e940d49c5909c6f387230, type: 3}
@@ -3850,6 +3853,7 @@ MonoBehaviour:
     initialPosIndex: 26
     coinColor: {r: 0.35686275, g: 0.6, b: 1, a: 1}
     outCoins: []
+    noOfRoundsWithoutCoinOut: 0
   - colorName: Yellow
     playerID: 3
     coinPrefab: {fileID: 5391737638218640456, guid: 1e54b61f397214de9acdbbec1ed282df, type: 3}
@@ -3857,11 +3861,13 @@ MonoBehaviour:
     initialPosIndex: 39
     coinColor: {r: 1, g: 0.83921576, b: 0.4901961, a: 1}
     outCoins: []
+    noOfRoundsWithoutCoinOut: 0
   gamePlayersList: 
   gameBotType: 0
   enterHomeWithOutCutting: 1
   showCutSceneAnimation: 1
   punishPlayerOnConsecutiveRoll: 0
+  autoBringSingleCoinOut: 1
   coinLayer:
     serializedVersion: 2
     m_Bits: 128
