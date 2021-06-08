@@ -357,7 +357,7 @@ public class GameController : MonoBehaviour
     void HandleDiceRoll(int turnValue)
     {
         //handling 6 probablity from here
-        //HandleProbablity();
+        Dice.instance.UpdateDiceProbablity(players[turnCounter].noOfRoundsWithoutCoinOut);
         
         if(players[turnValue].player==playerType.Human)
         {
@@ -375,31 +375,6 @@ public class GameController : MonoBehaviour
     public void StopBlinkingAnimation()
     {
         highLights[turnCounter].StopAnimation();
-    }
-    #endregion
-
-    #region Handling probablity of six
-    void HandleProbablity()
-    {
-        if(players[turnCounter].noOfRoundsWithoutCoinOut==3)
-        {
-            Dice.instance.diceProbablity=Dice.DiceProbablity.thirtyThreePercent;
-        }
-        else if(players[turnCounter].noOfRoundsWithoutCoinOut>=4)
-        {
-            Dice.instance.diceProbablity=Dice.DiceProbablity.fiftyPercent;
-        }
-        else
-        {
-            if(players[turnCounter].outCoins.Count==0)
-            {
-                Dice.instance.diceProbablity=Dice.DiceProbablity.twentyFivePercent;
-            }
-            else
-            {
-                Dice.instance.diceProbablity=Dice.DiceProbablity.sixteenPercent;
-            }
-        }
     }
     #endregion
 
@@ -1009,7 +984,7 @@ public class GameController : MonoBehaviour
     private Coin GetCoinToMove()
     {
         Coin tempMaxMovedCoin=movableCoinsList[0];
-        
+
         for(int i=0;i<movableCoinsList.Count;i++)
         {
             if(tempMaxMovedCoin.stepCounter<movableCoinsList[i].stepCounter)

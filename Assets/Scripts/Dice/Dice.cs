@@ -46,15 +46,6 @@ public class Dice : MonoBehaviour
    public int minDebugVal;
    public int maxDebugVal;
 
-   public enum DiceProbablity
-   {
-       sixteenPercent,
-       twentyFivePercent,
-       thirtyThreePercent,
-       fiftyPercent
-   }
-   public DiceProbablity diceProbablity;
-
    void Awake()
    {
        if(instance!=null)
@@ -70,7 +61,7 @@ public class Dice : MonoBehaviour
    void Start()
    {
         rb=GetComponent<Rigidbody>();
-        currentDiceValue=GetRandomDiceValue();
+        currentDiceValue=Random.Range(1,7);
         RotateDiceToCorrectFace();
         diceStates=states.idle;
    }
@@ -133,7 +124,7 @@ public class Dice : MonoBehaviour
    {
        //from here we will stop blinking animation
        GameController.instance.StopBlinkingAnimation();
-       currentDiceValue=GetRandomDiceValue();
+       currentDiceValue=GetRandomDiceValue(currentAttempts);
         startDiceAnimation=true;
         yield return new WaitForSeconds(1f);
         startDiceAnimation=false;
@@ -143,37 +134,6 @@ public class Dice : MonoBehaviour
         rb.drag=40f;
         canRollDice=false;
         GameController.instance.HandleObtainedDiceValue(currentDiceValue);
-   }
-
-   int GetRandomDiceValue()
-   {
-       if(!enableDebugging)
-       {
-            return Random.Range(1,7);
-            /*
-           switch (diceProbablity)
-           {
-                case DiceProbablity.sixteenPercent:
-                return Random.Range(1,7);
-                break;
-                case DiceProbablity.twentyFivePercent:
-                return Random.Range(3,7);
-                break;
-                case DiceProbablity.thirtyThreePercent:
-                return Random.Range(4,7);
-                break;
-                case DiceProbablity.fiftyPercent:
-                return Random.Range(5,7);
-                break;
-                default:
-                break;
-           }
-           */
-       }
-       else
-       {
-            return Random.Range(minDebugVal,maxDebugVal);
-       }
    }
 
    void RotateDiceToCorrectFace()
@@ -187,4 +147,50 @@ public class Dice : MonoBehaviour
         mousePos.z=zCoord;
         return Camera.main.ScreenToWorldPoint(mousePos);
     }
+
+    #region Probablity of gettting 6
+    int currentAttempts =0;
+    public void UpdateDiceProbablity(int receivedAttempts)
+    {
+        Debug.Log("Hello : "+receivedAttempts);
+       currentAttempts=receivedAttempts;
+    }
+
+    int GetRandomDiceValue(int attempts)
+    {
+       int numToReplace=0;
+       if(attempts<2)
+       {
+            numToReplace=1;
+       }
+       else if(attempts>=2&&attempts<4)
+       {
+           numToReplace=2;
+       }
+       else
+       {
+            numToReplace=3;
+       }
+        int[] newArray=GetProbablityArray(numToReplace);
+        int newIndex=Random.Range(0,newArray.Length);
+        int newDiceValue=newArray[newIndex];
+        return newDiceValue;
+    }
+
+    int[] GetProbablityArray(int noToReplace)
+    {
+        int[] outComeArray={1,2,3,4,5,6};
+        while(noToReplace!=0)
+        {
+            int i0=Random.Range(0,5);
+            int num0=outComeArray[i0];
+            if(num0!=6)
+            {
+                outComeArray[i0]=6;
+                noToReplace--;
+            }
+        }
+        return outComeArray;
+    }
+    #endregion
 }
