@@ -149,6 +149,8 @@ public class Dice : MonoBehaviour
    {
        if(!enableDebugging)
        {
+            return Random.Range(1,7);
+            /*
            switch (diceProbablity)
            {
                 case DiceProbablity.sixteenPercent:
@@ -164,9 +166,9 @@ public class Dice : MonoBehaviour
                 return Random.Range(5,7);
                 break;
                 default:
-                return Random.Range(1,7);
                 break;
            }
+           */
        }
        else
        {

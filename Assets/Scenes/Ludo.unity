@@ -146,8 +146,8 @@ MonoBehaviour:
   currentDiceValue: 2
   diceStates: 0
   enableDebugging: 0
-  minDebugVal: 1
-  maxDebugVal: 5
+  minDebugVal: 6
+  maxDebugVal: 7
   diceProbablity: 0
 --- !u!54 &24529192
 Rigidbody:

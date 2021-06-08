@@ -233,14 +233,24 @@ public class GameController : MonoBehaviour
                     {
                        if(players[turnCounter].outCoins.Count==0&&autoBringSingleCoinOut)
                        {
-                            int randomCoinIndex=Random.Range(0,generatedCoinsHolder.GetChild(turnCounter).childCount);
-                            Transform baseCoinTransform=generatedCoinsHolder.GetChild(turnCounter).GetChild(randomCoinIndex).transform;
-                            Coin tempBaseCoin=baseCoinTransform.GetComponent<Coin>();
-                            if(!players[turnCounter].outCoins.Contains(baseCoinTransform))
+                           List<Coin> tempBaseCoinList=new List<Coin>();
+
+                           for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+                           {
+                               Coin tempBaseCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>();
+                               if(tempBaseCoin.atBase&&!tempBaseCoin.atHome)
+                               {
+                                   tempBaseCoinList.Add(tempBaseCoin);
+                               }
+                           }
+
+                            int randomCoinIndex=Random.Range(0,tempBaseCoinList.Count);
+                            Coin coinToTakeOut=tempBaseCoinList[randomCoinIndex];
+                            if(!players[turnCounter].outCoins.Contains(coinToTakeOut.gameObject.transform))
                             {
-                                players[turnCounter].outCoins.Add(baseCoinTransform);
+                                players[turnCounter].outCoins.Add(coinToTakeOut.gameObject.transform);
                             }
-                            StartCoroutine(UpdateCoinPosition(tempBaseCoin));
+                            StartCoroutine(UpdateCoinPosition(coinToTakeOut));
                        }
                        else
                        {
@@ -347,7 +357,7 @@ public class GameController : MonoBehaviour
     void HandleDiceRoll(int turnValue)
     {
         //handling 6 probablity from here
-        HandleProbablity();
+        //HandleProbablity();
         
         if(players[turnValue].player==playerType.Human)
         {
@@ -497,9 +507,6 @@ public class GameController : MonoBehaviour
                             if(coin.stepCounter==5)
                             {
                                 coin.atHome=true;
-                                //remove out coins
-                                players[turnCounter].outCoins.Remove(coin.transform);
-                                HandleDiceRoll(turnCounter);
                             }
                         }
                     }
@@ -728,6 +735,9 @@ public class GameController : MonoBehaviour
 
     void CheckForWinner(Coin coin)
     {
+        //remove the coins from out coins
+        players[turnCounter].outCoins.Remove(coin.transform);
+
         int count=0;
         for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
         {
@@ -765,6 +775,8 @@ public class GameController : MonoBehaviour
         {
             HandleDiceRoll(turnCounter);
         }
+
+        UpdateDicePositionOnBoard();
     }
 
     void ShowPlayerRank()
