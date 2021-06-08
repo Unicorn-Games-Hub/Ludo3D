@@ -956,12 +956,9 @@ public class GameController : MonoBehaviour
             Coin tempOutsideCoin=players[turnCounter].outCoins[i].GetComponent<Coin>();
             if(tempOutsideCoin.onWayToHome)
             {
-               if(tempOutsideCoin.stepCounter<homePaths[turnCounter].childCount)
+                if((tempOutsideCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
                 {
-                    if((tempOutsideCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
-                    {
-                       movableCoinsList.Add(tempOutsideCoin);
-                    }
+                    movableCoinsList.Add(tempOutsideCoin);
                 }
             }
             else
@@ -1012,6 +1009,7 @@ public class GameController : MonoBehaviour
     private Coin GetCoinToMove()
     {
         Coin tempMaxMovedCoin=movableCoinsList[0];
+        
         for(int i=0;i<movableCoinsList.Count;i++)
         {
             if(tempMaxMovedCoin.stepCounter<movableCoinsList[i].stepCounter)
