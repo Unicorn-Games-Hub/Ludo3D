@@ -578,7 +578,9 @@ public class GameController : MonoBehaviour
         isStepCompleted=true;
     }
 
-    private float coinMoveSpeed=1f;
+    //changing the walking speed
+    [Range(1f,5f)]
+    public float coinMoveSpeed=1f;
     #endregion
 
     #region Safe
@@ -1227,6 +1229,22 @@ public class GameController : MonoBehaviour
 
     void Defensive(Transform currentChar)
     {
+        /*
+        //from here we will check if there is another character avaliable at safe zone or not if yes play defending animation else normal animation
+        Coin curCharCoin=currentChar.GetComponent<Coin>();
+        for(int i=0;i<players[turnCounter].outCoins.Count;i++)
+        {
+            Coin tempPlayerCoin=players[turnCounter].outCoins[i].GetComponent<Coin>();
+            if(tempPlayerCoin.id!=turnCounter&&tempPlayerCoin.isSafe)
+            {
+                //lets get stepCounter information of each coin
+            //    int opponentsCurPosIndex=tempPlayerCoin.stepCounter+players[tempPlayerCoin.id].initialPosIndex;
+            //    int myCurPosIndex=curCharCoin.stepCounter;
+                Debug.Log("Opponents safe pos index : "+tempPlayerCoin.stepCounter);
+            }
+        }
+        */
+      
        if(CharAnimationHandler.instance!=null)
         {
             CharAnimationHandler.instance.PlayDefensiveAnimation(currentChar);

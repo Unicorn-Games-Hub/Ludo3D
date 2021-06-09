@@ -145,10 +145,9 @@ MonoBehaviour:
   canRollDice: 0
   currentDiceValue: 2
   diceStates: 0
-  enableDebugging: 0
+  enableDebugging: 1
   minDebugVal: 6
   maxDebugVal: 7
-  diceProbablity: 0
 --- !u!54 &24529192
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2891,7 +2890,6 @@ MonoBehaviour:
   defenderPos: {x: -0.5, y: -0.5, z: -0.93}
   attackerPos: {x: 2.3, y: -0.5, z: -0.93}
   attackingPos: {x: 0.5, y: -0.5, z: -0.93}
-  walkSpeed: 1.2
   animHandler: {fileID: 205835704}
   obToHideForCutScene:
   - {fileID: 24529190}
@@ -3885,6 +3883,7 @@ MonoBehaviour:
   - {fileID: 2278881486518704873}
   - {fileID: 5142496316085089046}
   - {fileID: 9014597377364360759}
+  coinMoveSpeed: 2.5
 --- !u!4 &1717436298
 Transform:
   m_ObjectHideFlags: 0

@@ -17,6 +17,8 @@ public class CharAnimationHandler : MonoBehaviour
 
     private Animation anim;
 
+    string walkAnimName;
+    
     void Start()
     {
         if(instance!=null)
@@ -27,6 +29,8 @@ public class CharAnimationHandler : MonoBehaviour
         {
             instance=this;
         }
+
+       walkAnimName=walkAnim.name;
     }
 
     #region Character animations
@@ -41,6 +45,7 @@ public class CharAnimationHandler : MonoBehaviour
     {
         anim=t.GetComponent<Animation>();
         anim.clip=walkAnim;
+        anim[walkAnimName].speed=GameController.instance.coinMoveSpeed;
         anim.Play();
     }
 

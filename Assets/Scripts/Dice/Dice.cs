@@ -152,7 +152,6 @@ public class Dice : MonoBehaviour
     int currentAttempts =0;
     public void UpdateDiceProbablity(int receivedAttempts)
     {
-        Debug.Log("Hello : "+receivedAttempts);
        currentAttempts=receivedAttempts;
     }
 

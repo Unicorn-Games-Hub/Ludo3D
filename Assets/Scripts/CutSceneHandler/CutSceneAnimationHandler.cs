@@ -13,7 +13,7 @@ public class CutSceneAnimationHandler : MonoBehaviour
     private Transform defender=null;
     private Transform attacker=null;
 
-    public float walkSpeed=1.2f;
+    private float walkSpeed=1f;
 
     public CharAnimationHandler animHandler;
 
@@ -129,7 +129,7 @@ public class CutSceneAnimationHandler : MonoBehaviour
     void MoveAttacker()
     {
         animHandler.PlayWalkAnimation(attacker);
-
+        walkSpeed=GameController.instance.coinMoveSpeed;
         iTween.MoveTo(attacker.gameObject, iTween.Hash("position",attackingPos, 
         "speed", walkSpeed, 
         "easetype", iTween.EaseType.linear,
