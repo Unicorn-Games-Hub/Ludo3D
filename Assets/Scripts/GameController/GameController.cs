@@ -1069,9 +1069,9 @@ public class GameController : MonoBehaviour
 
         for(int i=0;i<gamePlayersList.Count;i++)
         {
-            for(int j=0;j<generatedCoinsHolder.GetChild(i).childCount;i++)
+            for(int j=0;i<players[i].outCoins.Count;j++)
             {
-                Coin opOutCoins=generatedCoinsHolder.GetChild(i).GetChild(j).GetComponent<Coin>();
+                Coin opOutCoins=players[i].outCoins[j].GetComponent<Coin>();
                 if(opOutCoins.id!=turnCounter)
                 {
                     opponentsOutCoins.Add(opOutCoins);
