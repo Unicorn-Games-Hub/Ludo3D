@@ -794,21 +794,22 @@ public class GameController : MonoBehaviour
                 players[turnCounter].outCoins.Add(coinToBringOut);
             }
             coinToMove=coinToBringOut.GetComponent<Coin>();
+            StartCoroutine(UpdateCoinPosition(coinToMove));
             break;
             case BotPriority.safezone:
-            Coin tempsafeCoin=safeCoinsList[0];
-            for(int i=0;i<safeCoinsList.Count;i++)
-            {
-                if(tempsafeCoin.stepCounter<safeCoinsList[i].stepCounter)
-                {
-                    tempsafeCoin=safeCoinsList[i];
-                }
-            }
-            coinToMove=tempsafeCoin;
+            // Coin tempsafeCoin=safeCoinsList[0];
+            // for(int i=0;i<safeCoinsList.Count;i++)
+            // {
+            //     if(tempsafeCoin.stepCounter<safeCoinsList[i].stepCounter)
+            //     {
+            //         tempsafeCoin=safeCoinsList[i];
+            //     }
+            // }
+            // coinToMove=tempsafeCoin;
             break;
             case BotPriority.home:
-            int newHomeCoinIndex=Random.Range(0,homeCoinsList.Count);
-            coinToMove=homeCoinsList[newHomeCoinIndex];
+            // int newHomeCoinIndex=Random.Range(0,homeCoinsList.Count);
+            // coinToMove=homeCoinsList[newHomeCoinIndex];
             break;
             case BotPriority.move:
             coinToMove=GetCoinToMove();
@@ -818,10 +819,31 @@ public class GameController : MonoBehaviour
             break;
         }
 
-        if(priority!=BotPriority.nothing)
+        // if(priority!=BotPriority.nothing)
+        // {
+        //     StartCoroutine(UpdateCoinPosition(coinToMove));
+        // }
+        yield return new WaitForEndOfFrame();
+        if(priority!=BotPriority.nothing&&priority!=BotPriority.takeOut)
         {
-            StartCoroutine(UpdateCoinPosition(coinToMove));
-        }
+            Coin coinWithHighWt=players[turnCounter].outCoins[0].GetComponent<Coin>();
+            for(int i=0;i<players[turnCounter].outCoins.Count;i++)
+            {
+                Coin movableOutCoins=players[turnCounter].outCoins[i].GetComponent<Coin>();
+                if(coinWithHighWt.GetMaxWeightPercentage()<movableOutCoins.GetMaxWeightPercentage())
+                {
+                    coinWithHighWt=movableOutCoins;
+                }
+            }
+            //lets reset all priority
+            yield return new WaitForEndOfFrame();
+            for(int i=0;i<players[turnCounter].outCoins.Count;i++)
+            {
+                players[turnCounter].outCoins[i].GetComponent<Coin>().ResetPriorityValues();
+            }
+            yield return new WaitForEndOfFrame();
+            StartCoroutine(UpdateCoinPosition(coinWithHighWt));
+        }        
     }
 
     private BotPriority ResolveBotPriority()
@@ -910,6 +932,10 @@ public class GameController : MonoBehaviour
                 if(IsCoinSafe(tempOutchar))
                 {
                     safeCoinsList.Add(tempOutchar);
+
+                    //safe zone potential
+                    float safeZoneWeight=GetWeights(6);
+                    tempOutchar.ComputeWeightage(100,safeZoneWeight,6);
                 }
             }
         }
@@ -967,6 +993,10 @@ public class GameController : MonoBehaviour
                 if((newHomeCoin.stepCounter+currentDiceValue)==homePaths[turnCounter].childCount-1)
                 {
                     homeCoinsList.Add(newHomeCoin);
+
+                    //home possiblity weight
+                    float homeWeight=GetWeights(7);
+                    newHomeCoin.ComputeWeightage(100,homeWeight,7);
                 }
             }
         }
@@ -983,10 +1013,15 @@ public class GameController : MonoBehaviour
     #endregion
 
     #region Coin Avaliable for moving
+    class CuttableCoinInfo
+    {
+        public Coin cuttingCoin;
+        public List<Coin> coinsInfront=new List<Coin>(); 
+    }
     private Coin GetCoinToMove()
     {
+        /*
         Coin tempMaxMovedCoin=movableCoinsList[0];
-
         for(int i=0;i<movableCoinsList.Count;i++)
         {
             if(tempMaxMovedCoin.stepCounter<movableCoinsList[i].stepCounter)
@@ -998,7 +1033,6 @@ public class GameController : MonoBehaviour
                 return movableCoinsList[i];
             }
         }
-
         float coinpp=(float)((tempMaxMovedCoin.stepCounter*100)/coinPathContainer.childCount);
         if(gameBotType==BotType.Normal)
         {
@@ -1026,6 +1060,125 @@ public class GameController : MonoBehaviour
         {
             return GetRandomMovableCoin();
         }
+        */
+
+        //lets get total out coins of all players
+        List<Coin> opponentsOutCoins=new List<Coin>();
+        List<CuttableCoinInfo> frontCoinsList=new List<CuttableCoinInfo>();
+        List<CuttableCoinInfo> coinsBehindList=new List<CuttableCoinInfo>();
+
+        for(int i=0;i<gamePlayersList.Count;i++)
+        {
+            for(int j=0;j<generatedCoinsHolder.GetChild(i).childCount;i++)
+            {
+                Coin opOutCoins=generatedCoinsHolder.GetChild(i).GetChild(j).GetComponent<Coin>();
+                if(opOutCoins.id!=turnCounter)
+                {
+                    opponentsOutCoins.Add(opOutCoins);
+                }
+            }
+        }
+
+        for(int i=0;i<movableCoinsList.Count;i++)
+        {
+            if((movableCoinsList[i].stepCounter+currentDiceValue)>coinPathContainer.childCount-2&&!movableCoinsList[i].onWayToHome)
+            {
+                movableCoinsList[i].ComputeWeightage(100,10f,5);
+            }
+
+            //compute journey of all
+            float distancetravelled=(movableCoinsList[i].stepCounter/(coinPathContainer.childCount-1))*100f;
+            int curScore=GetJourneyScores(distancetravelled);
+            float curWeight=GetWeights(4);
+            movableCoinsList[i].ComputeWeightage(curScore,curWeight,4);
+
+            //check how many opponent coins are infront of me
+            for(int j=0;j<opponentsOutCoins.Count;j++)
+            {
+                if(opponentsOutCoins[j].stepCounter>movableCoinsList[i].stepCounter)
+                {
+                    if((opponentsOutCoins[j].stepCounter-movableCoinsList[i].stepCounter)<6)
+                    {
+                        CuttableCoinInfo tempInfo=new CuttableCoinInfo();
+                        tempInfo.cuttingCoin=movableCoinsList[i];
+                        tempInfo.coinsInfront.Add(opponentsOutCoins[j]);
+                        frontCoinsList.Add(tempInfo);
+                    }
+                }
+                else if(movableCoinsList[i].stepCounter>opponentsOutCoins[j].stepCounter)
+                {
+                    //some coins are behind the me and my coin is not safe
+                    CuttableCoinInfo tempBehindCoinInfo=new CuttableCoinInfo();
+                    tempBehindCoinInfo.cuttingCoin=movableCoinsList[i];
+                    tempBehindCoinInfo.coinsInfront.Add(opponentsOutCoins[j]);
+                    coinsBehindList.Add(tempBehindCoinInfo);
+                }
+            }
+        }
+        
+        int futureCutScore=0;
+        int behindCutScore=0;
+        float futureCutWeight=0f;
+        float behindCutWeight=0f;
+
+        //now lets check the score and weight for coins which are ahead of us
+        for(int i=0;i<frontCoinsList.Count;i++)
+        {
+            if(frontCoinsList[i].coinsInfront.Count==1)
+            {
+                futureCutScore=10;
+                futureCutWeight=GetWeights(2);
+                frontCoinsList[i].cuttingCoin.ComputeWeightage(futureCutScore,futureCutWeight,2);
+            }
+            else if(frontCoinsList[i].coinsInfront.Count==2)
+            {
+                futureCutScore=30;
+                futureCutWeight=GetWeights(2);
+                frontCoinsList[i].cuttingCoin.ComputeWeightage(futureCutScore,futureCutWeight,2);
+            }
+            else if(frontCoinsList[i].coinsInfront.Count==3)
+            {   
+                futureCutScore=50;
+                futureCutWeight=GetWeights(2);
+                frontCoinsList[i].cuttingCoin.ComputeWeightage(futureCutScore,futureCutWeight,2);
+            }
+            else if(frontCoinsList[i].coinsInfront.Count>=4)
+            {
+                futureCutScore=100;
+                futureCutWeight=GetWeights(2);
+                frontCoinsList[i].cuttingCoin.ComputeWeightage(futureCutScore,futureCutWeight,2);
+            }
+        }
+
+        //now lets check the score and weight for coins which are behind of us
+        for(int i=0;i<coinsBehindList.Count;i++)
+        {
+            if(coinsBehindList[i].coinsInfront.Count==1)
+            {
+                behindCutScore=10;
+                behindCutWeight=GetWeights(1);
+                coinsBehindList[i].cuttingCoin.ComputeWeightage(behindCutScore,behindCutWeight,1);
+            }
+            else if(coinsBehindList[i].coinsInfront.Count==2)
+            {
+                behindCutScore=30;
+                behindCutWeight=GetWeights(1);
+                coinsBehindList[i].cuttingCoin.ComputeWeightage(behindCutScore,behindCutWeight,1);
+            }
+            else if(coinsBehindList[i].coinsInfront.Count==3)
+            {
+                behindCutScore=50;
+                behindCutWeight=GetWeights(1);
+                coinsBehindList[i].cuttingCoin.ComputeWeightage(behindCutScore,behindCutWeight,1);
+            }
+            else if(coinsBehindList[i].coinsInfront.Count>=4)
+            {
+                behindCutScore=100;
+                behindCutWeight=GetWeights(1);
+                coinsBehindList[i].cuttingCoin.ComputeWeightage(behindCutScore,behindCutWeight,1);
+            }
+        }
+        return null;
     }
 
     Coin GetRandomMovableCoin()
@@ -1034,6 +1187,59 @@ public class GameController : MonoBehaviour
         return movableCoinsList[tempCoinIndex];
     }
     #endregion
+
+    #region Weights
+    int GetJourneyScores(float dt)
+    {
+        int score=0;
+        if(dt>10f&&dt<=25f)
+        {
+            score=50;
+        }
+        else if(dt>25f&&dt<=35f)
+        {
+            score=60;
+        }
+        else if(dt>35f&&dt<=50f)
+        {
+            score=70;
+        }
+        else if(dt>50f&&dt<=60f)
+        {
+            score=75;
+        }
+        else if(dt>60f&&dt<=75f)
+        {
+            score=80;
+        }
+        else if(dt>75f)
+        {
+            score=25;
+        }
+        return score;
+    }
+
+    float GetWeights(int weightIndex)
+    {
+        float[] weightValueNormal={15f,15f,10f,20f,15f,7.5f,7.5f,10f};
+        float[] weightValueEasy={20f,20f,5f,10f,15f,10f,10f,10f};
+        float[] weightValueAggressive={10f,10f,20f,25f,10f,7.5f,7.5f,10f};
+
+        if(gameBotType==BotType.Normal)
+        {
+            return weightValueNormal[weightIndex];
+        }
+        else if(gameBotType==BotType.Easy)
+        {
+            return weightValueEasy[weightIndex];
+        }
+        else 
+        {
+            return weightValueAggressive[weightIndex];
+        }
+    }
+    #endregion
+
 
     [System.Serializable]
     public class CoinCutInfo
@@ -1107,6 +1313,22 @@ public class GameController : MonoBehaviour
                         coinInfo.coinPlayID=1;
                     }
                     avalibleCutCoinList.Add(coinInfo);
+
+                    //cut potential weight
+                    float cuttingWeight=GetWeights(3);
+                    int cuttingScore=0;
+
+                    float tp=(coinsOutsideBase[j].stepCounter/(coinPathContainer.childCount-1))*100f;
+                   
+                    if(tp>75f)
+                    {
+                        cuttingScore=100;
+                    }
+                    else
+                    {
+                        cuttingScore=75;
+                    }
+                    myCoin.ComputeWeightage(cuttingScore,cuttingWeight,3);
                 }
             }
         }
@@ -1237,9 +1459,11 @@ public class GameController : MonoBehaviour
             Coin tempPlayerCoin=players[turnCounter].outCoins[i].GetComponent<Coin>();
             if(tempPlayerCoin.id!=turnCounter&&tempPlayerCoin.isSafe)
             {
+                if(curCharCoin.stepCounter==tempPlayerCoin.stepCounter)
+                {
+                    //
+                }
                 //lets get stepCounter information of each coin
-            //    int opponentsCurPosIndex=tempPlayerCoin.stepCounter+players[tempPlayerCoin.id].initialPosIndex;
-            //    int myCurPosIndex=curCharCoin.stepCounter;
                 Debug.Log("Opponents safe pos index : "+tempPlayerCoin.stepCounter);
             }
         }
