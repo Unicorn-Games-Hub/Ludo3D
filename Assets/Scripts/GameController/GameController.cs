@@ -812,7 +812,8 @@ public class GameController : MonoBehaviour
             // coinToMove=homeCoinsList[newHomeCoinIndex];
             break;
             case BotPriority.move:
-            coinToMove=GetCoinToMove();
+            // coinToMove=GetCoinToMove();
+            GetCoinToMove();
             break;
             case BotPriority.nothing:
             UpdateTurn();
@@ -823,6 +824,7 @@ public class GameController : MonoBehaviour
         // {
         //     StartCoroutine(UpdateCoinPosition(coinToMove));
         // }
+
         yield return new WaitForEndOfFrame();
         if(priority!=BotPriority.nothing&&priority!=BotPriority.takeOut)
         {
@@ -835,14 +837,15 @@ public class GameController : MonoBehaviour
                     coinWithHighWt=movableOutCoins;
                 }
             }
-            //lets reset all priority
-            yield return new WaitForEndOfFrame();
-            for(int i=0;i<players[turnCounter].outCoins.Count;i++)
-            {
-                players[turnCounter].outCoins[i].GetComponent<Coin>().ResetPriorityValues();
-            }
-            yield return new WaitForEndOfFrame();
+
             StartCoroutine(UpdateCoinPosition(coinWithHighWt));
+
+            //lets reset all priority
+            // yield return new WaitForEndOfFrame();
+            // for(int i=0;i<players[turnCounter].outCoins.Count;i++)
+            // {
+            //     players[turnCounter].outCoins[i].GetComponent<Coin>().ResetPriorityValues();
+            // }
         }        
     }
 
@@ -929,10 +932,18 @@ public class GameController : MonoBehaviour
             Coin tempOutchar=players[turnCounter].outCoins[i].GetComponent<Coin>();
             if(!tempOutchar.onWayToHome)
             {
-                if(IsCoinSafe(tempOutchar))
+                int tempPathIndex=tempOutchar.stepCounter+currentDiceValue;
+                if(tempPathIndex>coinPathContainer.childCount-1)
+                {
+                    if(tempPathIndex>coinPathContainer.childCount-1)
+                    {
+                        tempPathIndex=tempPathIndex-coinPathContainer.childCount;
+                    }
+                }
+                
+                if(safePosIndexList.Contains(tempPathIndex))
                 {
                     safeCoinsList.Add(tempOutchar);
-
                     //safe zone potential
                     float safeZoneWeight=GetWeights(6);
                     tempOutchar.ComputeWeightage(100,safeZoneWeight,6);
@@ -1018,7 +1029,7 @@ public class GameController : MonoBehaviour
         public Coin cuttingCoin;
         public List<Coin> coinsInfront=new List<Coin>(); 
     }
-    private Coin GetCoinToMove()
+    private void GetCoinToMove()
     {
         /*
         Coin tempMaxMovedCoin=movableCoinsList[0];
@@ -1069,7 +1080,7 @@ public class GameController : MonoBehaviour
 
         for(int i=0;i<gamePlayersList.Count;i++)
         {
-            for(int j=0;i<players[i].outCoins.Count;j++)
+            for(int j=0;j<players[i].outCoins.Count;j++)
             {
                 Coin opOutCoins=players[i].outCoins[j].GetComponent<Coin>();
                 if(opOutCoins.id!=turnCounter)
@@ -1178,7 +1189,6 @@ public class GameController : MonoBehaviour
                 coinsBehindList[i].cuttingCoin.ComputeWeightage(behindCutScore,behindCutWeight,1);
             }
         }
-        return null;
     }
 
     Coin GetRandomMovableCoin()
