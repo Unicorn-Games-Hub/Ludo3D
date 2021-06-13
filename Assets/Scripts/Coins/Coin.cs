@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Coin : MonoBehaviour
 {
@@ -17,11 +18,15 @@ public class Coin : MonoBehaviour
     public Vector3 initialPosInfo;
     
     //score for handling scores and weight
-    public int[] scores=new int[8];
-    public float[] weights=new float[8];
-    public float priorityValue=0f;
-
+    private float priorityWeight=0f;
     public float[] priorityValues=new float[8];
+    public float maxValueAmongAll=0;
+
+    //player number indicator
+    // public GameObject indicatorUI;
+    // public Text playerCounterText;
+    // private int playerCounter=1;
+
 
     public void HandleCoinInfo(int Id,Vector3 coinPos)
     {
@@ -37,10 +42,25 @@ public class Coin : MonoBehaviour
 
     public void ComputeWeightage(int score,float weight,int priorityIndex)
     {
-        priorityValue=((float)score/100f)*weight;
-        priorityValues[priorityIndex]=priorityValue;
+        priorityWeight=((float)score/100f)*weight;
+        priorityValues[priorityIndex]=priorityWeight;
     }
 
+    /*
+    public void GetMaxValueAmongAll()
+    {
+        float maxWeight=priorityValues[0];
+        for(int i=0;i<priorityValues.Length;i++)
+        {
+            if(priorityValues[i]>maxWeight)
+            {
+                maxWeight=priorityValues[i];
+            }
+        }
+        maxValueAmongAll=maxWeight;
+    }
+    */
+   
     public float GetMaxWeightPercentage()
     {
         float maxWeight=priorityValues[0];
@@ -53,6 +73,7 @@ public class Coin : MonoBehaviour
         }
         return maxWeight;
     }
+  
 
     public void ResetPriorityValues()
     {
@@ -61,4 +82,13 @@ public class Coin : MonoBehaviour
             priorityValues[i]=0f;
         }
     }
+
+    #region number of player indicator
+    // public void UpdateIndicator()
+    // {
+    //     playerCounter++;
+    //     playerCounterText.text=playerCounter.ToString();
+    //     indicatorUI.SetActive(true);
+    // }
+    #endregion
 }
