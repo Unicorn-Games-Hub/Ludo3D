@@ -768,7 +768,12 @@ public class GameController : MonoBehaviour
     #region New AI Behaviour
     IEnumerator HandleBotTurn()
     {
-        yield return new WaitForSeconds(1f);
+        //lets reset the weightage of each coins
+        for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+        {
+            generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().ResetPriorityValues();
+        }
+        yield return new WaitForSeconds(0.5f);
         StartCoroutine(Dice.instance.RolltheDice());
     }
 
@@ -1109,6 +1114,9 @@ public class GameController : MonoBehaviour
                     opponentCoinTempIndex=opponentCoinTempIndex-coinPathContainer.childCount;
                 }
 
+                Debug.Log("My Index : "+myCoinTempIndex);
+                Debug.Log("Opponents Index : "+opponentCoinTempIndex);
+
                 if(myCoinTempIndex>opponentCoinTempIndex)
                 {
                     //some of the opponents coins are behind me
@@ -1188,6 +1196,9 @@ public class GameController : MonoBehaviour
         StartCoroutine(UpdateCoinPosition(highestPriorityCoin));
     }
     #endregion
+
+
+
 
 
     #region BOT Behaviour
