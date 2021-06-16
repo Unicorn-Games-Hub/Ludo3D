@@ -1749,6 +1749,16 @@ MonoBehaviour:
   atHome: 0
   isSafe: 0
   initialPosInfo: {x: 0, y: 0, z: 0}
+  priorityValues:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  maxValueAmongAll: 0
 --- !u!1 &6630458219316140788
 GameObject:
   m_ObjectHideFlags: 0
