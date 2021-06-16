@@ -45,21 +45,6 @@ public class Coin : MonoBehaviour
         priorityWeight=((float)score/100f)*weight;
         priorityValues[priorityIndex]=priorityWeight;
     }
-
-    /*
-    public void GetMaxValueAmongAll()
-    {
-        float maxWeight=priorityValues[0];
-        for(int i=0;i<priorityValues.Length;i++)
-        {
-            if(priorityValues[i]>maxWeight)
-            {
-                maxWeight=priorityValues[i];
-            }
-        }
-        maxValueAmongAll=maxWeight;
-    }
-    */
    
     public float GetMaxWeightPercentage()
     {
@@ -74,7 +59,6 @@ public class Coin : MonoBehaviour
         return maxWeight;
     }
   
-
     public void ResetPriorityValues()
     {
         for(int i=0;i<priorityValues.Length;i++)
@@ -84,11 +68,11 @@ public class Coin : MonoBehaviour
     }
 
     #region number of player indicator
-    // public void UpdateIndicator()
-    // {
-    //     playerCounter++;
-    //     playerCounterText.text=playerCounter.ToString();
-    //     indicatorUI.SetActive(true);
-    // }
+    public void UpdateIndicatorInfo(int playerCounter)
+    {
+        Debug.Log("Total coins at my positions is : "+playerCounter);
+        //playerCounterText.text=playerCounter.ToString();
+        //indicatorUI.SetActive(true);
+    }
     #endregion
 }

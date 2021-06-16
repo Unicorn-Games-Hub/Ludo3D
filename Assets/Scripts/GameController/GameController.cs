@@ -103,8 +103,6 @@ public class GameController : MonoBehaviour
 
     [Header("Highlight Animation")]
     public HighLightAnimation[] highLights;
-    
-
 
     void Awake()
     {
@@ -541,8 +539,6 @@ public class GameController : MonoBehaviour
             //lets check if the current coin is safe or not
             coin.isSafe=IsCoinSafe(coin);
 
-            //StartCoroutine(HandlePlayerNumIndicator(coin));
-
             if(coin.isSafe)
             {
                 Defensive(coin.transform);
@@ -576,6 +572,9 @@ public class GameController : MonoBehaviour
                 CheckForWinner(coin);
             }
         }
+
+        //checking how many coins are avaliable at single place and update the counter
+        StartCoroutine(HandlePlayerNumIndicator(coin));
     } 
 
     Transform charFromHome=null;
@@ -697,7 +696,7 @@ public class GameController : MonoBehaviour
         //lets check if cut happened due to 6 or not
         if(currentDiceValue==6)
         {
-            bonusTurnCounter=2;
+            bonusTurnCounter++;
             Debug.Log("Cut due to 6");
         }
         StartCoroutine(UpdateTurnAfterCutting());
@@ -741,7 +740,7 @@ public class GameController : MonoBehaviour
         //lets check if home reached by getting 6 or not
         if(currentDiceValue==6)
         {
-            bonusTurnCounter=2;
+            bonusTurnCounter++;
             Debug.Log("home reached due to 6");
         }
 
@@ -1408,9 +1407,13 @@ public class GameController : MonoBehaviour
     
     #region Player Indicator
     private List<Coin> allOutCoinList=new List<Coin>();
+    private List<Coin> coinsAtCurrentLocation=new List<Coin>();
     
     IEnumerator HandlePlayerNumIndicator(Coin recentlyMovedCoin)
     {
+        allOutCoinList.Clear();
+        coinsAtCurrentLocation.Clear();
+
         for(int i=0;i<gamePlayersList.Count;i++)
         {
             for(int j=0;j<players[i].outCoins.Count;j++)
@@ -1447,16 +1450,36 @@ public class GameController : MonoBehaviour
 
                 if(curTempPosIndex==movedCoinTempPosIndex)
                 {
-                    if(allOutCoinList[i].id==recentlyMovedCoin.id)
-                    {
-                        //recentlyMovedCoin.UpdateIndicator();
-                    }
-                    else
-                    {
-                        // allOutCoinList[i].UpdateIndicator();
-                        // recentlyMovedCoin.UpdateIndicator();
-                    }
+                   if(!coinsAtCurrentLocation.Contains(allOutCoinList[i]))
+                   {
+                       coinsAtCurrentLocation.Add(allOutCoinList[i]);
+                   }
                 }
+            }
+        }
+
+        //now we have info about the coins which are at same place
+        if(coinsAtCurrentLocation.Count>0)
+        {
+            int sameColoredcc=0;
+            int differentColoredcc=0;
+            Coin diffColoredCoin=null;
+            for(int i=0;i<coinsAtCurrentLocation.Count;i++)
+            {
+                if(coinsAtCurrentLocation[i].id==recentlyMovedCoin.id)
+                {
+                    sameColoredcc++;
+                }
+                else
+                {
+                    differentColoredcc++;
+                    diffColoredCoin=coinsAtCurrentLocation[i];
+                }
+            }
+            recentlyMovedCoin.UpdateIndicatorInfo(sameColoredcc+1);
+            if(diffColoredCoin!=null)
+            {
+                diffColoredCoin.UpdateIndicatorInfo(differentColoredcc);
             }
         }
     }
