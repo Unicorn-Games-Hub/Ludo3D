@@ -4125,6 +4125,8 @@ MonoBehaviour:
   - {fileID: 5142496316085089046}
   - {fileID: 9014597377364360759}
   coinMoveSpeed: 2.5
+  originalPathMat: {fileID: 2100000, guid: 217ecbb55cd6d4fc88c439cef75b08bc, type: 2}
+  tempSafeZoneMat: {fileID: 2100000, guid: ddcb5dfa81a7b4221ad2a7696c56f5e4, type: 2}
 --- !u!4 &1717436298
 Transform:
   m_ObjectHideFlags: 0

@@ -438,6 +438,7 @@ public class GameController : MonoBehaviour
         }
     }
 
+   
     IEnumerator UpdateCoinPosition(Coin coin)
     {
         if(coin.atBase)
@@ -462,6 +463,12 @@ public class GameController : MonoBehaviour
             int newTargetCount=initialTargetCount+currentDiceValue;
             int tempStepCount=0;
 
+            //counter
+           //HandlePlayerNumIndicator(coin);
+
+           //for reseting
+           StartCoroutine(ResetPreviousBlock(initialTargetCount));
+          
             while((coin.stepCounter+players[turnCounter].initialPosIndex)<newTargetCount)
             {
                 if(coin.isReadyForHome)
@@ -560,11 +567,13 @@ public class GameController : MonoBehaviour
                 else
                 {
                     UpdateTurn();
+                    HandlePlayerNumIndicator(coin);
                 }
             }
             else if(!coin.atHome)
             {
                 UpdateTurn();
+                HandlePlayerNumIndicator(coin);
             }
             else
             {
@@ -572,9 +581,6 @@ public class GameController : MonoBehaviour
                 CheckForWinner(coin);
             }
         }
-
-        //checking how many coins are avaliable at single place and update the counter
-        StartCoroutine(HandlePlayerNumIndicator(coin));
     } 
 
     Transform charFromHome=null;
@@ -584,6 +590,9 @@ public class GameController : MonoBehaviour
         UpdateCharacterRotation(charFromHome);
         UpdateTurn();
         Defensive(charFromHome);
+
+        //for counter
+        HandlePlayerNumIndicator(charFromHome.GetComponent<Coin>());
     }
 
     private bool isStepCompleted=false;
@@ -656,26 +665,44 @@ public class GameController : MonoBehaviour
                 
                 if(tempCoinPosIndex==tempMyCharPosIndex)
                 {
-                    lastCuttedCoin=cuttableCoins[i];
-
-                    if(showCutSceneAnimation)
+                    int samePosCoinCounter=0;
+                    Transform curPathBlock=coinPathContainer.GetChild(tempMyCharPosIndex).transform;
+                    Vector3 curCoinPosition=new Vector3(curPathBlock.position.x,0.2f,curPathBlock.position.z);
+                    Collider[] hitColliders = Physics.OverlapSphere(curCoinPosition, 0.1f);
+                    foreach (var v in hitColliders)
                     {
-                        if(CutSceneAnimationHandler.instance!=null)
+                        if(v.transform.gameObject.layer == LayerMask.NameToLayer("Coin"))
                         {
-                            CutSceneAnimationHandler.instance.StartCutSceneAnimation(lastCuttedCoin.id,myChar.id);
+                            samePosCoinCounter++;
                         }
+                    }
+
+                    if(samePosCoinCounter==2)
+                    {
+                        lastCuttedCoin=cuttableCoins[i];
+                        if(showCutSceneAnimation)
+                        {
+                            if(CutSceneAnimationHandler.instance!=null)
+                            {
+                                CutSceneAnimationHandler.instance.StartCutSceneAnimation(lastCuttedCoin.id,myChar.id);
+                            }
+                        }
+                        else
+                        {
+                            iTween.MoveTo(cuttableCoins[i].gameObject, iTween.Hash("position", 
+                            cuttableCoins[i].initialPosInfo, 
+                            "speed", coinMoveSpeed, 
+                            "easetype", iTween.EaseType.linear,
+                            "oncomplete", "ResetCutCoin", 
+                            "oncompletetarget", this.gameObject
+                            ));
+                        }
+                        return true; 
                     }
                     else
                     {
-                        iTween.MoveTo(cuttableCoins[i].gameObject, iTween.Hash("position", 
-                        cuttableCoins[i].initialPosInfo, 
-                        "speed", coinMoveSpeed, 
-                        "easetype", iTween.EaseType.linear,
-                        "oncomplete", "ResetCutCoin", 
-                        "oncompletetarget", this.gameObject
-                        ));
+                        return false;
                     }
-                    return true;
                 }
             }
         }
@@ -1408,12 +1435,81 @@ public class GameController : MonoBehaviour
     #region Player Indicator
     private List<Coin> allOutCoinList=new List<Coin>();
     private List<Coin> coinsAtCurrentLocation=new List<Coin>();
+    public Material originalPathMat;
+    public Material tempSafeZoneMat;
     
-    IEnumerator HandlePlayerNumIndicator(Coin recentlyMovedCoin)
+    void HandlePlayerNumIndicator(Coin recentlyMovedCoin)
     {
+        GameObject center=null;
+
+        if(!recentlyMovedCoin.onWayToHome)
+        {
+            int blockIndex=recentlyMovedCoin.stepCounter+players[recentlyMovedCoin.id].initialPosIndex;
+            if(blockIndex>coinPathContainer.childCount-1)
+            {
+                blockIndex=blockIndex-coinPathContainer.childCount;
+            }
+            center=coinPathContainer.GetChild(blockIndex).gameObject;
+        }
+        else
+        {
+            center=coinPathContainer.GetChild(recentlyMovedCoin.stepCounter).gameObject;
+        }
+
+        Vector3 centerPos=new Vector3(center.transform.position.x,0.2f,center.transform.position.z);
+
+        Collider[] hitColliders = Physics.OverlapSphere(centerPos, 0.1f);
+        List<Coin> coinsAtSimilarPosition=new List<Coin>();
+
+        foreach (var h in hitColliders)
+        {
+            if(h.transform.gameObject.layer == LayerMask.NameToLayer("Coin"))
+            {
+                coinsAtSimilarPosition.Add(h.transform.GetComponent<Coin>());
+            }
+        }
+
+        Debug.Log("Total coins at location : "+center.name+" is "+coinsAtSimilarPosition.Count);
+
+
+        if(!safePosIndexList.Contains(recentlyMovedCoin.stepCounter))
+        {
+            if(coinsAtSimilarPosition.Count>1)
+            {
+                UpdateTemporarySafeZone(center,tempSafeZoneMat);
+            }
+            else
+            {
+                UpdateTemporarySafeZone(center,originalPathMat);
+            }
+        }
+
+        /*
+        if(coinsAtSimilarPosition.Count==1)
+        {
+            //single coin avaliable
+        }
+        else if(coinsAtSimilarPosition.Count==2)
+        {
+            //two coins avaliable
+        }
+        else if(coinsAtSimilarPosition.Count>2)
+        {
+            //more than 2 coins avaliable
+        }
+
+        //we now can count how many players are there in the current location
+        if(coinsAtSimilarPosition.Count>1&&!recentlyMovedCoin.isSafe)
+        {
+            //multiple coins spotted at unsafe location
+        }
+        */
+
+
+
+        /*
         allOutCoinList.Clear();
         coinsAtCurrentLocation.Clear();
-
         for(int i=0;i<gamePlayersList.Count;i++)
         {
             for(int j=0;j<players[i].outCoins.Count;j++)
@@ -1476,10 +1572,48 @@ public class GameController : MonoBehaviour
                     diffColoredCoin=coinsAtCurrentLocation[i];
                 }
             }
+
             recentlyMovedCoin.UpdateIndicatorInfo(sameColoredcc+1);
             if(diffColoredCoin!=null)
             {
                 diffColoredCoin.UpdateIndicatorInfo(differentColoredcc);
+            }
+        }
+        */
+    }
+
+    void UpdateTemporarySafeZone(GameObject previousSafeZone,Material tempMat)
+    {
+        previousSafeZone.GetComponent<MeshRenderer>().material=tempMat;
+    }
+
+    IEnumerator ResetPreviousBlock(int prevBlockIndex)
+    {
+        if(prevBlockIndex>coinPathContainer.childCount-1)
+        {
+            prevBlockIndex=prevBlockIndex-coinPathContainer.childCount;
+        }
+        yield return new WaitForSeconds(0.5f);
+        Transform newTempPosition=coinPathContainer.GetChild(prevBlockIndex).transform;
+        Vector3 newTempPos=new Vector3(newTempPosition.position.x,0.2f,newTempPosition.position.z);
+
+        Collider[] hitColliders = Physics.OverlapSphere(newTempPos, 0.1f);
+        int coinsAtThisPosCount=0;
+
+        foreach (var h in hitColliders)
+        {
+            if(h.transform.gameObject.layer == LayerMask.NameToLayer("Coin"))
+            {
+                coinsAtThisPosCount++;
+            }
+        }
+
+        if(!safePosIndexList.Contains(prevBlockIndex))
+        {
+            if(coinsAtThisPosCount<2)
+            {
+                UpdateTemporarySafeZone(newTempPosition.gameObject,originalPathMat);
+                Debug.Log("Reset Successful..");
             }
         }
     }
