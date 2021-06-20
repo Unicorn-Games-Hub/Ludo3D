@@ -4107,6 +4107,7 @@ MonoBehaviour:
   showCutSceneAnimation: 1
   punishPlayerOnConsecutiveRoll: 0
   autoBringSingleCoinOut: 1
+  allowDiceMoveTowardsPlayers: 0
   coinLayer:
     serializedVersion: 2
     m_Bits: 128

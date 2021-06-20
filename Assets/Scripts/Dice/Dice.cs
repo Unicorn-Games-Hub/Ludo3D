@@ -192,4 +192,5 @@ public class Dice : MonoBehaviour
         return outComeArray;
     }
     #endregion
+
 }

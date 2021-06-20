@@ -76,6 +76,7 @@ public class GameController : MonoBehaviour
     public bool showCutSceneAnimation=true;
     public bool punishPlayerOnConsecutiveRoll=false;
     public bool autoBringSingleCoinOut=true;
+    public bool allowDiceMoveTowardsPlayers=false;
 
     //clickable layerMask
     public LayerMask coinLayer;
@@ -463,12 +464,12 @@ public class GameController : MonoBehaviour
             int newTargetCount=initialTargetCount+currentDiceValue;
             int tempStepCount=0;
 
-            //counter
-           //HandlePlayerNumIndicator(coin);
-
-           //for reseting
-           StartCoroutine(ResetPreviousBlock(initialTargetCount));
-          
+           //Reseting counter and indicator only for public lane coins
+           if(!coin.onWayToHome)
+           {
+               StartCoroutine(ResetPreviousBlock(initialTargetCount));
+           }
+           
             while((coin.stepCounter+players[turnCounter].initialPosIndex)<newTargetCount)
             {
                 if(coin.isReadyForHome)
@@ -1406,7 +1407,38 @@ public class GameController : MonoBehaviour
     void UpdateDicePositionOnBoard()
     {
         newDicePosition=diceInitialPos[turnCounter];
-        moveDice=true;
+        if(allowDiceMoveTowardsPlayers)
+        {
+            moveDice=true;
+        }
+        else
+        {
+            ludoDice.transform.position=newDicePosition;
+            //StartCoroutine(ShrinkAndExpandDice());
+        }
+        
+        //here we disable colliders of all coins except coins of current turn
+        for(int i=0;i<gamePlayersList.Count;i++)
+        {
+            for(int j=0;j<generatedCoinsHolder.GetChild(i).childCount;j++)
+            {
+               if(i==turnCounter)
+               {
+                   generatedCoinsHolder.GetChild(i).GetChild(j).GetComponent<BoxCollider>().enabled=true;
+               }
+               else
+               {
+                   generatedCoinsHolder.GetChild(i).GetChild(j).GetComponent<BoxCollider>().enabled=false;
+               }
+            }
+        }
+    }
+
+    IEnumerator ShrinkAndExpandDice()
+    {
+        ludoDice.transform.localScale=new Vector3(0f,0f,0f);
+        yield return new WaitForSeconds(0.1f);
+        ludoDice.transform.localScale=new Vector3(0.8f,0.8f,0.8f);
     }
     #endregion
 
@@ -1453,7 +1485,8 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            center=coinPathContainer.GetChild(recentlyMovedCoin.stepCounter).gameObject;
+            //disable for home lane coin
+            //center=coinPathContainer.GetChild(recentlyMovedCoin.stepCounter).gameObject;
         }
 
         Vector3 centerPos=new Vector3(center.transform.position.x,0.2f,center.transform.position.z);
