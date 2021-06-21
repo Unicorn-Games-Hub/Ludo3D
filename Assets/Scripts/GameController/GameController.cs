@@ -670,6 +670,7 @@ public class GameController : MonoBehaviour
                     Transform curPathBlock=coinPathContainer.GetChild(tempMyCharPosIndex).transform;
                     Vector3 curCoinPosition=new Vector3(curPathBlock.position.x,0.2f,curPathBlock.position.z);
                     Collider[] hitColliders = Physics.OverlapSphere(curCoinPosition, 0.1f);
+
                     foreach (var v in hitColliders)
                     {
                         if(v.transform.gameObject.layer == LayerMask.NameToLayer("Coin"))
@@ -685,7 +686,7 @@ public class GameController : MonoBehaviour
                         {
                             if(CutSceneAnimationHandler.instance!=null)
                             {
-                                CutSceneAnimationHandler.instance.StartCutSceneAnimation(lastCuttedCoin.id,myChar.id);
+                                CutSceneAnimationHandler.instance.StartCutSceneAnimation(lastCuttedCoin.id,myChar.id,0);
                             }
                         }
                         else
@@ -1416,8 +1417,10 @@ public class GameController : MonoBehaviour
             ludoDice.transform.position=newDicePosition;
             //StartCoroutine(ShrinkAndExpandDice());
         }
-        
+
+        //it is affecting the coin cut and multi coin safe zone
         //here we disable colliders of all coins except coins of current turn
+        /*
         for(int i=0;i<gamePlayersList.Count;i++)
         {
             for(int j=0;j<generatedCoinsHolder.GetChild(i).childCount;j++)
@@ -1432,6 +1435,7 @@ public class GameController : MonoBehaviour
                }
             }
         }
+        */
     }
 
     IEnumerator ShrinkAndExpandDice()
@@ -1473,7 +1477,6 @@ public class GameController : MonoBehaviour
     void HandlePlayerNumIndicator(Coin recentlyMovedCoin)
     {
         GameObject center=null;
-
         if(!recentlyMovedCoin.onWayToHome)
         {
             int blockIndex=recentlyMovedCoin.stepCounter+players[recentlyMovedCoin.id].initialPosIndex;
@@ -1490,20 +1493,38 @@ public class GameController : MonoBehaviour
         }
 
         Vector3 centerPos=new Vector3(center.transform.position.x,0.2f,center.transform.position.z);
-
         Collider[] hitColliders = Physics.OverlapSphere(centerPos, 0.1f);
         List<Coin> coinsAtSimilarPosition=new List<Coin>();
+
+        //
+        List<Coin> diffCoins=new List<Coin>();
 
         foreach (var h in hitColliders)
         {
             if(h.transform.gameObject.layer == LayerMask.NameToLayer("Coin"))
             {
-                coinsAtSimilarPosition.Add(h.transform.GetComponent<Coin>());
+                Coin nc=h.transform.GetComponent<Coin>();
+                coinsAtSimilarPosition.Add(nc);
+                if(nc!=recentlyMovedCoin&&nc.id!=recentlyMovedCoin.id)
+                {
+                    diffCoins.Add(nc);
+                }
             }
         }
-
+        
         Debug.Log("Total coins at location : "+center.name+" is "+coinsAtSimilarPosition.Count);
 
+        if(diffCoins.Count>0)
+        {
+            if(showCutSceneAnimation)
+            {
+                if(CutSceneAnimationHandler.instance!=null)
+                {
+                    int diffCoinIndex=Random.Range(0,diffCoins.Count);
+                    CutSceneAnimationHandler.instance.StartCutSceneAnimation(diffCoins[diffCoinIndex].id,recentlyMovedCoin.id,1);
+                }
+            }
+        }
 
         if(!safePosIndexList.Contains(recentlyMovedCoin.stepCounter))
         {
@@ -1515,104 +1536,7 @@ public class GameController : MonoBehaviour
             {
                 UpdateTemporarySafeZone(center,originalPathMat);
             }
-        }
-
-        /*
-        if(coinsAtSimilarPosition.Count==1)
-        {
-            //single coin avaliable
-        }
-        else if(coinsAtSimilarPosition.Count==2)
-        {
-            //two coins avaliable
-        }
-        else if(coinsAtSimilarPosition.Count>2)
-        {
-            //more than 2 coins avaliable
-        }
-
-        //we now can count how many players are there in the current location
-        if(coinsAtSimilarPosition.Count>1&&!recentlyMovedCoin.isSafe)
-        {
-            //multiple coins spotted at unsafe location
-        }
-        */
-
-
-
-        /*
-        allOutCoinList.Clear();
-        coinsAtCurrentLocation.Clear();
-        for(int i=0;i<gamePlayersList.Count;i++)
-        {
-            for(int j=0;j<players[i].outCoins.Count;j++)
-            {
-                Coin curCoinInfoHolder=players[i].outCoins[j].GetComponent<Coin>();
-
-                if(curCoinInfoHolder!=recentlyMovedCoin)
-                {
-                    if(!allOutCoinList.Contains(curCoinInfoHolder))
-                    {
-                        allOutCoinList.Add(curCoinInfoHolder);
-                    }
-                }
-            }
-        }
-        yield return new WaitForEndOfFrame();
-
-        if(allOutCoinList.Count>0)
-        {
-            for(int i=0;i<allOutCoinList.Count;i++)
-            {
-                int curTempPosIndex=allOutCoinList[i].stepCounter+players[allOutCoinList[i].id].initialPosIndex;
-                int movedCoinTempPosIndex=recentlyMovedCoin.stepCounter+players[recentlyMovedCoin.id].initialPosIndex;
-
-                if(curTempPosIndex>coinPathContainer.childCount-1)
-                {
-                    curTempPosIndex=curTempPosIndex-coinPathContainer.childCount;
-                }
-                
-                if(movedCoinTempPosIndex>coinPathContainer.childCount-1)
-                {
-                    movedCoinTempPosIndex=movedCoinTempPosIndex-coinPathContainer.childCount;
-                }
-
-                if(curTempPosIndex==movedCoinTempPosIndex)
-                {
-                   if(!coinsAtCurrentLocation.Contains(allOutCoinList[i]))
-                   {
-                       coinsAtCurrentLocation.Add(allOutCoinList[i]);
-                   }
-                }
-            }
-        }
-
-        //now we have info about the coins which are at same place
-        if(coinsAtCurrentLocation.Count>0)
-        {
-            int sameColoredcc=0;
-            int differentColoredcc=0;
-            Coin diffColoredCoin=null;
-            for(int i=0;i<coinsAtCurrentLocation.Count;i++)
-            {
-                if(coinsAtCurrentLocation[i].id==recentlyMovedCoin.id)
-                {
-                    sameColoredcc++;
-                }
-                else
-                {
-                    differentColoredcc++;
-                    diffColoredCoin=coinsAtCurrentLocation[i];
-                }
-            }
-
-            recentlyMovedCoin.UpdateIndicatorInfo(sameColoredcc+1);
-            if(diffColoredCoin!=null)
-            {
-                diffColoredCoin.UpdateIndicatorInfo(differentColoredcc);
-            }
-        }
-        */
+        } 
     }
 
     void UpdateTemporarySafeZone(GameObject previousSafeZone,Material tempMat)
@@ -1672,29 +1596,10 @@ public class GameController : MonoBehaviour
 
     void Defensive(Transform currentChar)
     {
-        /*
-        //from here we will check if there is another character avaliable at safe zone or not if yes play defending animation else normal animation
-        Coin curCharCoin=currentChar.GetComponent<Coin>();
-        for(int i=0;i<players[turnCounter].outCoins.Count;i++)
-        {
-            Coin tempPlayerCoin=players[turnCounter].outCoins[i].GetComponent<Coin>();
-            if(tempPlayerCoin.id!=turnCounter&&tempPlayerCoin.isSafe)
-            {
-                if(curCharCoin.stepCounter==tempPlayerCoin.stepCounter)
-                {
-                    //
-                }
-                //lets get stepCounter information of each coin
-                Debug.Log("Opponents safe pos index : "+tempPlayerCoin.stepCounter);
-            }
-        }
-        */
-      
        if(CharAnimationHandler.instance!=null)
         {
             CharAnimationHandler.instance.PlayDefensiveAnimation(currentChar);
         } 
     }
-    
     #endregion
 }

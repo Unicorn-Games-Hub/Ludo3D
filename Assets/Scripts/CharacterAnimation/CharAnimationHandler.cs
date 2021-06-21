@@ -14,10 +14,12 @@ public class CharAnimationHandler : MonoBehaviour
     public AnimationClip attackAnim;
     public AnimationClip killAnim;
     public AnimationClip deathAnim;
+    public AnimationClip defendAttackAnim;
 
     private Animation anim;
 
     string walkAnimName;
+    string defendAttackAnimName;
     
     void Start()
     {
@@ -31,6 +33,7 @@ public class CharAnimationHandler : MonoBehaviour
         }
 
        walkAnimName=walkAnim.name;
+       defendAttackAnimName=defendAttackAnim.name;
     }
 
     #region Character animations
@@ -74,6 +77,14 @@ public class CharAnimationHandler : MonoBehaviour
     {
         anim=t.GetComponent<Animation>();
         anim.clip=deathAnim;
+        anim.Play();
+    }
+
+    public void PlayDefendAttackAnimation(Transform t)
+    {
+        anim=t.GetComponent<Animation>();
+        anim.clip=defendAttackAnim;
+        anim[defendAttackAnimName].speed=2.2f;
         anim.Play();
     }
 

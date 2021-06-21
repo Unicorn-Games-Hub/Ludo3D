@@ -558,6 +558,7 @@ MonoBehaviour:
   attackAnim: {fileID: 6720303635017113406, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
   killAnim: {fileID: 2996450741573297445, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
   deathAnim: {fileID: -4630339522487117836, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
+  defendAttackAnim: {fileID: 8925044659521273951, guid: 5e4fa2f1c08414f29b607655d0281bd5, type: 3}
 --- !u!4 &205835705
 Transform:
   m_ObjectHideFlags: 0

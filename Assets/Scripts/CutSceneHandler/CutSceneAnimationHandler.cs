@@ -33,6 +33,7 @@ public class CutSceneAnimationHandler : MonoBehaviour
 
     private int dId=0;
     private int aId=0;
+    private int animID=0;
 
     [Header("Background Color")]
     public Image bgImage;
@@ -55,13 +56,14 @@ public class CutSceneAnimationHandler : MonoBehaviour
        HideCharacters();
        screnFadeHolder.SetActive(false);
     }
-
-    public void StartCutSceneAnimation(int defenderID,int attackerID)
+    
+    public void StartCutSceneAnimation(int defenderID,int attackerID,int animationId)
     {
         screnFadeHolder.SetActive(true);
         fadeAmount=0f;
         dId=defenderID;
         aId=attackerID;
+        animID=animationId;
         isStarted=true;
         fadeIn=true;
         bgImage.color=new Color(0f,0f,0f,1f);
@@ -141,9 +143,19 @@ public class CutSceneAnimationHandler : MonoBehaviour
     void StartAttacking()
     {
         animHandler.PlayKillAnimation(attacker);
-        StartCoroutine(KillDefender());
+        if(animID==0)
+        {
+            //from here we will check either it is for defending or killing
+            StartCoroutine(KillDefender());
+        }
+        else
+        {
+            StartCoroutine(DefendTheAttack());
+        }
+       
     }
 
+    //for killing the defender
     IEnumerator KillDefender()
     {
         yield return new WaitForSeconds(1f);
@@ -154,6 +166,14 @@ public class CutSceneAnimationHandler : MonoBehaviour
         {
             GameController.instance.ResetCutCoin();
         }
+    }
+
+    //for defending the attacker
+    IEnumerator DefendTheAttack()
+    {
+        animHandler. PlayDefendAttackAnimation(defender);
+        yield return new WaitForSeconds(1f);
+        fadeIn=true;
     }
 
    void HideCharacters()
