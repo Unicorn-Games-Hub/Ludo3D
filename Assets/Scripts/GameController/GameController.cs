@@ -673,7 +673,7 @@ public class GameController : MonoBehaviour
 
                     foreach (var v in hitColliders)
                     {
-                        if(v.transform.gameObject.layer == LayerMask.NameToLayer("Coin"))
+                        if(v.transform.gameObject.layer == LayerMask.NameToLayer("Coin")||v.transform.gameObject.layer == LayerMask.NameToLayer("OppCoin"))
                         {
                             samePosCoinCounter++;
                         }
@@ -1418,24 +1418,24 @@ public class GameController : MonoBehaviour
             //StartCoroutine(ShrinkAndExpandDice());
         }
 
-        //it is affecting the coin cut and multi coin safe zone
-        //here we disable colliders of all coins except coins of current turn
-        /*
+        //here we will now change the layer of opponent coins to another layer name
         for(int i=0;i<gamePlayersList.Count;i++)
         {
             for(int j=0;j<generatedCoinsHolder.GetChild(i).childCount;j++)
             {
                if(i==turnCounter)
                {
-                   generatedCoinsHolder.GetChild(i).GetChild(j).GetComponent<BoxCollider>().enabled=true;
+                   //coins of current turn player
+                   generatedCoinsHolder.GetChild(i).GetChild(j).gameObject.layer=LayerMask.NameToLayer("Coin");
                }
                else
                {
-                   generatedCoinsHolder.GetChild(i).GetChild(j).GetComponent<BoxCollider>().enabled=false;
+                   //coins of player whose turn is not the current turn
+                   //opp coin stands for opponents coin
+                    generatedCoinsHolder.GetChild(i).GetChild(j).gameObject.layer=LayerMask.NameToLayer("OppCoin");
                }
             }
         }
-        */
     }
 
     IEnumerator ShrinkAndExpandDice()
@@ -1501,7 +1501,7 @@ public class GameController : MonoBehaviour
 
         foreach (var h in hitColliders)
         {
-            if(h.transform.gameObject.layer == LayerMask.NameToLayer("Coin"))
+            if(h.transform.gameObject.layer == LayerMask.NameToLayer("Coin")||h.transform.gameObject.layer == LayerMask.NameToLayer("OppCoin"))
             {
                 Coin nc=h.transform.GetComponent<Coin>();
                 coinsAtSimilarPosition.Add(nc);
@@ -1559,7 +1559,7 @@ public class GameController : MonoBehaviour
 
         foreach (var h in hitColliders)
         {
-            if(h.transform.gameObject.layer == LayerMask.NameToLayer("Coin"))
+            if(h.transform.gameObject.layer == LayerMask.NameToLayer("Coin")||h.transform.gameObject.layer== LayerMask.NameToLayer("OppCoin"))
             {
                 coinsAtThisPosCount++;
             }
