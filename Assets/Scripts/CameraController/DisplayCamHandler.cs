@@ -33,6 +33,9 @@ public class DisplayCamHandler : MonoBehaviour
 
     public Text modeText;
 
+    [Header("Direction Light Shadow")]
+    public Light dirLight;
+
     void Start()
     {
         gameCam=GetComponent<Camera>();
@@ -87,10 +90,12 @@ public class DisplayCamHandler : MonoBehaviour
         if(displayMode==screenMode.mode3D)
         {
             modeText.text="3D";
+            dirLight.shadows = LightShadows.Soft;
         }
         else if(displayMode==screenMode.mode2D)
         {
             modeText.text="2D";
+            dirLight.shadows = LightShadows.None;
         }
     }
 }

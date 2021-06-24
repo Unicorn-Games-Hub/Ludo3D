@@ -49,6 +49,7 @@ public class GameController : MonoBehaviour
         public string colorName;
         public int playerID;
         public Transform coinPrefab;
+        public Transform charPrefab;
         public playerType player;
         public int initialPosIndex=0;
         public Color coinColor;
@@ -82,6 +83,10 @@ public class GameController : MonoBehaviour
     public LayerMask coinLayer;
     private Vector3 newCoinPos=Vector3.zero;
 
+    //changing the coin move speed
+    [Range(1f,5f)]
+    public float coinMoveSpeed=1f;
+
     //Raycasting
     private Ray ray;
     private RaycastHit hit;
@@ -92,6 +97,7 @@ public class GameController : MonoBehaviour
     //Refrence to the dice material
     public Material diceMat;
 
+   
     [Header("Ingame player indicator")]
     public Transform playerIndicators;
 
@@ -105,6 +111,23 @@ public class GameController : MonoBehaviour
     [Header("Highlight Animation")]
     public HighLightAnimation[] highLights;
 
+    [Header("Indicator Essentials")]
+    private List<Coin> allOutCoinList=new List<Coin>();
+    private List<Coin> coinsAtCurrentLocation=new List<Coin>();
+    public Material originalPathMat;
+    public Material tempSafeZoneMat;
+
+    //for playing coin or character
+    public enum modelType
+    {
+        character,
+        coin
+    }
+    public modelType playerModel;
+
+
+
+
     void Awake()
     {
         if(instance!=null)
@@ -117,6 +140,7 @@ public class GameController : MonoBehaviour
         }
     }
 
+    #region player initialization
     void Start()
     {
         if(GameDataHolder.instance!=null)
@@ -143,21 +167,41 @@ public class GameController : MonoBehaviour
 
     void GenerateCoins()
     {
+        Transform tempPlayer=null;
+        Vector3 tempPlayerPos=Vector3.zero;
+        Quaternion initialPlayerRot=Quaternion.Euler(0f,0f,0f);
+
         for(int i=0;i<players.Count;i++)
         {
            for(int j=0;j<noOfCoins;j++)
            {
                if(players[i].player==playerType.Human||players[i].player==playerType.Bot)
                {
-                    Transform newCoin=Instantiate(players[i].coinPrefab,coinContainer.GetChild(i).GetChild(j).position,players[i].coinPrefab.transform.rotation);
+                   if(playerModel==modelType.character)
+                    {
+                        tempPlayer=players[i].charPrefab;
+                        tempPlayerPos=coinContainer.GetChild(i).GetChild(j).position;
+                        initialPlayerRot=Quaternion.Euler(0f,startRotations[i].y,0f);
+                    }
+                    else  if(playerModel==modelType.coin)
+                    {
+                        tempPlayer=players[i].coinPrefab;  
+                        tempPlayerPos=new Vector3(coinContainer.GetChild(i).GetChild(j).position.x,0.2f,coinContainer.GetChild(i).GetChild(j).position.z);
+                        initialPlayerRot=players[i].coinPrefab.transform.rotation;
+                    }
+                
+                    // Transform newCoin=Instantiate(players[i].coinPrefab,coinContainer.GetChild(i).GetChild(j).position,players[i].coinPrefab.transform.rotation);
+                    //newCoin.transform.localRotation=Quaternion.Euler(0f,startRotations[i].y,0f);
+                    // newCoin.transform.localRotation=Quaternion.Euler(0f,initialYrot,0f);
+
+                    Transform newCoin=Instantiate(tempPlayer,tempPlayerPos,tempPlayer.rotation);
                     newCoin.SetParent(generatedCoinsHolder.GetChild(i).transform);
                     newCoin.GetComponent<Coin>().HandleCoinInfo(players[i].playerID,newCoin.transform.localPosition);
-                    newCoin.transform.localRotation=Quaternion.Euler(0f,startRotations[i].y,0f);
+                    newCoin.transform.localRotation=initialPlayerRot;
                     if(!gamePlayersList.Contains(players[i].playerID))
                     {
                         gamePlayersList.Add(players[i].playerID);
                     }
-
                     if(enterHomeWithOutCutting)
                     {
                         newCoin.GetComponent<Coin>().isReadyForHome=true;
@@ -167,6 +211,7 @@ public class GameController : MonoBehaviour
         }
         GetRandomTurn();
     }
+    #endregion
 
     #region turn
     void GetRandomTurn()
@@ -444,8 +489,18 @@ public class GameController : MonoBehaviour
     {
         if(coin.atBase)
         {
+            float tempYpos=0f;
+            if(playerModel==modelType.character)
+            {
+                tempYpos=-0.01f;
+            }
+            else if(playerModel==modelType.coin)
+            {
+                tempYpos=0.135f;
+            }
+
             int startingIndex=players[turnCounter].initialPosIndex;
-            iTween.MoveTo(coin.gameObject, iTween.Hash("position", new Vector3(coinPathContainer.GetChild(startingIndex).position.x,-0.01f/*coin.transform.position.y*/,coinPathContainer.GetChild(startingIndex).position.z), 
+            iTween.MoveTo(coin.gameObject, iTween.Hash("position", new Vector3(coinPathContainer.GetChild(startingIndex).position.x,tempYpos,coinPathContainer.GetChild(startingIndex).position.z), 
             "speed",coinMoveSpeed, 
             "easetype", iTween.EaseType.linear,
             "oncomplete", "UpdateTurnAfterFirstMove", 
@@ -603,9 +658,7 @@ public class GameController : MonoBehaviour
         isStepCompleted=true;
     }
 
-    //changing the walking speed
-    [Range(1f,5f)]
-    public float coinMoveSpeed=1f;
+   
     #endregion
 
     #region Safe
@@ -682,22 +735,37 @@ public class GameController : MonoBehaviour
                     if(samePosCoinCounter==2)
                     {
                         lastCuttedCoin=cuttableCoins[i];
-                        if(showCutSceneAnimation)
+                        if(playerModel==modelType.character)
                         {
-                            if(CutSceneAnimationHandler.instance!=null)
+                            if(showCutSceneAnimation)
                             {
-                                CutSceneAnimationHandler.instance.StartCutSceneAnimation(lastCuttedCoin.id,myChar.id,0);
+                                if(CutSceneAnimationHandler.instance!=null)
+                                {
+                                    CutSceneAnimationHandler.instance.StartCutSceneAnimation(lastCuttedCoin.id,myChar.id,0);
+                                }
+                            }
+                            else
+                            {
+                                MoveCutCoin(lastCuttedCoin);
+                                // iTween.MoveTo(cuttableCoins[i].gameObject, iTween.Hash("position", 
+                                // cuttableCoins[i].initialPosInfo, 
+                                // "speed", coinMoveSpeed, 
+                                // "easetype", iTween.EaseType.linear,
+                                // "oncomplete", "ResetCutCoin", 
+                                // "oncompletetarget", this.gameObject
+                                // ));
                             }
                         }
-                        else
+                        else if(playerModel==modelType.coin)
                         {
-                            iTween.MoveTo(cuttableCoins[i].gameObject, iTween.Hash("position", 
-                            cuttableCoins[i].initialPosInfo, 
-                            "speed", coinMoveSpeed, 
-                            "easetype", iTween.EaseType.linear,
-                            "oncomplete", "ResetCutCoin", 
-                            "oncompletetarget", this.gameObject
-                            ));
+                            if(showCutSceneAnimation)
+                            {
+                                MoveCutCoin(lastCuttedCoin);
+                            }
+                            else
+                            {
+                                ResetThisCoin(lastCuttedCoin);
+                            }
                         }
                         return true; 
                     }
@@ -709,6 +777,17 @@ public class GameController : MonoBehaviour
             }
         }
         return false;
+    }
+
+    void MoveCutCoin(Coin recentCutCoin)
+    {
+        iTween.MoveTo(recentCutCoin.gameObject, iTween.Hash("position", 
+        recentCutCoin.initialPosInfo, 
+        "speed", coinMoveSpeed, 
+        "easetype", iTween.EaseType.linear,
+        "oncomplete", "ResetCutCoin", 
+        "oncompletetarget", this.gameObject
+        )); 
     }
 
     public void ResetCutCoin()
@@ -740,8 +819,13 @@ public class GameController : MonoBehaviour
         coinToReset.atHome=false;
         coinToReset.isSafe=false;
         coinToReset.transform.position=coinToReset.initialPosInfo;
-        coinToReset.transform.localRotation=Quaternion.Euler(0f,startRotations[coinToReset.id].y,0f);
 
+        //only reset rotation of characters
+        if(playerModel==modelType.character)
+        {
+            coinToReset.transform.localRotation=Quaternion.Euler(0f,startRotations[coinToReset.id].y,0f);
+        }
+       
         Transform tempCoinTransform=coinToReset.gameObject.transform;
         if(players[coinToReset.id].outCoins.Contains(tempCoinTransform))
         {
@@ -1449,30 +1533,29 @@ public class GameController : MonoBehaviour
     #region Character Rotation
     void UpdateCharacterRotation(Transform ludoChar)
     {
-        Coin charCoin=ludoChar.GetComponent<Coin>();
-        
-        if(!charCoin.onWayToHome)
+        if(playerModel==modelType.character)
         {
-            int stepsToMove=charCoin.stepCounter+players[turnCounter].initialPosIndex+1;
-            if(stepsToMove>coinPathContainer.childCount-1)
+            Coin charCoin=ludoChar.GetComponent<Coin>();
+            if(!charCoin.onWayToHome)
             {
-                stepsToMove=stepsToMove-coinPathContainer.childCount;
+                int stepsToMove=charCoin.stepCounter+players[turnCounter].initialPosIndex+1;
+                if(stepsToMove>coinPathContainer.childCount-1)
+                {
+                    stepsToMove=stepsToMove-coinPathContainer.childCount;
+                }
+                ludoChar.rotation = Quaternion.LookRotation(ludoChar.position - coinPathContainer.GetChild(stepsToMove).transform.position);
             }
-            ludoChar.rotation = Quaternion.LookRotation(ludoChar.position - coinPathContainer.GetChild(stepsToMove).transform.position);
-        }
-        else
-        {
-            int homeLastCount=homePaths[turnCounter].childCount-1;
-            ludoChar.rotation = Quaternion.LookRotation(ludoChar.position - homePaths[turnCounter].GetChild(homeLastCount).transform.position);
+            else
+            {
+                int homeLastCount=homePaths[turnCounter].childCount-1;
+                ludoChar.rotation = Quaternion.LookRotation(ludoChar.position - homePaths[turnCounter].GetChild(homeLastCount).transform.position);
+            }
         }
     }
     #endregion
     
     #region Player Indicator
-    private List<Coin> allOutCoinList=new List<Coin>();
-    private List<Coin> coinsAtCurrentLocation=new List<Coin>();
-    public Material originalPathMat;
-    public Material tempSafeZoneMat;
+   
     
     void HandlePlayerNumIndicator(Coin recentlyMovedCoin)
     {
@@ -1516,12 +1599,15 @@ public class GameController : MonoBehaviour
 
         if(diffCoins.Count>0)
         {
-            if(showCutSceneAnimation)
+            if(playerModel==modelType.character)
             {
-                if(CutSceneAnimationHandler.instance!=null)
+                if(showCutSceneAnimation)
                 {
-                    int diffCoinIndex=Random.Range(0,diffCoins.Count);
-                    CutSceneAnimationHandler.instance.StartCutSceneAnimation(diffCoins[diffCoinIndex].id,recentlyMovedCoin.id,1);
+                    if(CutSceneAnimationHandler.instance!=null)
+                    {
+                        int diffCoinIndex=Random.Range(0,diffCoins.Count);
+                        CutSceneAnimationHandler.instance.StartCutSceneAnimation(diffCoins[diffCoinIndex].id,recentlyMovedCoin.id,1);
+                    }
                 }
             }
         }
@@ -1577,29 +1663,37 @@ public class GameController : MonoBehaviour
     #endregion
 
     #region Character Animation
-
     void Idle(Transform currentChar)
     {
-        if(CharAnimationHandler.instance!=null)
+        if(playerModel==modelType.character)
         {
-            CharAnimationHandler.instance.PlayIdleAnimation(currentChar);
+            if(CharAnimationHandler.instance!=null)
+            {
+                CharAnimationHandler.instance.PlayIdleAnimation(currentChar);
+            }
         }
     }
 
     void Walk(Transform currentChar)
     {
-        if(CharAnimationHandler.instance!=null)
+        if(playerModel==modelType.character)
         {
-            CharAnimationHandler.instance.PlayWalkAnimation(currentChar);
+            if(CharAnimationHandler.instance!=null)
+            {
+                CharAnimationHandler.instance.PlayWalkAnimation(currentChar);
+            }
         }
     }
 
     void Defensive(Transform currentChar)
     {
-       if(CharAnimationHandler.instance!=null)
+        if(playerModel==modelType.character)
         {
-            CharAnimationHandler.instance.PlayDefensiveAnimation(currentChar);
-        } 
+            if(CharAnimationHandler.instance!=null)
+            {
+                CharAnimationHandler.instance.PlayDefensiveAnimation(currentChar);
+            }
+        }
     }
     #endregion
 }

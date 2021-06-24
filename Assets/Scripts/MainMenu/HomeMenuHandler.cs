@@ -27,6 +27,7 @@ public class HomeMenuHandler : MonoBehaviour
     private int modeIndex=0;
     private int totalPlayers=0;
 
+   private List<int> playerIds=new List<int>();
 
     void Start()
     {
@@ -83,6 +84,7 @@ public class HomeMenuHandler : MonoBehaviour
 
     void UpdateSelectionUI(int curPlayerNum)
     {
+        playerIds.Clear();
         totalPlayers=curPlayerNum;
         GameObject tempSelectionUI=null;
         for(int i=0;i<playerSelectionUI.Length;i++)
@@ -93,8 +95,42 @@ public class HomeMenuHandler : MonoBehaviour
         tempSelectionUI=playerSelectionUI[curPlayerNum-2];
         tempSelectionUI.GetComponent<Image>().sprite=selectionIndicator[1];
 
+        switch(curPlayerNum)
+        {
+            case 2:
+            playerIds.Add(0);
+            playerIds.Add(2);
+            break;
+            case 3:
+            playerIds.Add(0);
+            playerIds.Add(1);
+            playerIds.Add(2);
+            break;
+            case 4:
+            playerIds.Add(0);
+            playerIds.Add(1);
+            playerIds.Add(2);
+            playerIds.Add(3);
+            break;
+            default:
+            playerIds.Add(0);
+            playerIds.Add(1);
+            playerIds.Add(2);
+            playerIds.Add(3);
+            break;
+        }
+
         for(int i=0;i<avaliablePlayers.Length;i++)
         {
+            if(GameDataHolder.instance!=null)
+            {
+                GameDataHolder.instance.playerIndex[i]=2;
+            }
+            avaliablePlayers[i].interactable=false;
+        }
+            
+            
+            /*
             if(i<curPlayerNum)
             {
                 if(modeIndex==0)
@@ -113,12 +149,35 @@ public class HomeMenuHandler : MonoBehaviour
             else
             {
                 avaliablePlayers[i].interactable=false;
+
                 if(GameDataHolder.instance!=null)
                 {
                     GameDataHolder.instance.playerIndex[i]=2;
                 }
             }
+            */
+
+
+        for(int i=0;i<playerIds.Count;i++)
+        {
+            if(modeIndex==0)
+            {
+                GameDataHolder.instance.playerIndex[playerIds[i]]=0;
+            }
+            else
+            {
+                if(avaliablePlayers[playerIds[i]].GetComponent<PlayerSelector>().playerID>0)
+                {
+                    GameDataHolder.instance.playerIndex[playerIds[i]]=1;
+                }
+                else
+                {
+                    GameDataHolder.instance.playerIndex[playerIds[i]]=0;
+                }
+            }
+            avaliablePlayers[playerIds[i]].interactable=true;
         }
+
         //lets check game start is valid or not
         HandleStartValidation();
     }
@@ -127,19 +186,18 @@ public class HomeMenuHandler : MonoBehaviour
     {
         startButton.interactable=true;
         int botCount=0;
-        for(int i=0;i<totalPlayers;i++)
+
+        for(int i=0;i<GameDataHolder.instance.playerIndex.Length;i++)
         {
-            if(avaliablePlayers[i].GetComponent<PlayerSelector>().playerID==1)
+            if(GameDataHolder.instance.playerIndex[i]==1)
             {
                 botCount++;
             }
         }
-
+       
         if(botCount==totalPlayers)
         {
             startButton.interactable=false;
-            // int tempHuman=Random.Range(0,totalPlayers);
-            // GameModeSelectionHandler.instance.MakeItHuman(tempHuman);
         }
     }
 

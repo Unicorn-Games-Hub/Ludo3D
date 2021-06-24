@@ -2065,6 +2065,7 @@ MonoBehaviour:
     - {x: 90, y: 180, z: 0}
     - {x: 90, y: -180, z: 0}
   modeText: {fileID: 1544695734}
+  dirLight: {fileID: 705507994}
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -4072,7 +4073,8 @@ MonoBehaviour:
   players:
   - colorName: Green
     playerID: 0
-    coinPrefab: {fileID: 3970057363857400681, guid: 5704da5175a5047bf8da57e8df333930, type: 3}
+    coinPrefab: {fileID: 436554077625717156, guid: cefa0f1cab5024a8ebef265c1db65971, type: 3}
+    charPrefab: {fileID: 3970057363857400681, guid: 5704da5175a5047bf8da57e8df333930, type: 3}
     player: 1
     initialPosIndex: 0
     coinColor: {r: 0.44705886, g: 0.8352942, b: 0.49411768, a: 1}
@@ -4080,7 +4082,8 @@ MonoBehaviour:
     noOfRoundsWithoutCoinOut: 0
   - colorName: Red
     playerID: 1
-    coinPrefab: {fileID: 882979536779078947, guid: b9bc804e647e84130aa2647ed22815a6, type: 3}
+    coinPrefab: {fileID: 4720550230745011477, guid: c893462792944430ba1dab80b7e0e556, type: 3}
+    charPrefab: {fileID: 882979536779078947, guid: b9bc804e647e84130aa2647ed22815a6, type: 3}
     player: 0
     initialPosIndex: 13
     coinColor: {r: 1, g: 0.47058827, b: 0.4901961, a: 1}
@@ -4088,7 +4091,8 @@ MonoBehaviour:
     noOfRoundsWithoutCoinOut: 0
   - colorName: Blue
     playerID: 2
-    coinPrefab: {fileID: 4224728455472447539, guid: 29b1e329957e940d49c5909c6f387230, type: 3}
+    coinPrefab: {fileID: 1377974154913160156, guid: c175e551ecd7248e0bb4ce42b564fa89, type: 3}
+    charPrefab: {fileID: 4224728455472447539, guid: 29b1e329957e940d49c5909c6f387230, type: 3}
     player: 1
     initialPosIndex: 26
     coinColor: {r: 0.35686275, g: 0.6, b: 1, a: 1}
@@ -4096,7 +4100,8 @@ MonoBehaviour:
     noOfRoundsWithoutCoinOut: 0
   - colorName: Yellow
     playerID: 3
-    coinPrefab: {fileID: 5391737638218640456, guid: 1e54b61f397214de9acdbbec1ed282df, type: 3}
+    coinPrefab: {fileID: 791956182272476057, guid: 4de52d1c1a3ec4421856d6e1983ecfea, type: 3}
+    charPrefab: {fileID: 5391737638218640456, guid: 1e54b61f397214de9acdbbec1ed282df, type: 3}
     player: 1
     initialPosIndex: 39
     coinColor: {r: 1, g: 0.83921576, b: 0.4901961, a: 1}
@@ -4114,6 +4119,7 @@ MonoBehaviour:
     m_Bits: 128
   safePosIndexList: 00000000080000000d000000150000001a00000022000000270000002f000000
   diceMat: {fileID: 2100000, guid: 568f858d82b0a41da93b98d3b19f536b, type: 2}
+  playerModel: 0
   playerIndicators: {fileID: 186344612}
   ludoDice: {fileID: 24529193}
   diceInitialPos:
