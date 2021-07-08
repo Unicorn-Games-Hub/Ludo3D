@@ -21,6 +21,6 @@ public class RemoteImage : MonoBehaviour
 
     public void Close()
     {
-        //FirebaseManager.instance.CloseThis(this.gameObject);
+        FirebaseManager.instance.CloseThis(this.gameObject);
     }
 }

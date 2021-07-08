@@ -2,16 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
-//using Firebase.Extensions;
-//using Firebase.Database;
-// using System;
-// using System.IO;
-// using UnityEngine.Networking;
-// using SimpleJSON;
+using Firebase.Extensions;
+using Firebase.Database;
+using System;
+using System.IO;
+using UnityEngine.Networking;
+using SimpleJSON;
 
 public class FirebaseManager : MonoBehaviour
 {
-    /*
     public static FirebaseManager instance;
 
     Firebase.DependencyStatus dependencyStatus = Firebase.DependencyStatus.UnavailableOther;
@@ -373,7 +372,7 @@ public class FirebaseManager : MonoBehaviour
     #endregion
 
     #region Firebase Database
-    //DatabaseReference reference;
+    DatabaseReference reference;
 
     public class User 
     {
@@ -397,7 +396,7 @@ public class FirebaseManager : MonoBehaviour
         Debug.Log("Time to push user data to database.");
         User user = new User(name, email);
         string json = JsonUtility.ToJson(user);
-        //reference.Child("users").Child(userId).SetRawJsonValueAsync(json);
+        reference.Child("users").Child(userId).SetRawJsonValueAsync(json);
         GetUsers();
     }
 
@@ -455,14 +454,14 @@ public class FirebaseManager : MonoBehaviour
     //             }
     //         }
     //     };
-    
+
         writeNewUser("abc99", "mango", "mango@gmail.com");
     }
 
     void Getdata()
     {
-        //DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("Leaders");
+        DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("Leaders");
     }
     #endregion
-    */
+  
 }

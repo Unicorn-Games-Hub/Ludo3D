@@ -60,9 +60,9 @@ public class SaveGameData : MonoBehaviour
         {
             messageToSubmit="Unicorn Games LLC.";
         }
-        // if(FirebaseDataHandler.instance!=null)
-        // {
-        //     FirebaseDataHandler.instance.SubmitGameData(messageToSubmit,totalWins,radioBtnValue,checkBoxBtnValue);
-        // }
+        if(FirebaseDataHandler.instance!=null)
+        {
+            FirebaseDataHandler.instance.SubmitGameData(messageToSubmit,totalWins,radioBtnValue,checkBoxBtnValue);
+        }
     }
 }

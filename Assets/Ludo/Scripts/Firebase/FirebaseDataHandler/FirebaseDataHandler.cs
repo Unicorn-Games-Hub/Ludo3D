@@ -2,18 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-// using Firebase;
-// using Firebase.Database;
-// using Firebase.Extensions;
-// using System.Threading.Tasks;
-// using System;
-// using UnityEngine.Networking;
-// using SimpleJSON;
-
+using Firebase;
+using Firebase.Database;
+using Firebase.Extensions;
+using System.Threading.Tasks;
+using System;
+using UnityEngine.Networking;
+using SimpleJSON;
 
 public class FirebaseDataHandler : MonoBehaviour
 {
-   /*
     public static FirebaseDataHandler instance;
     
     Firebase.DependencyStatus dependencyStatus = Firebase.DependencyStatus.UnavailableOther;
@@ -333,5 +331,5 @@ public class FirebaseDataHandler : MonoBehaviour
         });
     }
     #endregion
-    */
+   
 }

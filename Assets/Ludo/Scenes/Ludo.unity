@@ -1503,7 +1503,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f64624685993e4d16bc66d20de5f73ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  appBundleID: com.UnicornGames.Ludo
+  appBundleID: 
   downloadPriority: 1
   iconImg: {fileID: 214409224}
   smallImg: {fileID: 1665800756}
@@ -8233,7 +8233,6 @@ MonoBehaviour:
   smallConfitti: {fileID: 1828687841}
   largeConfitti: {fileID: 510238364}
   playerModel: 0
-  cutsCoinForSure: 0
   animState: 0
 --- !u!4 &1717436298
 Transform:
