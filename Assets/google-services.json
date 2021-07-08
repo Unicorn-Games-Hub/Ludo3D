@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "872156327930",
+    "firebase_url": "https://ludo-unicorn-default-rtdb.firebaseio.com",
+    "project_id": "ludo-unicorn",
+    "storage_bucket": "ludo-unicorn.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:872156327930:android:117761b813b1228d5e3e43",
+        "android_client_info": {
+          "package_name": "com.UnicornGames.Ludo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "872156327930-l4lro254u7ur4uiiqgq87omk8vrv7htu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVJYKhzHZNR8MM4kF7O6AmmBTXHlapVUo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "872156327930-l4lro254u7ur4uiiqgq87omk8vrv7htu.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "872156327930-kq1sdesmnip4tcnceg0jnpu3f5i6oro0.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.UnicornGames.Ludo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

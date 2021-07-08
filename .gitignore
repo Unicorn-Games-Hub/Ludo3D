@@ -58,3 +58,10 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
+[Aa]ssets/Firebase/
+[Aa]ssets/Editor Default Resources/
+[Aa]ssets/ExternalDependencyManager/
+[Aa]ssets/Parse/
+[Aa]ssets/Plugins/
+[Aa]ssets/StreamingAssets/
+[Aa]ssets/TextMesh Pro/
