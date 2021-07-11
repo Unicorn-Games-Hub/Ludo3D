@@ -111,15 +111,34 @@ public class GameController : MonoBehaviour
     [Header("Highlight Animation")]
     public HighLightAnimation[] highLights;
 
+    //animation state
+    public enum statusType
+    {
+        None,
+        Cut,
+        Defend
+    }
+    [HideInInspector]
+    public statusType animState; 
+
     [Header("Indicator Essentials")]
     private List<Coin> allOutCoinList=new List<Coin>();
     private List<Coin> coinsAtCurrentLocation=new List<Coin>();
     public Material originalPathMat;
     public Material tempSafeZoneMat;
 
-    [Header("Particles")]
+    public Sprite[] indicatorSpriteContainer;
+
+
+    [Header("Confetti Particles")]
     public ParticleSystem smallConfitti=null;
     public ParticleSystem largeConfitti=null;
+
+    [Header("Spawn Particles")]
+    public ParticleSystem[] spawnParticles;
+
+    [Header("Death Particles")]
+    public ParticleSystem[] deathParticles;
 
     //for playing coin or character
     public enum modelType
@@ -205,6 +224,9 @@ public class GameController : MonoBehaviour
                     Transform newCoin=Instantiate(tempPlayer,tempPlayerPos,tempPlayer.rotation);
                     newCoin.SetParent(generatedCoinsHolder.GetChild(i).transform);
                     newCoin.GetComponent<Coin>().HandleCoinInfo(players[i].playerID,newCoin.transform.localPosition);
+                    //updating indicator sprite
+                    newCoin.GetComponent<Coin>().indicator.GetComponent<SpriteRenderer>().sprite=indicatorSpriteContainer[players[i].playerID];
+                    //
                     newCoin.transform.localRotation=initialPlayerRot;
                     if(!gamePlayersList.Contains(players[i].playerID))
                     {
@@ -322,6 +344,7 @@ public class GameController : MonoBehaviour
                            foreach(Coin c in clickableCoinsList)
                             {
                                 c.SetClickable(true);
+                                ActivateIndicator(c);
                             }
                        }
                     }
@@ -371,6 +394,7 @@ public class GameController : MonoBehaviour
                             coinThatisMovable=tempOutCoin;
                             tempOutCoin.SetClickable(true);
                             tempCoinCounter++;
+                            ActivateIndicator(tempOutCoin);
                         }
                         else
                         {
@@ -381,6 +405,7 @@ public class GameController : MonoBehaviour
                                     coinThatisMovable=tempOutCoin;
                                     tempOutCoin.SetClickable(true);
                                     tempCoinCounter++;
+                                    ActivateIndicator(tempOutCoin);
                                 }
                             }
                         }
@@ -417,6 +442,15 @@ public class GameController : MonoBehaviour
         {
             currentDiceValue=0;
             UpdateTurn();
+        }
+    }
+
+    //for activating indicator coin
+    void ActivateIndicator(Coin clickableTempCoin)
+    {
+        if(clickableTempCoin.indicator!=null)
+        {
+            clickableTempCoin.indicator.SetActive(true);
         }
     }
 
@@ -476,6 +510,7 @@ public class GameController : MonoBehaviour
                         for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
                         {
                             generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().isClickable=false;
+                            generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().indicator.SetActive(false);
                         }
                     }
                 }
@@ -724,17 +759,6 @@ public class GameController : MonoBehaviour
     #endregion
 
     #region Move Character one step front
-
-    
-    public enum statusType
-    {
-        None,
-        Cut,
-        Defend
-    }
-    [HideInInspector]
-    public statusType animState; 
-
     IEnumerator TimeToCutOpponentCoin(Coin coin1,Coin coin2)
     {
         yield return new WaitForSeconds(0.5f);
@@ -743,18 +767,18 @@ public class GameController : MonoBehaviour
 
         //-----------------------------------------------remaining
         //get opponent coin dissolve it
+        deathParticles[coin2.id].transform.position=new Vector3(coin2.transform.position.x,0.14f,coin2.transform.position.z);
+        deathParticles[coin2.id].Play();
 
         //reset opponent coin
-        ResetThisCoin(coin2);
+        StartCoroutine(ResetThisCoin(coin2));
         //---------------------------------------------------------
-
+       
         int tempCoinNewStepCount=coin1.stepCounter+players[coin1.id].initialPosIndex+1;
-
         if(tempCoinNewStepCount>coinPathContainer.childCount-1)
         {
             tempCoinNewStepCount=tempCoinNewStepCount-coinPathContainer.childCount;
         }
-        coin1.stepCounter=tempCoinNewStepCount;
         Vector3 oneStepFrontPos=new Vector3(coinPathContainer.GetChild(tempCoinNewStepCount).position.x,coin1.transform.position.y,coinPathContainer.GetChild(tempCoinNewStepCount).position.z);
        
         iTween.MoveTo(coin1.transform.gameObject, iTween.Hash("position",oneStepFrontPos, 
@@ -763,7 +787,10 @@ public class GameController : MonoBehaviour
             "oncomplete", "OneStepCompleted", 
             "oncompletetarget", this.gameObject
         ));
-
+        //rotating character
+        UpdateCharacterRotation(coin1.transform);
+        //lets increment the step counter of coin by 1
+        coin1.stepCounter++;
         Walk(coin1.transform);
         yield return new WaitForSeconds(0.3f);
         Idle(coin1.transform);
@@ -945,7 +972,7 @@ public class GameController : MonoBehaviour
                             }
                             else
                             {
-                                ResetThisCoin(lastCuttedCoin);
+                                StartCoroutine(ResetThisCoin(lastCuttedCoin));
                             }
                         }
                         return true; 
@@ -973,7 +1000,7 @@ public class GameController : MonoBehaviour
 
     public void ResetCutCoin()
     {
-        ResetThisCoin(lastCuttedCoin);
+        StartCoroutine(ResetThisCoin(lastCuttedCoin));
         if(!enterHomeWithOutCutting)
         {
             for(int j=0;j<generatedCoinsHolder.GetChild(turnCounter).childCount;j++)
@@ -991,8 +1018,15 @@ public class GameController : MonoBehaviour
         StartCoroutine(UpdateTurnAfterCutting());
     }
 
-    void ResetThisCoin(Coin coinToReset)
+    IEnumerator ResetThisCoin(Coin coinToReset)
     {
+        coinToReset.gameObject.SetActive(false);
+        yield return new WaitForSeconds(1f);
+        //spawn particle effect
+        spawnParticles[coinToReset.id].transform.position=new Vector3(coinToReset.initialPosInfo.x,0.21f,coinToReset.initialPosInfo.z);
+        spawnParticles[coinToReset.id].Play();
+        coinToReset.gameObject.SetActive(true);
+        //
         coinToReset.stepCounter=0;
         coinToReset.atBase=true;
         coinToReset.canGoHome=false;
@@ -1706,7 +1740,7 @@ public class GameController : MonoBehaviour
                         //reset the coin
                         if(punishPlayerOnConsecutiveRoll)
                         {
-                            ResetThisCoin(maxTravelledCoin);
+                            StartCoroutine(ResetThisCoin(maxTravelledCoin));
                         }
                         consecutiveRollList.Clear();
                         return true;

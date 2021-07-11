@@ -26,6 +26,7 @@ public class Coin : MonoBehaviour
     // public GameObject indicatorUI;
     // public Text playerCounterText;
     // private int playerCounter=1;
+    public GameObject indicator;
 
 
     public void HandleCoinInfo(int Id,Vector3 coinPos)
