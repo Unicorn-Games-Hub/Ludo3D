@@ -29,6 +29,9 @@ public class HomeMenuHandler : MonoBehaviour
 
    private List<int> playerIds=new List<int>();
 
+   [Header("Onboarding UI")]
+   public GameObject onboardingUI;
+
     void Start()
     {
         //4 players at default
@@ -37,6 +40,7 @@ public class HomeMenuHandler : MonoBehaviour
         {
            FirebaseHandler.instance.TrackOpenFortheFirstTime();
         }
+        onboardingUI.SetActive(false);
     }
 
     void Update()
@@ -232,6 +236,20 @@ public class HomeMenuHandler : MonoBehaviour
     }
 
     public void StartTheGame()
+    {
+        if(PlayerPrefs.GetInt("Ludo-Onboarding")==0)
+        {
+            gameModeUI.SetActive(false);
+            onboardingUI.SetActive(true);
+            PlayerPrefs.SetInt("Ludo-Onboarding",1);
+        }
+        else
+        {
+           Play(); 
+        }
+    }
+
+    public void Play()
     {
         SceneManager.LoadScene("Ludo");
     }

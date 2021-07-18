@@ -166,6 +166,8 @@ public class GameController : MonoBehaviour
     #region player initialization
     void Start()
     {
+        HandleGameData();
+
         if(GameDataHolder.instance!=null)
         {
             for(int i=0;i<GameDataHolder.instance.playerIndex.Length;i++)
@@ -190,6 +192,28 @@ public class GameController : MonoBehaviour
             }
         }
         GenerateCoins();
+    }
+
+    void HandleGameData()
+    {
+        if(PlayerPrefs.GetInt("LudoPlayer-Type")==0)
+        {
+            playerModel=modelType.character;
+        }
+        else
+        {
+            playerModel=modelType.coin;
+        }
+
+        //cut scene animation
+        if(PlayerPrefs.GetInt("Ludo-CutScene")==1)
+        {
+            showCutSceneAnimation=true;
+        }
+        else
+        {
+            showCutSceneAnimation=false;
+        }
     }
 
     void GenerateCoins()
@@ -300,13 +324,13 @@ public class GameController : MonoBehaviour
                     for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
                     {
                         Coin curTempCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>();
-                        if(!curTempCoin.onWayToHome)
+                        if(!curTempCoin.onWayToHome&&!curTempCoin.atHome)
                         {
                             clickableCoinsList.Add(curTempCoin);
                         }
                         else
                         {
-                            if(curTempCoin.stepCounter<homePaths[turnCounter].childCount)
+                            if(curTempCoin.stepCounter<homePaths[turnCounter].childCount&&!curTempCoin.atHome)
                             {
                                 if((curTempCoin.stepCounter+currentDiceValue)<homePaths[turnCounter].childCount)
                                 {
@@ -325,7 +349,7 @@ public class GameController : MonoBehaviour
                            for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
                            {
                                Coin tempBaseCoin=generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>();
-                               if(tempBaseCoin.atBase&&!tempBaseCoin.atHome)
+                               if(tempBaseCoin.atBase)
                                {
                                    tempBaseCoinList.Add(tempBaseCoin);
                                }
@@ -362,7 +386,7 @@ public class GameController : MonoBehaviour
                 if(players[turnCounter].outCoins.Count==1&&players[turnCounter].player==playerType.Human)
                 {
                     Coin singleOutCoin=players[turnCounter].outCoins[0].GetComponent<Coin>();
-                    if(!singleOutCoin.onWayToHome)
+                    if(!singleOutCoin.onWayToHome&&!singleOutCoin.atHome)
                     {
                         StartCoroutine(UpdateCoinPosition(singleOutCoin));
                     }
@@ -389,7 +413,7 @@ public class GameController : MonoBehaviour
                     for(int i=0;i<players[turnCounter].outCoins.Count;i++)
                     {
                         Coin tempOutCoin=players[turnCounter].outCoins[i].GetComponent<Coin>();
-                        if(!tempOutCoin.onWayToHome)
+                        if(!tempOutCoin.onWayToHome&&!tempOutCoin.atHome)
                         {
                             coinThatisMovable=tempOutCoin;
                             tempOutCoin.SetClickable(true);
@@ -413,6 +437,7 @@ public class GameController : MonoBehaviour
 
                     if(tempCoinCounter==1)
                     {
+                        HideCoinIndicator();
                         StartCoroutine(UpdateCoinPosition(coinThatisMovable));
                     }
                     else if(tempCoinCounter==0)
@@ -507,11 +532,7 @@ public class GameController : MonoBehaviour
                         }
 
                         //Disable clicking for the every coin of current turn
-                        for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
-                        {
-                            generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().isClickable=false;
-                            generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().indicator.SetActive(false);
-                        }
+                        HideCoinIndicator();
                     }
                 }
             }
@@ -524,6 +545,15 @@ public class GameController : MonoBehaviour
             {
                 moveDice=false;
             }
+        }
+    }
+
+    void HideCoinIndicator()
+    {
+        for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+        {
+            generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().isClickable=false;
+            generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().indicator.SetActive(false);
         }
     }
 
@@ -574,7 +604,7 @@ public class GameController : MonoBehaviour
             int newTargetCount=0;
             int tempStepCount=0;
 
-            if(animState!=statusType.None&&playerModel==modelType.character&&!showCutSceneAnimation)
+            if(animState!=statusType.None&&playerModel==modelType.character&&!showCutSceneAnimation&&!coin.onWayToHome)
             {
                 initialTargetCount=coin.stepCounter+players[turnCounter].initialPosIndex;
                 newTargetCount=(initialTargetCount+currentDiceValue)-1;
@@ -586,10 +616,10 @@ public class GameController : MonoBehaviour
             }
           
            //Reseting counter and indicator only for public lane coins
-           if(!coin.onWayToHome)
-           {
-               StartCoroutine(ResetPreviousBlock(initialTargetCount));
-           }
+        //    if(!coin.onWayToHome)
+        //    {
+        //        StartCoroutine(ResetPreviousBlock(initialTargetCount));
+        //    }
            
             while((coin.stepCounter+players[turnCounter].initialPosIndex)<newTargetCount)
             {
@@ -680,21 +710,6 @@ public class GameController : MonoBehaviour
             //checking if coin is safe or can be cut
             if(!coin.onWayToHome)
             {
-                /*
-                //we will check new conditions for coin from here
-                if(CutTheCoin(coin))
-                {
-                    //lets make game wait until the cut scene finishes
-                    //give turn as a cut bonus
-                    // HandleDiceRoll(turnCounter);
-                }
-                else
-                {
-                    UpdateTurn();
-                    HandlePlayerNumIndicator(coin);
-                }
-                */
-
                 if(playerModel!=modelType.character||showCutSceneAnimation)
                 {
                     //we will check new conditions for coin from here
@@ -764,15 +779,11 @@ public class GameController : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         Attack(coin1.transform);
         yield return new WaitForSeconds(2f);
-
-        //-----------------------------------------------remaining
-        //get opponent coin dissolve it
+        //playing death particke effect
         deathParticles[coin2.id].transform.position=new Vector3(coin2.transform.position.x,0.14f,coin2.transform.position.z);
         deathParticles[coin2.id].Play();
-
         //reset opponent coin
         StartCoroutine(ResetThisCoin(coin2));
-        //---------------------------------------------------------
        
         int tempCoinNewStepCount=coin1.stepCounter+players[coin1.id].initialPosIndex+1;
         if(tempCoinNewStepCount>coinPathContainer.childCount-1)
@@ -787,10 +798,11 @@ public class GameController : MonoBehaviour
             "oncomplete", "OneStepCompleted", 
             "oncompletetarget", this.gameObject
         ));
-        //rotating character
-        UpdateCharacterRotation(coin1.transform);
+
         //lets increment the step counter of coin by 1
         coin1.stepCounter++;
+        //rotating character
+        UpdateCharacterRotation(coin1.transform);
         Walk(coin1.transform);
         yield return new WaitForSeconds(0.3f);
         Idle(coin1.transform);
@@ -851,7 +863,6 @@ public class GameController : MonoBehaviour
             }
         }
 
-        //now
         if(opCoinsAtTargetPos.Count==1)
         {
             ocToCut=opCoinsAtTargetPos[0];
@@ -955,13 +966,6 @@ public class GameController : MonoBehaviour
                             else
                             {
                                 MoveCutCoin(lastCuttedCoin);
-                                // iTween.MoveTo(cuttableCoins[i].gameObject, iTween.Hash("position", 
-                                // cuttableCoins[i].initialPosInfo, 
-                                // "speed", coinMoveSpeed, 
-                                // "easetype", iTween.EaseType.linear,
-                                // "oncomplete", "ResetCutCoin", 
-                                // "oncompletetarget", this.gameObject
-                                // ));
                             }
                         }
                         else if(playerModel==modelType.coin)
@@ -1059,7 +1063,6 @@ public class GameController : MonoBehaviour
 
     #region Win lose
     private List<int> winnersList=new List<int>();
-
     void CheckForWinner(Coin coin)
     {
         //confitti on entering home
@@ -1122,11 +1125,14 @@ public class GameController : MonoBehaviour
                 {
                     //human won the game lets show winner ui
                     Debug.Log("Human won the game lets show game end ui and compute completed percentage of each bots");
+                    ShowLudoLeaderboard(1);
+
                 }
                 else
                 {
                     //bot won lets show the leaderboard
                     Debug.Log("Bot won the game lets show leaderboard ui");
+                    ShowLudoLeaderboard(0);
                 }
             }
             else
@@ -1146,15 +1152,18 @@ public class GameController : MonoBehaviour
                     if(remainingHuman==0)
                     {
                         Debug.Log("Only one player not able to move coins to home so lets show game end UI");
+                        ShowLudoLeaderboard(1);
                     }
                     else
                     {
                         Debug.Log("not all human reached home so lets show leaderboard ui");
+                        ShowLudoLeaderboard(0);
                     }
                 }
                 else
                 {
                     Debug.Log("Only one player not able to move coins to home so lets show game end UI");
+                    ShowLudoLeaderboard(1);
                 }
             }
             //****************************************************
@@ -1170,6 +1179,20 @@ public class GameController : MonoBehaviour
     void ShowPlayerRank()
     {
         Debug.Log("Congratulations ,"+players[winnersList[0]].colorName+" won the game");
+        ShowLudoLeaderboard(1);
+    }
+
+    void ShowLudoLeaderboard(int lbValue)
+    {
+        if(LeaderboardHandler.instance!=null)
+        {
+            LeaderboardHandler.instance.ShowLeaderBoardUI(lbValue);
+        }
+    }
+
+    void ComputeWinningChance()
+    {
+
     }
     #endregion
     
@@ -1522,11 +1545,6 @@ public class GameController : MonoBehaviour
                     opponentCoinTempIndex=opponentCoinTempIndex-coinPathContainer.childCount;
                 }
 
-                /*
-                Debug.Log("My Index : "+myCoinTempIndex);
-                Debug.Log("Opponents Index : "+opponentCoinTempIndex);
-                */
-
                 if(myCoinTempIndex>opponentCoinTempIndex)
                 {
                     //some of the opponents coins are behind me
@@ -1597,13 +1615,6 @@ public class GameController : MonoBehaviour
                 highestPriorityCoin=movableAICoins[i];
             }
         }
-
-        /*
-        Debug.Log("Coins infront of me : "+coinsInfrontOfMe.Count);
-        Debug.Log("Coins behind me : "+coinsBehindMe.Count);
-        Debug.Log("Movable coins of mine : "+movableAICoins.Count);
-        */
-
         yield return new WaitForEndOfFrame();
         StartCoroutine(UpdateCoinPosition(highestPriorityCoin));
     }
@@ -1826,6 +1837,7 @@ public class GameController : MonoBehaviour
     #region Player Indicator
     void HandlePlayerNumIndicator(Coin recentlyMovedCoin)
     {
+        /*
         GameObject center=null;
         if(!recentlyMovedCoin.onWayToHome)
         {
@@ -1890,6 +1902,7 @@ public class GameController : MonoBehaviour
                 UpdateTemporarySafeZone(center,originalPathMat);
             }
         } 
+        */
     }
 
     void UpdateTemporarySafeZone(GameObject previousSafeZone,Material tempMat)

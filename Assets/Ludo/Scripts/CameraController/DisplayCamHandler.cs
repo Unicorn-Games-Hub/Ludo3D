@@ -39,6 +39,16 @@ public class DisplayCamHandler : MonoBehaviour
     void Start()
     {
         gameCam=GetComponent<Camera>();
+
+        //default will be 3D
+        if(PlayerPrefs.GetInt("LudoBoard-Type")==0)
+        {
+            displayMode=screenMode.mode3D;
+        }
+        else
+        {
+            displayMode=screenMode.mode2D;
+        }
         UpdateDisplayMode();
     }
 
