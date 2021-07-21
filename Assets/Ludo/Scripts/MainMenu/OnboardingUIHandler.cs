@@ -27,6 +27,7 @@ public class OnboardingUIHandler : MonoBehaviour
 
     [Header("Boards")]
     public GameObject[] boardCheckMarks;
+    public GameObject artStyleBtn;
 
     [Header("Players")]
     public GameObject[] playerCheckMarks;
@@ -42,6 +43,7 @@ public class OnboardingUIHandler : MonoBehaviour
         UpdateBoardCheckMark();
         UpdatePlayerCheckMark();
         UpdateCutSceneSprite();
+        UpdateArtStyleSprite();
     }
   
     void Update()
@@ -108,6 +110,10 @@ public class OnboardingUIHandler : MonoBehaviour
     {
         PlayerPrefs.SetInt("LudoBoard-Type",boardId);
         UpdateBoardCheckMark();
+        if(AnalyticsTracker.instance!=null)
+        {
+            AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoBoard-Type"));
+        }
     }
 
     void UpdateBoardCheckMark()
@@ -125,6 +131,10 @@ public class OnboardingUIHandler : MonoBehaviour
     {
         PlayerPrefs.SetInt("LudoPlayer-Type",charId);
         UpdatePlayerCheckMark();
+        if(AnalyticsTracker.instance!=null)
+        {
+            AnalyticsTracker.instance.TrackLudoPlayer(PlayerPrefs.GetInt("LudoPlayer-Type"));
+        }
     }
 
     void UpdatePlayerCheckMark()
@@ -158,13 +168,14 @@ public class OnboardingUIHandler : MonoBehaviour
             PlayerPrefs.SetInt("Ludo-CutScene",0);
         }
         UpdateCutSceneSprite();
+
+        if(AnalyticsTracker.instance!=null)
+        {
+            AnalyticsTracker.instance.TrackCutSceneAnimationStatus(PlayerPrefs.GetInt("Ludo-CutScene"));
+        }
     }
     void UpdateCutSceneSprite()
     {
-        if(!PlayerPrefs.HasKey("Ludo-CutScene"))
-        {
-            PlayerPrefs.SetInt("Ludo-CutScene",1);
-        }
         cutSceneAnimBtn.GetComponent<Image>().sprite=cutSceneSprite[PlayerPrefs.GetInt("Ludo-CutScene")];
     }
     #endregion
@@ -177,6 +188,36 @@ public class OnboardingUIHandler : MonoBehaviour
             indicatiors[i].SetActive(false);
         }
         indicatiors[indicatorIndex].SetActive(true);
+    }
+    #endregion
+
+    #region ArtStyle selection
+   
+    public void UpdateBoardArtStyle()
+    {
+        if(PlayerPrefs.GetInt("ludo_board_artStyle")==0)
+        {
+            PlayerPrefs.SetInt("ludo_board_artStyle",1);
+        }
+        else
+        {
+            PlayerPrefs.SetInt("ludo_board_artStyle",0);
+        }
+        UpdateArtStyleSprite();
+
+        if(AnalyticsTracker.instance!=null)
+        {
+            AnalyticsTracker.instance.TrackLudoArtStyle(PlayerPrefs.GetInt("ludo_board_artStyle"));
+        }
+    }
+
+    void UpdateArtStyleSprite()
+    {
+        if(!PlayerPrefs.HasKey("ludo_board_artStyle"))
+        {
+            PlayerPrefs.SetInt("ludo_board_artStyle",0);
+        }
+        artStyleBtn.GetComponent<Image>().sprite=cutSceneSprite[PlayerPrefs.GetInt("ludo_board_artStyle")];
     }
     #endregion
 }

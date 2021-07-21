@@ -51,28 +51,36 @@ public class LeaderboardHandler : MonoBehaviour
             continueBtn.SetActive(false);
             otherBtn.SetActive(true); 
         }
+        leaderboardUI.GetComponent<Animator>().SetBool("showLB",true);
     }
     #endregion
 
     #region button events
     public void Continue()
+    {   
+        leaderboardUI.GetComponent<Animator>().SetBool("showLB",false);
+        StartCoroutine(WaitBeforeClosingLeaderboard());
+    }
+
+    IEnumerator WaitBeforeClosingLeaderboard()
     {
+        yield return new WaitForSeconds(2f);
         leaderboardUI.SetActive(false);
     }
 
     public void Home()
     {
-
+        SceneManager.LoadScene("Home");
     }
 
     public void Restart()
     {
-
+        SceneManager.LoadScene("Ludo");
     }
 
-    public void Next()
+    public void Exit()
     {
-
+        Application.Quit();
     }
     #endregion
 }

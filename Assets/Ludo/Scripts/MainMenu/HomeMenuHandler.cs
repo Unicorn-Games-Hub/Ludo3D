@@ -241,7 +241,6 @@ public class HomeMenuHandler : MonoBehaviour
         {
             gameModeUI.SetActive(false);
             onboardingUI.SetActive(true);
-            PlayerPrefs.SetInt("Ludo-Onboarding",1);
         }
         else
         {
@@ -249,8 +248,19 @@ public class HomeMenuHandler : MonoBehaviour
         }
     }
 
+    public void CloseOnboardingUI()
+    {
+        gameModeUI.SetActive(true);
+        onboardingUI.SetActive(false);
+    }
+
     public void Play()
     {
+        if(PlayerPrefs.GetInt("Ludo-Onboarding")==0)
+        {
+            PlayerPrefs.SetInt("Ludo-Onboarding",1);
+        }
+        
         SceneManager.LoadScene("Ludo");
     }
     #endregion

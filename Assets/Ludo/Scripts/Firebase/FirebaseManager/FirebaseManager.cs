@@ -218,6 +218,12 @@ public class FirebaseManager : MonoBehaviour
            StartCoroutine(LoadLargeImage());
            break;
        }
+
+       //
+       if(AnalyticsTracker.instance!=null)
+       {
+           AnalyticsTracker.instance.TrackCrossPromotionShown();
+       }
     }
 
     IEnumerator LoadGameIcons()

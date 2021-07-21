@@ -20,6 +20,10 @@ public class IngameUIHandler : MonoBehaviour
 
     public void GoToHome()
     {
+        if(AnalyticsTracker.instance!=null)
+        {
+            AnalyticsTracker.instance.TrackSessionEndAfterGameExit();
+        }
         SceneManager.LoadScene(sceneName);
     }
 }

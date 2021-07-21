@@ -148,6 +148,18 @@ public class GameController : MonoBehaviour
     }
     public modelType playerModel;
 
+    [Header("Materials for metallic art style")]
+    public Material[] bodyMat;
+    [Range(0f,1f)]
+    public float metallicValue=0f;
+    //for selecting board art style
+    public enum boardStyle
+    {
+        board_default,
+        board_metallic
+    }
+    public boardStyle boardArtStyle;
+
     //keeping track of human
     private List<int> totalHumanPlayers=new List<int>();
 
@@ -167,7 +179,6 @@ public class GameController : MonoBehaviour
     void Start()
     {
         HandleGameData();
-
         if(GameDataHolder.instance!=null)
         {
             for(int i=0;i<GameDataHolder.instance.playerIndex.Length;i++)
@@ -192,10 +203,22 @@ public class GameController : MonoBehaviour
             }
         }
         GenerateCoins();
+
+        //changing art style
+        if(PlayerPrefs.GetInt("ludo_board_artStyle")==0)
+        {
+            boardArtStyle=boardStyle.board_default;
+        }
+        else
+        {
+            boardArtStyle=boardStyle.board_metallic;
+        }
+        HandleGameArtStyle();
     }
 
     void HandleGameData()
     {
+        //player type
         if(PlayerPrefs.GetInt("LudoPlayer-Type")==0)
         {
             playerModel=modelType.character;
@@ -206,13 +229,60 @@ public class GameController : MonoBehaviour
         }
 
         //cut scene animation
-        if(PlayerPrefs.GetInt("Ludo-CutScene")==1)
+        if(PlayerPrefs.GetInt("Ludo-CutScene")==0)
         {
             showCutSceneAnimation=true;
         }
         else
         {
             showCutSceneAnimation=false;
+        }
+
+        //home only on cut?
+        if(PlayerPrefs.GetInt("home_on_cut_only")==0)
+        {
+            enterHomeWithOutCutting=true;
+        }
+        else
+        {
+            enterHomeWithOutCutting=false;
+        }
+
+        //punish on consecutive roll
+        if(PlayerPrefs.GetInt("punish_on_consecutive_roll")==0)
+        {
+            punishPlayerOnConsecutiveRoll=false;
+        }
+        else
+        {
+            punishPlayerOnConsecutiveRoll=true;
+        }
+
+        //auto bring first coin out
+        if(PlayerPrefs.GetInt("auto_bring_firstcoin")==0)
+        {
+            autoBringSingleCoinOut=false;
+        }
+        else
+        {
+            autoBringSingleCoinOut=true;
+        }
+
+        //smooth dice movement
+        if(PlayerPrefs.GetInt("smooth_dice_movement")==0)
+        {
+            allowDiceMoveTowardsPlayers=false;
+        }
+        else
+        {
+            allowDiceMoveTowardsPlayers=true;
+        }
+        
+        //tracking no of games played
+        if(AnalyticsTracker.instance!=null)
+        {
+            AnalyticsTracker.instance.TrackNumberOfGamesPlayed();
+            AnalyticsTracker.instance.TrackSessionAfterGameStart();
         }
     }
 
@@ -750,6 +820,9 @@ public class GameController : MonoBehaviour
                 //time to check the winner
                 CheckForWinner(coin);
             }
+
+            ////-------------------------
+            ComputeWinPercentage(coin);
         }
     } 
 
@@ -878,7 +951,6 @@ public class GameController : MonoBehaviour
         }
     }
     #endregion character cuttting opponent coins ends from here
-
 
     #region Safe
     public bool IsCoinSafe(Coin checkCoin)
@@ -1190,10 +1262,57 @@ public class GameController : MonoBehaviour
         }
     }
 
+    void ShowFinalLeaderboardUI()
+    {
+        //here we will display ads
+        // ShowRewardedVideo()
+        ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
+        demo.ShowRewardedVideo();
+    }
+
     void ComputeWinningChance()
     {
 
     }
+    #endregion
+
+    #region  Calculations for leaderboard
+    void ComputeWinPercentage(Coin coinToCompute)
+    {
+        float tp=0f;
+        for(int i=0;i<generatedCoinsHolder.GetChild(coinToCompute.id).childCount;i++)
+        {
+            Coin gpCoin=generatedCoinsHolder.GetChild(coinToCompute.id).GetChild(i).GetComponent<Coin>();
+            tp+=GetTravelledPercentage(gpCoin);
+        }
+        tp=tp/generatedCoinsHolder.GetChild(coinToCompute.id).childCount;
+        Debug.Log("winning percentage of "+players[coinToCompute.id].colorName+" is :"+tp.ToString("F2")+"%");
+    }
+
+    float GetTravelledPercentage(Coin tempCurCoin)
+    {
+        //56 is the total number of step a coin has to move to its entire life to reach home from base
+        int tempTotalSetp=0;
+        float travelPercentage=0f;
+        if(!tempCurCoin.onWayToHome)
+        {
+            tempTotalSetp=tempCurCoin.stepCounter;
+        }
+        else 
+        {
+            if(!tempCurCoin.atHome)
+            {
+                tempTotalSetp=50+tempCurCoin.stepCounter;
+            }
+            else if(tempCurCoin.atHome)
+            {
+                tempTotalSetp=56;
+            }
+        }
+        travelPercentage=((float)tempTotalSetp/56f)*100f;
+        return travelPercentage;
+    }
+  
     #endregion
     
     #region New AI Behaviour
@@ -1984,6 +2103,26 @@ public class GameController : MonoBehaviour
             {
                 CharAnimationHandler.instance.PlayAttackAnimation(currentChar);
             }
+        }
+    }
+    #endregion
+
+    #region art style
+    void HandleGameArtStyle()
+    {
+        if(boardArtStyle==boardStyle. board_default)
+        {
+            metallicValue=0f;
+        }
+    
+        UpdateGameArtStyle();
+    }
+    void UpdateGameArtStyle()
+    {
+        for(int i=0;i<bodyMat.Length;i++)
+        {
+            bodyMat[i].SetFloat ("_Glossiness", metallicValue);
+            bodyMat[i].SetFloat ("_Metallic", 0.2f);
         }
     }
     #endregion

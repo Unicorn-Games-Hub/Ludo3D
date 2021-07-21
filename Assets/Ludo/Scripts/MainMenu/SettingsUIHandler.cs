@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class SettingsUIHandler : MonoBehaviour
 {
+    [Header("Settings UI")]
+    public GameObject[] settingsUI;
+
     [Header("Ludo Settings")]
     public Transform soundToggleBtn;
     public Transform musicToggleBtn;
@@ -30,6 +33,9 @@ public class SettingsUIHandler : MonoBehaviour
         UpdateSoundToggle();
         UpdateMusicToggle();
         UpdateVibrationToggle();
+        UpdatePlayerSelection();
+        UpdateBoardSelection();
+        HandleSettingsUI(0);
     }   
 
     #region Updating toggle and on off value of text
@@ -135,6 +141,116 @@ public class SettingsUIHandler : MonoBehaviour
         {
             FirebaseHandler.instance.TrackGameVibration(PlayerPrefs.GetInt("Ludo-Vibration"));
         }
+    }
+    #endregion
+
+    #region Player options
+    public string[] playerType={"Character","Coin"};
+    private int playerIndexCounter=0;
+    public Text playerText;
+
+    public void ChoosePrevChar()
+    {
+        if(playerIndexCounter==0)
+        {
+            playerIndexCounter=playerType.Length-1;
+        }
+        else
+        {
+            playerIndexCounter--;
+        }
+        HandlePlayerTypleIndexValue(playerIndexCounter);
+    }
+
+    public void ChooseNextChar()
+    {
+        if(playerIndexCounter<playerType.Length-1)
+        {
+            playerIndexCounter++;
+        }
+        else
+        {
+            playerIndexCounter=0;
+        }
+        HandlePlayerTypleIndexValue(playerIndexCounter);
+    }
+
+    void HandlePlayerTypleIndexValue(int pId)
+    {
+        PlayerPrefs.SetInt("LudoPlayer-Type",pId);
+        UpdatePlayerSelection();
+        if(AnalyticsTracker.instance!=null)
+        {
+            AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoPlayer-Type"));
+        }
+    }
+
+    void UpdatePlayerSelection()
+    {
+        playerText.text=playerType[PlayerPrefs.GetInt("LudoPlayer-Type")];
+    }
+    #endregion
+
+    #region Board options
+    public Sprite[] boardSprites;
+    private int boardIndexCounter=0;
+    public Image optionSettingsBoardImage;
+    public void ChoosePrevBoard()
+    {
+       if(boardIndexCounter==0)
+       {
+           boardIndexCounter=boardSprites.Length-1;
+       }
+       else
+       {
+           boardIndexCounter--;
+       }
+        HandleBoardChangeCount(boardIndexCounter);
+    }
+
+    public void ChooseNextBoard()
+    {
+        if(boardIndexCounter<boardSprites.Length-1)
+        {
+            boardIndexCounter++;
+        }
+        else
+        {
+            boardIndexCounter=0;
+        }
+        HandleBoardChangeCount(boardIndexCounter);
+    }
+
+    void HandleBoardChangeCount(int bId)
+    {
+        PlayerPrefs.SetInt("LudoBoard-Type",bId);
+        UpdateBoardSelection();
+        //
+        if(AnalyticsTracker.instance!=null)
+        {
+            AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoBoard-Type"));
+        }
+    }
+
+    void UpdateBoardSelection()
+    {
+        optionSettingsBoardImage.sprite=boardSprites[PlayerPrefs.GetInt("LudoBoard-Type")];
+    }
+    #endregion
+
+    #region Settings ui
+    public void ShowSettingsUI(int settingsIndex)
+    {
+        HandleSettingsUI(settingsIndex);
+    }
+
+    void HandleSettingsUI(int sId)
+    {
+        for(int i=0;i<settingsUI.Length;i++)
+        {
+            settingsUI[i].SetActive(false);
+        }
+        settingsUI[sId].SetActive(true);
     }
     #endregion
 }
