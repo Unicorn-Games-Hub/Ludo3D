@@ -104,6 +104,7 @@ public class FirebaseManager : MonoBehaviour
 
     void FetchComplete(Task fetchTask) 
     {
+       
         if(fetchTask.IsCanceled) 
         {
             Debug.Log("Fetch canceled.");
@@ -144,6 +145,7 @@ public class FirebaseManager : MonoBehaviour
             Debug.Log("Latest Fetch call still pending.");
         break;
         }
+       
     }
     #endregion
 
@@ -176,7 +178,7 @@ public class FirebaseManager : MonoBehaviour
                             dataInfoList.Add(new databaseData(curGameName[2],jsonData[i]["bundleID"],jsonData[i]["appUrl"],jsonData[i]["priority"],
                             jsonData[i]["message"],jsonData[i]["images"]["image_icon"],jsonData[i]["images"]["image_small"],
                             jsonData[i]["images"]["image_large"]));
-                            //dataPriorityList.Add(jsonData[i]["priority"]);
+                            dataPriorityList.Add(jsonData[i]["priority"]);
                         }
                     }
                     ComparePriorityAndDownloadAppData();
@@ -429,38 +431,36 @@ public class FirebaseManager : MonoBehaviour
     ArrayList leaderBoard = new ArrayList();
     protected void ConnectToFirebaseDatabase()
     {
-      
-    //    FirebaseDatabase.DefaultInstance.GetReference("Leaders").OrderByChild("score").ValueChanged += (object sender2, ValueChangedEventArgs e2) => {
-    //         if (e2.DatabaseError != null) 
-    //         {
-    //             Debug.LogError(e2.DatabaseError.Message);
-    //             return;
-    //         }
-    //         Debug.Log("Received values for Leaders.");
-    //         string title = leaderBoard[0].ToString();
-    //         leaderBoard.Clear();
-    //         leaderBoard.Add(title);
-    //         if (e2.Snapshot != null && e2.Snapshot.ChildrenCount > 0) 
-    //         {
-    //             foreach (var childSnapshot in e2.Snapshot.Children) 
-    //             {
-    //                 if (childSnapshot.Child("score") == null|| childSnapshot.Child("score").Value == null) 
-    //                 {
-    //                     Debug.LogError("Bad data in sample.");
-    //                     break;
-    //                 } 
-    //                 else
-    //                 {
-    //                     Debug.Log("Leaders entry : " +
-    //                     childSnapshot.Child("email").Value.ToString() + " - " +
-    //                     childSnapshot.Child("score").Value.ToString());
-    //                     leaderBoard.Insert(1, childSnapshot.Child("score").Value.ToString()
-    //                     + "  " + childSnapshot.Child("email").Value.ToString());
-    //                 }
-    //             }
-    //         }
-    //     };
-
+       FirebaseDatabase.DefaultInstance.GetReference("Leaders").OrderByChild("score").ValueChanged += (object sender2, ValueChangedEventArgs e2) => {
+            if (e2.DatabaseError != null) 
+            {
+                Debug.LogError(e2.DatabaseError.Message);
+                return;
+            }
+            Debug.Log("Received values for Leaders.");
+            string title = leaderBoard[0].ToString();
+            leaderBoard.Clear();
+            leaderBoard.Add(title);
+            if (e2.Snapshot != null && e2.Snapshot.ChildrenCount > 0) 
+            {
+                foreach (var childSnapshot in e2.Snapshot.Children) 
+                {
+                    if (childSnapshot.Child("score") == null|| childSnapshot.Child("score").Value == null) 
+                    {
+                        Debug.LogError("Bad data in sample.");
+                        break;
+                    } 
+                    else
+                    {
+                        Debug.Log("Leaders entry : " +
+                        childSnapshot.Child("email").Value.ToString() + " - " +
+                        childSnapshot.Child("score").Value.ToString());
+                        leaderBoard.Insert(1, childSnapshot.Child("score").Value.ToString()
+                        + "  " + childSnapshot.Child("email").Value.ToString());
+                    }
+                }
+            }
+        };
         writeNewUser("abc99", "mango", "mango@gmail.com");
     }
 

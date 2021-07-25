@@ -7,6 +7,7 @@ public class Coin : MonoBehaviour
 {
     public int id=0;
     public int stepCounter=0;
+    public int stepsMovedTillNow=0;
     public bool isClickable=false;
     public bool atBase=true;
     public bool isReadyForHome=true;

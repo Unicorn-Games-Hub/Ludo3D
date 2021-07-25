@@ -2,10 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using Firebase;
-using Firebase.Database;
-using Firebase.Extensions;
-using System.Threading.Tasks;
+// using Firebase;
+// using Firebase.Database;
+// using Firebase.Extensions;
+// using System.Threading.Tasks;
 using System;
 using UnityEngine.Networking;
 using SimpleJSON;
@@ -14,8 +14,8 @@ public class FirebaseDataHandler : MonoBehaviour
 {
     public static FirebaseDataHandler instance;
     
-    Firebase.DependencyStatus dependencyStatus = Firebase.DependencyStatus.UnavailableOther;
-    DatabaseReference reference;
+    //Firebase.DependencyStatus dependencyStatus = Firebase.DependencyStatus.UnavailableOther;
+    //DatabaseReference reference;
 
     private const int MaxScores = 5;
     private string email = "xyz@gmail.com";
@@ -42,6 +42,7 @@ public class FirebaseDataHandler : MonoBehaviour
 
    void Start()
    {
+       /*
         Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task => {
         dependencyStatus = task.Result;
         if(dependencyStatus == Firebase.DependencyStatus.Available) 
@@ -53,19 +54,21 @@ public class FirebaseDataHandler : MonoBehaviour
             Debug.LogError( "Could not resolve all Firebase dependencies: " + dependencyStatus);
         }
     });
+    */
    }
 
    void InitializeFirebase()
    {
-       FirebaseApp app = FirebaseApp.DefaultInstance;
-       StartCoroutine(GetLudoDataFromDatabase());
-       GetPlayerData();
+    //    FirebaseApp app = FirebaseApp.DefaultInstance;
+    //    StartCoroutine(GetLudoDataFromDatabase());
+    //    GetPlayerData();
    }
 
     ArrayList leaderBoard = new ArrayList();
 
    void HandleGameData()
    {
+       /*
         FirebaseDatabase.DefaultInstance.GetReference("Leaders").OrderByChild("score").ValueChanged += (object sender2, ValueChangedEventArgs e2) => {
           if (e2.DatabaseError != null)
            {
@@ -97,10 +100,12 @@ public class FirebaseDataHandler : MonoBehaviour
             }
           }
         };
+        */
    }
 
     public void AddScore(int score,string email) 
     {
+        /*
       if (score == 0 || string.IsNullOrEmpty(email)) 
       {
         Debug.Log("invalid score or email.");
@@ -124,8 +129,10 @@ public class FirebaseDataHandler : MonoBehaviour
             Debug.Log("Transaction complete.");
           }
         });
+        */
     }
 
+    /*
     TransactionResult AddScoreTransaction(MutableData mutableData) 
     {
       List<object> leaders = mutableData.Value as List<object>;
@@ -163,7 +170,7 @@ public class FirebaseDataHandler : MonoBehaviour
       mutableData.Value = leaders;
       return TransactionResult.Success(mutableData);
     }
-
+    */
     #region Retriving Game Data From Database
     public class LudoUpdateData
     {
@@ -189,8 +196,10 @@ public class FirebaseDataHandler : MonoBehaviour
     private int r1,c1;
 
     private IEnumerator GetLudoDataFromDatabase()
-    {
+    {   
+       
         bool downloadCompleted=false;
+        /*
         FirebaseDatabase.DefaultInstance.GetReference("LudoUpdate").GetValueAsync().ContinueWith(task => {
         if (task.IsFaulted) 
         {
@@ -211,26 +220,28 @@ public class FirebaseDataHandler : MonoBehaviour
                 downloadCompleted=true;
             }
         }});
+        */
 
         while(!downloadCompleted)
         {
             yield return new WaitForSeconds(1f);
         }
         StartCoroutine(UpdateData());
+        
     }
 
     IEnumerator UpdateData()
     {
         yield return new WaitForSeconds(1f);
-        if(getDataUI!=null)
-        {
-            Debug.Log(receivedMessage);
-            getDataUI.GetComponent<GetGameData>().UpdateGameData(receivedMessage,appUrl,r1,c1);
-        }
-        if(!string.IsNullOrEmpty(receivedImageUrl))
-        {
-            StartCoroutine(DownloadImageFromDatabase(receivedImageUrl));
-        }
+        // if(getDataUI!=null)
+        // {
+        //     Debug.Log(receivedMessage);
+        //     getDataUI.GetComponent<GetGameData>().UpdateGameData(receivedMessage,appUrl,r1,c1);
+        // }
+        // if(!string.IsNullOrEmpty(receivedImageUrl))
+        // {
+        //     StartCoroutine(DownloadImageFromDatabase(receivedImageUrl));
+        // }
     }
     #endregion
 
@@ -270,41 +281,41 @@ public class FirebaseDataHandler : MonoBehaviour
 
     public void SubmitGameData(string msg,int totalWins,int rvalue,int cvalue)
     {
-        reference = FirebaseDatabase.DefaultInstance.RootReference;
-        LudoUpdateData ludoData=new LudoUpdateData(msg,totalWins,rvalue,cvalue);
-        string json = JsonUtility.ToJson(ludoData);
-        string userId=SystemInfo.deviceUniqueIdentifier;
-        reference.Child("Users").Child(userId).SetRawJsonValueAsync(json).ContinueWith(task => {
-            if(task.IsCanceled)
-            {
-                Debug.Log("data updated successfully");
-            }
-            else
-            {
-                Debug.Log("error updating data!");
-            }
-        });
+        // reference = FirebaseDatabase.DefaultInstance.RootReference;
+        // LudoUpdateData ludoData=new LudoUpdateData(msg,totalWins,rvalue,cvalue);
+        // string json = JsonUtility.ToJson(ludoData);
+        // string userId=SystemInfo.deviceUniqueIdentifier;
+        // reference.Child("Users").Child(userId).SetRawJsonValueAsync(json).ContinueWith(task => {
+        //     if(task.IsCanceled)
+        //     {
+        //         Debug.Log("data updated successfully");
+        //     }
+        //     else
+        //     {
+        //         Debug.Log("error updating data!");
+        //     }
+        // });
     }
 
     #region Retriving Player data from database
     public void GetPlayerData()
     {
-        userID=SystemInfo.deviceUniqueIdentifier;
-        int popUpValue=0;
-       FirebaseDatabase.DefaultInstance.GetReference("Users").Child(userID).GetValueAsync().ContinueWith(task => {
-        if (task.IsFaulted) 
-        {
-            Debug.Log("Error Getting data from firebaseDatabase.");
-        }
-        else if (task.IsCompleted) 
-        {
-            DataSnapshot dataSnapshot = task.Result;
-            if(dataSnapshot!=null&&dataSnapshot.ChildrenCount>0)
-            {
-                popUpValue=Int32.Parse(dataSnapshot.Child("popupShown").Value.ToString());
-                HandlePopUp(popUpValue);
-            }
-        }});
+    //     userID=SystemInfo.deviceUniqueIdentifier;
+    //     int popUpValue=0;
+    //    FirebaseDatabase.DefaultInstance.GetReference("Users").Child(userID).GetValueAsync().ContinueWith(task => {
+    //     if (task.IsFaulted) 
+    //     {
+    //         Debug.Log("Error Getting data from firebaseDatabase.");
+    //     }
+    //     else if (task.IsCompleted) 
+    //     {
+    //         DataSnapshot dataSnapshot = task.Result;
+    //         if(dataSnapshot!=null&&dataSnapshot.ChildrenCount>0)
+    //         {
+    //             popUpValue=Int32.Parse(dataSnapshot.Child("popupShown").Value.ToString());
+    //             HandlePopUp(popUpValue);
+    //         }
+    //     }});
     }
 
     void HandlePopUp(int pValue)
@@ -322,13 +333,13 @@ public class FirebaseDataHandler : MonoBehaviour
 
     public void UpdatePopUpValue()
     {
-        int newval=2;
-        FirebaseDatabase.DefaultInstance.GetReference("Users").Child(userID).Child("popupShown").SetValueAsync(newval).ContinueWith(task => {
-            if(task.IsCompleted) 
-            {
-                Debug.Log("value updated successfully");
-            }
-        });
+        // int newval=2;
+        // FirebaseDatabase.DefaultInstance.GetReference("Users").Child(userID).Child("popupShown").SetValueAsync(newval).ContinueWith(task => {
+        //     if(task.IsCompleted) 
+        //     {
+        //         Debug.Log("value updated successfully");
+        //     }
+        // });
     }
     #endregion
    

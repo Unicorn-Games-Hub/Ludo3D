@@ -41,6 +41,12 @@ public class HomeMenuHandler : MonoBehaviour
            FirebaseHandler.instance.TrackOpenFortheFirstTime();
         }
         onboardingUI.SetActive(false);
+
+        //default value for metallic art style is 1 
+        if(!PlayerPrefs.HasKey("ludo_board_artStyle"))
+        {
+            PlayerPrefs.SetInt("ludo_board_artStyle",1);
+        }
     }
 
     void Update()

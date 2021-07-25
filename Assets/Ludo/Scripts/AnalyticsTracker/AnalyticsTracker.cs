@@ -104,7 +104,7 @@ public class AnalyticsTracker : MonoBehaviour
     public void TrackLudoArtStyle(int artStatus)
     {
         string artStyle="artstyle_metallic";
-        if(artStatus==0)
+        if(artStatus==1)
         {
             artStyle="artstyle_default";
         }

@@ -5,8 +5,9 @@ using UnityEngine;
 public class Dice : MonoBehaviour
 {
     public static Dice instance;
-   private Rigidbody rb;
-   private RaycastHit hit;
+    private Rigidbody rb;
+    private RaycastHit hit;
+    public LayerMask diceLayer;
 
     //dice dragging and throwing
    private Vector3 initialMousePos,curMousePos;
@@ -73,7 +74,7 @@ public class Dice : MonoBehaviour
             if(Input.GetMouseButtonDown(0)&&canRollDice)
             {
                 Ray ray=Camera.main.ScreenPointToRay(Input.mousePosition);
-                if(Physics.Raycast(ray,out hit))
+                if(Physics.Raycast(ray,out hit,diceLayer))
                 {
                     if(hit.collider!=null)
                     {   

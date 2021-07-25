@@ -101,7 +101,7 @@ public class GameAnalyticsHandler : MonoBehaviour
     //average time spent on game
     public void TrackAverageTimeSpent()
     {
-        //GameAnalytics.NewDesignEvent("average_time_spent", 200f);
+        GameAnalytics.NewDesignEvent("average_time_spent", 200f);
     }
 
 

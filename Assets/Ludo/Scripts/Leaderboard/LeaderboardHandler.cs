@@ -20,6 +20,10 @@ public class LeaderboardHandler : MonoBehaviour
     }
     public List<pInfo> lbInfoList=new List<pInfo>();
 
+    [Header("Icons")]
+    public Sprite[] playerIcons;
+    public Sprite[] botIcons;
+
     void Awake()
     {
         if(instance!=null)
@@ -37,6 +41,64 @@ public class LeaderboardHandler : MonoBehaviour
         leaderboardUI.SetActive(false);
     }
 
+    #region updating rank
+    public void UpdateFirstRank(int id,string playerName,int botValue,float chance)
+    {
+        lbInfoList[0].nameText.text=playerName;
+        lbInfoList[0].scoreText.text="Winner";
+        if(botValue==0)
+        {
+            lbInfoList[0].iconImage.sprite=playerIcons[id];
+        }
+        else
+        {
+            lbInfoList[0].iconImage.sprite=botIcons[id];
+        }
+    }
+
+    public void UpdateSecondRank(int id,string playerName,int botValue,float chance)
+    {
+        lbInfoList[1].nameText.text=playerName;
+        lbInfoList[1].scoreText.text=chance.ToString("F2")+"%";;
+        if(botValue==0)
+        {
+            lbInfoList[1].iconImage.sprite=playerIcons[id];
+        }
+        else
+        {
+           lbInfoList[1].iconImage.sprite=botIcons[id];
+        }
+    }
+
+    public void UpdateThirdRank(int id,string playerName,int botValue,float chance)
+    {
+        lbInfoList[2].nameText.text=playerName;
+        lbInfoList[2].scoreText.text=chance.ToString("F2")+"%";;
+        if(botValue==0)
+        {
+            lbInfoList[2].iconImage.sprite=playerIcons[id];
+        }
+        else
+        {
+            lbInfoList[2].iconImage.sprite=botIcons[id];
+        }
+    }
+
+    public void UpdateFourthRank(int id,string playerName,int botValue,float chance)
+    {
+        lbInfoList[3].nameText.text=playerName;
+        lbInfoList[3].scoreText.text=chance.ToString("F2")+"%";;
+        if(botValue==0)
+        {
+            lbInfoList[3].iconImage.sprite=playerIcons[id];
+        }
+        else
+        {
+            lbInfoList[3].iconImage.sprite=botIcons[id];
+        }
+    }
+    #endregion
+
     #region Leaderboard 
     public void ShowLeaderBoardUI(int lbValue)
     {
@@ -49,7 +111,9 @@ public class LeaderboardHandler : MonoBehaviour
         else
         {
             continueBtn.SetActive(false);
-            otherBtn.SetActive(true); 
+            otherBtn.SetActive(true);
+            ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
+            demo.ShowRewardedVideo(); 
         }
         leaderboardUI.GetComponent<Animator>().SetBool("showLB",true);
     }

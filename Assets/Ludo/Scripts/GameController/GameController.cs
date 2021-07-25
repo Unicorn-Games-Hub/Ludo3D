@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class GameController : MonoBehaviour
 {
@@ -55,6 +56,7 @@ public class GameController : MonoBehaviour
         public Color coinColor;
         public List<Transform> outCoins=new List<Transform>();
         public int noOfRoundsWithoutCoinOut=0;
+        public float winningChance=0f;
     }
 
     public List<infoHolder> players=new List<infoHolder>();
@@ -178,6 +180,7 @@ public class GameController : MonoBehaviour
     #region player initialization
     void Start()
     {
+        Application.targetFrameRate=60;
         HandleGameData();
         if(GameDataHolder.instance!=null)
         {
@@ -205,7 +208,7 @@ public class GameController : MonoBehaviour
         GenerateCoins();
 
         //changing art style
-        if(PlayerPrefs.GetInt("ludo_board_artStyle")==0)
+        if(PlayerPrefs.GetInt("ludo_board_artStyle")==1)
         {
             boardArtStyle=boardStyle.board_default;
         }
@@ -654,6 +657,7 @@ public class GameController : MonoBehaviour
             coin.atBase=false;
             charFromHome=coin.transform;
             Walk(charFromHome);
+            ComputeWinPercentage(coin);
         }
         else
         {
@@ -759,6 +763,8 @@ public class GameController : MonoBehaviour
 
                 //play walk animation
                 Walk(coin.transform);
+
+                coin.stepsMovedTillNow++;
 
                 yield return new WaitUntil(() => isStepCompleted);
                 yield return new WaitForSeconds(0.1f);
@@ -874,6 +880,7 @@ public class GameController : MonoBehaviour
 
         //lets increment the step counter of coin by 1
         coin1.stepCounter++;
+        coin1.stepsMovedTillNow++;
         //rotating character
         UpdateCharacterRotation(coin1.transform);
         Walk(coin1.transform);
@@ -1104,6 +1111,7 @@ public class GameController : MonoBehaviour
         coinToReset.gameObject.SetActive(true);
         //
         coinToReset.stepCounter=0;
+        coinToReset.stepsMovedTillNow=0;
         coinToReset.atBase=true;
         coinToReset.canGoHome=false;
         coinToReset.onWayToHome=false;
@@ -1176,6 +1184,10 @@ public class GameController : MonoBehaviour
                 largeConfitti.Play();
             }
             winnersList.Add(coin.id);
+
+            //lets find out winner and otehr players rank
+            FindPlayersRank();
+           
             //remove player from the list
             gamePlayersList.Remove(coin.id);
 
@@ -1244,8 +1256,46 @@ public class GameController : MonoBehaviour
         {
             HandleDiceRoll(turnCounter);
         }
-
         UpdateDicePositionOnBoard();
+    }
+
+
+    int p1,p2,p3,p4=0;
+    void FindPlayersRank()
+    {
+        List<infoHolder> SortedList = players.OrderByDescending(o=>o.winningChance).ToList();
+        int rankIndex=1;
+
+        foreach(var v in SortedList)
+        {
+            Debug.Log("#"+rankIndex+" is : "+v.colorName);
+            rankIndex++;
+        }
+
+        if(LeaderboardHandler.instance!=null)
+        {
+            
+            if(SortedList[0].player==playerType.Bot)
+            {
+                p1=1;
+            }
+            if(SortedList[1].player==playerType.Bot)
+            {
+                p2=1;
+            }
+            if(SortedList[2].player==playerType.Bot)
+            {
+                p3=1;
+            }
+            if(SortedList[3].player==playerType.Bot)
+            {
+                p4=1;
+            }
+           LeaderboardHandler.instance.UpdateFirstRank(SortedList[0].playerID,SortedList[0].colorName,p1,SortedList[0].winningChance);
+           LeaderboardHandler.instance.UpdateSecondRank(SortedList[1].playerID,SortedList[1].colorName,p2,SortedList[1].winningChance);
+           LeaderboardHandler.instance.UpdateThirdRank(SortedList[1].playerID,SortedList[2].colorName,p3,SortedList[2].winningChance);
+           LeaderboardHandler.instance.UpdateFourthRank(SortedList[2].playerID,SortedList[3].colorName,p4,SortedList[3].winningChance);
+        }
     }
 
     void ShowPlayerRank()
@@ -1262,18 +1312,6 @@ public class GameController : MonoBehaviour
         }
     }
 
-    void ShowFinalLeaderboardUI()
-    {
-        //here we will display ads
-        // ShowRewardedVideo()
-        ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
-        demo.ShowRewardedVideo();
-    }
-
-    void ComputeWinningChance()
-    {
-
-    }
     #endregion
 
     #region  Calculations for leaderboard
@@ -1283,33 +1321,22 @@ public class GameController : MonoBehaviour
         for(int i=0;i<generatedCoinsHolder.GetChild(coinToCompute.id).childCount;i++)
         {
             Coin gpCoin=generatedCoinsHolder.GetChild(coinToCompute.id).GetChild(i).GetComponent<Coin>();
-            tp+=GetTravelledPercentage(gpCoin);
+            if(!gpCoin.atBase)
+            {
+                tp+=GetTravelledPercentage(gpCoin);
+            }
         }
         tp=tp/generatedCoinsHolder.GetChild(coinToCompute.id).childCount;
+        players[coinToCompute.id].winningChance=tp;
         Debug.Log("winning percentage of "+players[coinToCompute.id].colorName+" is :"+tp.ToString("F2")+"%");
     }
 
     float GetTravelledPercentage(Coin tempCurCoin)
     {
         //56 is the total number of step a coin has to move to its entire life to reach home from base
-        int tempTotalSetp=0;
+        int tempTotalSetp=tempCurCoin.stepsMovedTillNow;
         float travelPercentage=0f;
-        if(!tempCurCoin.onWayToHome)
-        {
-            tempTotalSetp=tempCurCoin.stepCounter;
-        }
-        else 
-        {
-            if(!tempCurCoin.atHome)
-            {
-                tempTotalSetp=50+tempCurCoin.stepCounter;
-            }
-            else if(tempCurCoin.atHome)
-            {
-                tempTotalSetp=56;
-            }
-        }
-        travelPercentage=((float)tempTotalSetp/56f)*100f;
+        travelPercentage=(((float)tempTotalSetp/56f)*90f)+10f;
         return travelPercentage;
     }
   
