@@ -8,6 +8,8 @@ public class GameDataHolder : MonoBehaviour
 
     public int[] playerIndex= new int[4];
 
+    public bool isInitialAdsShown=false;
+
     void Awake()
     {
         if(instance!=null)

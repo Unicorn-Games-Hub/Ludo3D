@@ -5836,10 +5836,10 @@ MonoBehaviour:
   toggleBtnmage: {fileID: 940272043}
   toggleBtn: {fileID: 208547759}
   optionBg:
-  - {fileID: 21300000, guid: 73f5369f2155d4ac187ffb223246ceb5, type: 3}
   - {fileID: 21300000, guid: 641035bd27b434f29ba8beac480dca0f, type: 3}
-  onPos: {x: -4, y: 0, z: 0}
-  offPos: {x: 19.5, y: 0, z: 0}
+  - {fileID: 21300000, guid: 73f5369f2155d4ac187ffb223246ceb5, type: 3}
+  onPos: {x: 19.5, y: 0, z: 0}
+  offPos: {x: -4, y: 0, z: 0}
   optionName: ludo_board_artStyle
 --- !u!114 &1041505671
 MonoBehaviour:
