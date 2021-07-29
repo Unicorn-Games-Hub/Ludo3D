@@ -19,5 +19,9 @@ public class PlayerSelector : MonoBehaviour
             playerID=0;
         }
         GameModeSelectionHandler.instance.ChangePlayerIcon(this.gameObject);
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
+        }
     }
 }

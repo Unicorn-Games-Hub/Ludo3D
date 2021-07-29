@@ -33,6 +33,7 @@ public class SettingsUIHandler : MonoBehaviour
         UpdateSoundToggle();
         UpdateMusicToggle();
         UpdateVibrationToggle();
+
         UpdatePlayerSelection();
         UpdateBoardSelection();
         HandleSettingsUI(0);
@@ -69,6 +70,11 @@ public class SettingsUIHandler : MonoBehaviour
             musicToggleBtn.GetChild(0).GetComponent<RectTransform>().anchoredPosition=offPos;
         }
         musicToggleBtn.GetComponent<Image>().sprite=toggleBgSprite[musicValue];
+
+        if(BackgroundMusicHandler.instance!=null)
+        {
+            BackgroundMusicHandler.instance.UpdateBgMusicStatus();
+        }
     }
 
     void UpdateVibrationToggle()
@@ -85,6 +91,7 @@ public class SettingsUIHandler : MonoBehaviour
             vibrationToggleBtn.GetChild(0).GetComponent<RectTransform>().anchoredPosition=offPos;
         }
         vibrationToggleBtn.GetComponent<Image>().sprite=toggleBgSprite[vibrationValue];
+
     }
     #endregion
 
@@ -105,6 +112,11 @@ public class SettingsUIHandler : MonoBehaviour
         {
             FirebaseHandler.instance.TrackGameSfx(PlayerPrefs.GetInt("Ludo-Sound"));
         }
+
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
+        }
     }
 
     public void ChangeGameMusicSettings()
@@ -122,6 +134,10 @@ public class SettingsUIHandler : MonoBehaviour
         if(FirebaseHandler.instance!=null)
         {
             FirebaseHandler.instance.TrackGameMusic(PlayerPrefs.GetInt("Ludo-Music"));
+        }
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
         }
     }
 
@@ -141,11 +157,15 @@ public class SettingsUIHandler : MonoBehaviour
         {
             FirebaseHandler.instance.TrackGameVibration(PlayerPrefs.GetInt("Ludo-Vibration"));
         }
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
+        }
     }
     #endregion
 
     #region Player options
-    public string[] playerType={"Character","Coin"};
+    private string[] playerType={"Character","Coin"};
     private int playerIndexCounter=0;
     public Text playerText;
 
@@ -182,6 +202,11 @@ public class SettingsUIHandler : MonoBehaviour
         if(AnalyticsTracker.instance!=null)
         {
             AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoPlayer-Type"));
+        }
+
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
         }
     }
 
@@ -230,6 +255,11 @@ public class SettingsUIHandler : MonoBehaviour
         {
             AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoBoard-Type"));
         }
+
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
+        }
     }
 
     void UpdateBoardSelection()
@@ -242,6 +272,11 @@ public class SettingsUIHandler : MonoBehaviour
     public void ShowSettingsUI(int settingsIndex)
     {
         HandleSettingsUI(settingsIndex);
+        
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
+        }
     }
 
     void HandleSettingsUI(int sId)

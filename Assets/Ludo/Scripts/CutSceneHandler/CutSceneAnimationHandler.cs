@@ -158,6 +158,10 @@ public class CutSceneAnimationHandler : MonoBehaviour
     //for killing the defender
     IEnumerator KillDefender()
     {
+        if(GameAudioHandler.instance!=null)
+        {
+            GameAudioHandler.instance.PlayCharacterAttackSound();
+        }
         yield return new WaitForSeconds(1f);
         animHandler.PlayDeathAnimation(defender);
         yield return new WaitForSeconds(1f);
@@ -171,6 +175,10 @@ public class CutSceneAnimationHandler : MonoBehaviour
     //for defending the attacker
     IEnumerator DefendTheAttack()
     {
+        if(GameAudioHandler.instance!=null)
+        {
+            GameAudioHandler.instance.PlayCharacterDefendSound();
+        }
         animHandler. PlayDefendAttackAnimation(defender);
         yield return new WaitForSeconds(1f);
         fadeIn=true;

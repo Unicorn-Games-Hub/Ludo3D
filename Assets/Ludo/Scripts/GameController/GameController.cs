@@ -208,7 +208,7 @@ public class GameController : MonoBehaviour
         GenerateCoins();
 
         //changing art style
-        if(PlayerPrefs.GetInt("ludo_board_artStyle")==1)
+        if(PlayerPrefs.GetInt("ludo_board_artStyle")==0)
         {
             boardArtStyle=boardStyle.board_default;
         }
@@ -658,6 +658,11 @@ public class GameController : MonoBehaviour
             charFromHome=coin.transform;
             Walk(charFromHome);
             ComputeWinPercentage(coin);
+
+            if(GameAudioHandler.instance!=null)
+            {
+                GameAudioHandler.instance.PlayOutOfBaseSound();
+            }
         }
         else
         {
@@ -777,6 +782,11 @@ public class GameController : MonoBehaviour
             if(coin.isSafe)
             {
                 Defensive(coin.transform);
+
+                if(GameAudioHandler.instance!=null)
+                {
+                    GameAudioHandler.instance.PlaySafeZoneReachedSound();
+                }
             }
             else
             {
@@ -857,6 +867,10 @@ public class GameController : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
         Attack(coin1.transform);
+        if(GameAudioHandler.instance!=null)
+        {
+            GameAudioHandler.instance.PlayCharacterAttackSound();
+        }
         yield return new WaitForSeconds(2f);
         //playing death particke effect
         deathParticles[coin2.id].transform.position=new Vector3(coin2.transform.position.x,0.14f,coin2.transform.position.z);
@@ -1108,6 +1122,12 @@ public class GameController : MonoBehaviour
         //spawn particle effect
         spawnParticles[coinToReset.id].transform.position=new Vector3(coinToReset.initialPosInfo.x,0.21f,coinToReset.initialPosInfo.z);
         spawnParticles[coinToReset.id].Play();
+
+        if(GameAudioHandler.instance!=null)
+        {
+            GameAudioHandler.instance.PlayPartShatterSound();
+        }
+
         coinToReset.gameObject.SetActive(true);
         //
         coinToReset.stepCounter=0;
@@ -1132,6 +1152,11 @@ public class GameController : MonoBehaviour
         }
         //
         UpdateDicePositionOnBoard();
+
+        if(GameAudioHandler.instance!=null)
+        {
+            GameAudioHandler.instance.PlayReSpawnSound();
+        }
     }
 
     IEnumerator UpdateTurnAfterCutting()
@@ -1150,6 +1175,12 @@ public class GameController : MonoBehaviour
         {
             smallConfitti.Play();
         }
+
+        if(GameAudioHandler.instance!=null)
+        {
+            GameAudioHandler.instance.PlayConfettiExplosionSound();
+        }
+        
         //remove the coins from out coins
         players[turnCounter].outCoins.Remove(coin.transform);
 
@@ -1185,6 +1216,11 @@ public class GameController : MonoBehaviour
             }
             winnersList.Add(coin.id);
 
+            if(GameAudioHandler.instance!=null)
+            {
+                GameAudioHandler.instance.PlayConfettiExplosionSound();
+            }
+
             //lets find out winner and otehr players rank
             FindPlayersRank();
            
@@ -1210,13 +1246,20 @@ public class GameController : MonoBehaviour
                     //human won the game lets show winner ui
                     Debug.Log("Human won the game lets show game end ui and compute completed percentage of each bots");
                     ShowLudoLeaderboard(1);
-
+                    if(GameAudioHandler.instance!=null)
+                    {
+                        GameAudioHandler.instance.PlayVictorySound();
+                    }
                 }
                 else
                 {
                     //bot won lets show the leaderboard
                     Debug.Log("Bot won the game lets show leaderboard ui");
                     ShowLudoLeaderboard(0);
+                    if(GameAudioHandler.instance!=null)
+                    {
+                        GameAudioHandler.instance.PlayDefeatSound();
+                    }
                 }
             }
             else
@@ -1274,7 +1317,6 @@ public class GameController : MonoBehaviour
 
         if(LeaderboardHandler.instance!=null)
         {
-            
             if(SortedList[0].player==playerType.Bot)
             {
                 p1=1;
@@ -2108,7 +2150,19 @@ public class GameController : MonoBehaviour
             {
                 CharAnimationHandler.instance.PlayWalkAnimation(currentChar);
             }
+    
+            if(GameAudioHandler.instance!=null)
+            {
+                GameAudioHandler.instance.PlayCharacterWalkSound();
+            }
         }
+        else
+        {
+            if(GameAudioHandler.instance!=null)
+            {
+                GameAudioHandler.instance.PlayCoinMoveSound();
+            }
+        } 
     }
 
     void Defensive(Transform currentChar)

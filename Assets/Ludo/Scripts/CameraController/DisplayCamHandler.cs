@@ -63,6 +63,11 @@ public class DisplayCamHandler : MonoBehaviour
             displayMode=screenMode.mode3D;
         }
         UpdateDisplayMode();
+
+        if(GameAudioHandler.instance!=null)
+        {
+            GameAudioHandler.instance.PlayButtonClickedSound();
+        }
     }
 
     void UpdateDisplayMode()

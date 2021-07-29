@@ -33,6 +33,11 @@ public class SettingsOption : MonoBehaviour
         {
             AnalyticsTracker.instance.HandleLudoSettings(optionName);
         }
+
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
+        }
     }
 
     void UpdateOptionSprite()

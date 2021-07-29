@@ -6,11 +6,15 @@ using UnityEngine.SceneManagement;
 
 public class HomeMenuHandler : MonoBehaviour
 {
+    public static HomeMenuHandler instance;
+
     [Header("HomeScreen UI")]
     public GameObject homeScreenUI;
     public GameObject homeUI;
     public GameObject settigsUI;
     public GameObject gameModeUI;
+
+    public GameObject permissionUI;
 
     private RectTransform uiToMove=null;
     private float moveSpeed=10f;
@@ -32,6 +36,22 @@ public class HomeMenuHandler : MonoBehaviour
    [Header("Onboarding UI")]
    public GameObject onboardingUI;
 
+   [Header("Game Audio")]
+   public AudioSource gameAudio;
+   public AudioClip btnClickSound;
+  
+   void Awake()
+   {
+       if(instance!=null)
+       {
+           return;
+       }
+       else
+       {
+           instance=this;
+       }
+   }
+
     void Start()
     {
         //4 players at default
@@ -41,12 +61,7 @@ public class HomeMenuHandler : MonoBehaviour
            FirebaseHandler.instance.TrackOpenFortheFirstTime();
         }
         onboardingUI.SetActive(false);
-
-        //default value for metallic art style is 1 
-        if(!PlayerPrefs.HasKey("ludo_board_artStyle"))
-        {
-            PlayerPrefs.SetInt("ludo_board_artStyle",1);
-        }
+        permissionUI.SetActive(false);
     }
 
     void Update()
@@ -62,12 +77,14 @@ public class HomeMenuHandler : MonoBehaviour
     {
         modeIndex=0;
         ShowGameModeUI();
+        PlayButtonClickSound();
     }
 
     public void PlayAgainstBot()
     {
         modeIndex=1;
         ShowGameModeUI();
+        PlayButtonClickSound();
     }
 
     public void ShowSettingsUI()
@@ -78,18 +95,16 @@ public class HomeMenuHandler : MonoBehaviour
         {
            FirebaseHandler.instance.TrackSettings();
         }
+        PlayButtonClickSound();
     }
 
-    public void CloseTheGame()
-    {
-        Application.Quit();
-    }
     #endregion
 
     #region Settings buttons events
     public void CloseSettingsUI()
     {
         uiToMove=homeUI.GetComponent<RectTransform>();
+        PlayButtonClickSound();
     }
     #endregion
 
@@ -98,6 +113,7 @@ public class HomeMenuHandler : MonoBehaviour
     public void SelectPlayersNumber(int noOfPlayes)
     {
         UpdateSelectionUI(noOfPlayes);
+        PlayButtonClickSound();
     }
 
     void UpdateSelectionUI(int curPlayerNum)
@@ -239,6 +255,7 @@ public class HomeMenuHandler : MonoBehaviour
     public void CloseGameModeUI()
     {
         uiToMove=homeUI.GetComponent<RectTransform>();
+        PlayButtonClickSound();
     }
 
     public void StartTheGame()
@@ -252,12 +269,14 @@ public class HomeMenuHandler : MonoBehaviour
         {
            Play(); 
         }
+        PlayButtonClickSound();
     }
 
     public void CloseOnboardingUI()
     {
         gameModeUI.SetActive(true);
         onboardingUI.SetActive(false);
+        PlayButtonClickSound();
     }
 
     public void Play()
@@ -268,6 +287,36 @@ public class HomeMenuHandler : MonoBehaviour
         }
         
         SceneManager.LoadScene("Ludo");
+    }
+    #endregion
+
+    #region permission
+    public void CloseTheGame()
+    {
+        PlayButtonClickSound();
+        permissionUI.SetActive(true);
+    }
+
+    public void ContinuePlaying()
+    {
+        PlayButtonClickSound();
+        permissionUI.SetActive(false);
+    }
+
+    public void QuitTheGame()
+    {
+        Application.Quit();
+    }
+    #endregion
+
+    #region Game Audio
+    public void PlayButtonClickSound()
+    {
+        if(PlayerPrefs.GetInt("Ludo-Sound")==0)
+        {
+            gameAudio.clip=btnClickSound;
+            gameAudio.Play();
+        }
     }
     #endregion
 }

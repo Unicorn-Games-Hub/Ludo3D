@@ -123,6 +123,10 @@ public class Dice : MonoBehaviour
 
    public IEnumerator RolltheDice()
    {
+       if(GameAudioHandler.instance!=null)
+       {
+           GameAudioHandler.instance.PlayDiceRollSound();
+       }
        //from here we will stop blinking animation
        GameController.instance.StopBlinkingAnimation();
        currentDiceValue=GetRandomDiceValue(currentAttempts);

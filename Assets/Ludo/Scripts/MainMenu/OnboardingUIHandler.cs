@@ -114,6 +114,11 @@ public class OnboardingUIHandler : MonoBehaviour
         {
             AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoBoard-Type"));
         }
+
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
+        }
     }
 
     void UpdateBoardCheckMark()
@@ -134,6 +139,11 @@ public class OnboardingUIHandler : MonoBehaviour
         if(AnalyticsTracker.instance!=null)
         {
             AnalyticsTracker.instance.TrackLudoPlayer(PlayerPrefs.GetInt("LudoPlayer-Type"));
+        }
+
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
         }
     }
 
@@ -172,6 +182,11 @@ public class OnboardingUIHandler : MonoBehaviour
         if(AnalyticsTracker.instance!=null)
         {
             AnalyticsTracker.instance.TrackCutSceneAnimationStatus(PlayerPrefs.GetInt("Ludo-CutScene"));
+        }
+
+        if(HomeMenuHandler.instance!=null)
+        {
+            HomeMenuHandler.instance.PlayButtonClickSound();
         }
     }
     void UpdateCutSceneSprite()
