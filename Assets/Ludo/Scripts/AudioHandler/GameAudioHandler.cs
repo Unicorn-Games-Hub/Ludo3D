@@ -51,7 +51,7 @@ public class GameAudioHandler : MonoBehaviour
     void Start()
     {
         ad=GetComponent<AudioSource>();
-        StartCoroutine(CheckForAppodealAds());
+        //StartCoroutine(CheckForAppodealAds());
     }
 
     IEnumerator CheckForAppodealAds()

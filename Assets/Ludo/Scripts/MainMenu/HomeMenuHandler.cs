@@ -260,15 +260,15 @@ public class HomeMenuHandler : MonoBehaviour
 
     public void StartTheGame()
     {
-        if(PlayerPrefs.GetInt("Ludo-Onboarding")==0)
-        {
-            gameModeUI.SetActive(false);
-            onboardingUI.SetActive(true);
-        }
-        else
-        {
+        // if(PlayerPrefs.GetInt("Ludo-Onboarding")==0)
+        // {
+        //     gameModeUI.SetActive(false);
+        //     onboardingUI.SetActive(true);
+        // }
+        // else
+        // {
            Play(); 
-        }
+        // }
         PlayButtonClickSound();
     }
 
