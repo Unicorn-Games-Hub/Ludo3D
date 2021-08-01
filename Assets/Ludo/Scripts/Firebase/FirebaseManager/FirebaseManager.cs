@@ -64,7 +64,7 @@ public class FirebaseManager : MonoBehaviour
             instance=this;
         }
     }
-
+   
     #region Remote config setup
     protected virtual void Start() 
     {
@@ -92,7 +92,7 @@ public class FirebaseManager : MonoBehaviour
             Debug.Log("RemoteConfig configured and ready!");
                 FetchDataAsync();
             isFirebaseInitialized = true;
-        });        
+        }); 
     }
 
     public Task FetchDataAsync()
@@ -148,6 +148,7 @@ public class FirebaseManager : MonoBehaviour
        
     }
     #endregion
+   
 
     #region Downloading ludo data
     IEnumerator DownloadLudoData(string dataUrl)
@@ -463,11 +464,10 @@ public class FirebaseManager : MonoBehaviour
         };
         writeNewUser("abc99", "mango", "mango@gmail.com");
     }
-
     void Getdata()
     {
         DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("Leaders");
     }
     #endregion
-  
+   
 }

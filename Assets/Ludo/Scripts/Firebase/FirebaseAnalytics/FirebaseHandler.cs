@@ -79,11 +79,12 @@ public class FirebaseHandler : MonoBehaviour
     }
     #endregion
 
+
     // public void TrackGameSessions(int totalSessions)
     // {
     //     Firebase.Analytics.FirebaseAnalytics.LogEvent("sessions_count","count",totalSessions);
     // }
-    
+
     public void TrackVicotry(int totalWin)
     {
         Firebase.Analytics.FirebaseAnalytics.LogEvent("Voctory","victoryCount",totalWin);
@@ -103,8 +104,4 @@ public class FirebaseHandler : MonoBehaviour
             new Firebase.Analytics.Parameter("High Score",30)
         });
     }
-
-    #region  Game Options
-
-    #endregion
 }
