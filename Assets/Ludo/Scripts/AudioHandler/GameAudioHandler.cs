@@ -51,29 +51,27 @@ public class GameAudioHandler : MonoBehaviour
     void Start()
     {
         ad=GetComponent<AudioSource>();
-        //StartCoroutine(CheckForAppodealAds());
+        StartCoroutine(CheckForAppodealAds());
     }
 
     IEnumerator CheckForAppodealAds()
     {
         // ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
-        // demo.ShowRewardedVideo();
+        // demo.showRewardedVideo();
         yield return new WaitForEndOfFrame();
-        /*
-        if(demo.isRewardVideoAdsLoaded)
-        {
-            demo.ShowRewardedVideo();
-        }
-        else
-        {
-            demo.showInterstitial();
-        }
-        yield return new WaitForEndOfFrame();
-        if(demo.isInterstitialAdsLoaded)
-        {
-            demo.showInterstitial();
-        }
-        */
+        // if(demo.isRewardVideoAdsLoaded)
+        // {
+        //     demo.showRewardedVideo();
+        // }
+        // else
+        // {
+        //     demo.showInterstitial();
+        // }
+        // yield return new WaitForEndOfFrame();
+        // if(demo.isInterstitialAdsLoaded)
+        // {
+        //     demo.showInterstitial();
+        // }
     }
 
     #region UI

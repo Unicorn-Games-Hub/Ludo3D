@@ -40,6 +40,7 @@ public class LeaderboardHandler : MonoBehaviour
     void Start()
     {
         leaderboardUI.SetActive(false);
+
         if(YCManager.instance!=null)
         {
             YCManager.instance.OnGameStarted(1);
@@ -54,18 +55,15 @@ public class LeaderboardHandler : MonoBehaviour
         if(botValue==0)
         {
             lbInfoList[0].iconImage.sprite=playerIcons[id];
-            if(YCManager.instance!=null)
-            {
-                YCManager.instance.OnGameFinished(true);
-            }
         }
         else
         {
             lbInfoList[0].iconImage.sprite=botIcons[id];
-            if(YCManager.instance!=null)
-            {
-                YCManager.instance.OnGameFinished(false);
-            }
+        }
+
+        if(YCManager.instance!=null)
+        {
+            YCManager.instance.OnGameFinished(true);
         }
     }
 
@@ -81,6 +79,7 @@ public class LeaderboardHandler : MonoBehaviour
         {
            lbInfoList[1].iconImage.sprite=botIcons[id];
         }
+        HandleGameUtilLevelFail();
     }
 
     public void UpdateThirdRank(int id,string playerName,int botValue,float chance)
@@ -95,6 +94,7 @@ public class LeaderboardHandler : MonoBehaviour
         {
             lbInfoList[2].iconImage.sprite=botIcons[id];
         }
+        HandleGameUtilLevelFail();
     }
 
     public void UpdateFourthRank(int id,string playerName,int botValue,float chance)
@@ -109,8 +109,17 @@ public class LeaderboardHandler : MonoBehaviour
         {
             lbInfoList[3].iconImage.sprite=botIcons[id];
         }
+        HandleGameUtilLevelFail();
     }
     #endregion
+
+    void HandleGameUtilLevelFail()
+    {
+        if(YCManager.instance!=null)
+        {
+            YCManager.instance.OnGameFinished(false);
+        }
+    }
 
     #region Leaderboard 
     public void ShowLeaderBoardUI(int lbValue)
@@ -126,7 +135,7 @@ public class LeaderboardHandler : MonoBehaviour
             continueBtn.SetActive(false);
             otherBtn.SetActive(true);
             // ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
-            // demo.ShowRewardedVideo(); 
+            // demo.showRewardedVideo(); 
         }
         leaderboardUI.GetComponent<Animator>().SetBool("showLB",true);
     }

@@ -79,12 +79,12 @@ public class FirebaseHandler : MonoBehaviour
     }
     #endregion
 
-    #region  Game Options
+
     // public void TrackGameSessions(int totalSessions)
     // {
     //     Firebase.Analytics.FirebaseAnalytics.LogEvent("sessions_count","count",totalSessions);
     // }
-    
+
     public void TrackVicotry(int totalWin)
     {
         //Firebase.Analytics.FirebaseAnalytics.LogEvent("Voctory","victoryCount",totalWin);
@@ -97,14 +97,11 @@ public class FirebaseHandler : MonoBehaviour
 
     public void TrackGameStatistics()
     {
-        /*
-        Firebase.Analytics.FirebaseAnalytics.LogEvent("Game Statistics",new Parameter[]{
-            new Firebase.Analytics.Parameter("OpponentCut",2),
-            new Firebase.Analytics.Parameter("Total Bonus Turn",1),
-            new Firebase.Analytics.Parameter("OpponentsDefeated",3),
-            new Firebase.Analytics.Parameter("High Score",30)
-        });
-        */
+        // Firebase.Analytics.FirebaseAnalytics.LogEvent("Game Statistics",new Parameter[]{
+        //     new Firebase.Analytics.Parameter("OpponentCut",2),
+        //     new Firebase.Analytics.Parameter("Total Bonus Turn",1),
+        //     new Firebase.Analytics.Parameter("OpponentsDefeated",3),
+        //     new Firebase.Analytics.Parameter("High Score",30)
+        // });
     }
-    #endregion
 }
