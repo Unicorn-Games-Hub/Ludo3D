@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using YsoCorp.GameUtils;
 
 public class LeaderboardHandler : MonoBehaviour
 {
@@ -39,6 +40,10 @@ public class LeaderboardHandler : MonoBehaviour
     void Start()
     {
         leaderboardUI.SetActive(false);
+        if(YCManager.instance!=null)
+        {
+            YCManager.instance.OnGameStarted(1);
+        }
     }
 
     #region updating rank
@@ -49,10 +54,18 @@ public class LeaderboardHandler : MonoBehaviour
         if(botValue==0)
         {
             lbInfoList[0].iconImage.sprite=playerIcons[id];
+            if(YCManager.instance!=null)
+            {
+                YCManager.instance.OnGameFinished(true);
+            }
         }
         else
         {
             lbInfoList[0].iconImage.sprite=botIcons[id];
+            if(YCManager.instance!=null)
+            {
+                YCManager.instance.OnGameFinished(false);
+            }
         }
     }
 
@@ -112,8 +125,8 @@ public class LeaderboardHandler : MonoBehaviour
         {
             continueBtn.SetActive(false);
             otherBtn.SetActive(true);
-            ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
-            demo.ShowRewardedVideo(); 
+            // ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
+            // demo.ShowRewardedVideo(); 
         }
         leaderboardUI.GetComponent<Animator>().SetBool("showLB",true);
     }

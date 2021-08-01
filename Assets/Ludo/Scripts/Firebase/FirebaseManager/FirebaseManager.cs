@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Threading.Tasks;
-using Firebase.Extensions;
-using Firebase.Database;
+// using Firebase.Extensions;
+// using Firebase.Database;
 using System;
 using System.IO;
 using UnityEngine.Networking;
@@ -13,7 +13,7 @@ public class FirebaseManager : MonoBehaviour
 {
     public static FirebaseManager instance;
 
-    Firebase.DependencyStatus dependencyStatus = Firebase.DependencyStatus.UnavailableOther;
+    //Firebase.DependencyStatus dependencyStatus = Firebase.DependencyStatus.UnavailableOther;
     protected bool isFirebaseInitialized = false;
 
     public string appBundleID;
@@ -68,6 +68,7 @@ public class FirebaseManager : MonoBehaviour
     #region Remote config setup
     protected virtual void Start() 
     {
+        /*
         Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWithOnMainThread(task => {
         dependencyStatus = task.Result;
         if(dependencyStatus == Firebase.DependencyStatus.Available) 
@@ -79,10 +80,12 @@ public class FirebaseManager : MonoBehaviour
             Debug.LogError( "Could not resolve all Firebase dependencies: " + dependencyStatus);
         }
       });
+      */
     }
 
     void InitializeFirebase() 
     {
+        /*
         System.Collections.Generic.Dictionary<string, object> defaults = new System.Collections.Generic.Dictionary<string, object>();
         defaults.Add("config_test_string", "default local string");
         defaults.Add("config_test_int", 1);
@@ -92,9 +95,11 @@ public class FirebaseManager : MonoBehaviour
             Debug.Log("RemoteConfig configured and ready!");
                 FetchDataAsync();
             isFirebaseInitialized = true;
-        });        
+        });   
+        */     
     }
 
+    /*
     public Task FetchDataAsync()
     {
         Debug.Log("Fetching data...");
@@ -104,7 +109,6 @@ public class FirebaseManager : MonoBehaviour
 
     void FetchComplete(Task fetchTask) 
     {
-       
         if(fetchTask.IsCanceled) 
         {
             Debug.Log("Fetch canceled.");
@@ -147,6 +151,7 @@ public class FirebaseManager : MonoBehaviour
         }
        
     }
+    */
     #endregion
 
     #region Downloading ludo data
@@ -380,7 +385,7 @@ public class FirebaseManager : MonoBehaviour
     #endregion
 
     #region Firebase Database
-    DatabaseReference reference;
+   // DatabaseReference reference;
 
     public class User 
     {
@@ -404,12 +409,13 @@ public class FirebaseManager : MonoBehaviour
         Debug.Log("Time to push user data to database.");
         User user = new User(name, email);
         string json = JsonUtility.ToJson(user);
-        reference.Child("users").Child(userId).SetRawJsonValueAsync(json);
+        //reference.Child("users").Child(userId).SetRawJsonValueAsync(json);
         GetUsers();
     }
 
     public void GetUsers()
     {
+        /*
         FirebaseDatabase.DefaultInstance.GetReference("users").GetValueAsync().ContinueWith(task =>{
             if(task.IsFaulted)
             {
@@ -426,11 +432,13 @@ public class FirebaseManager : MonoBehaviour
                 }   
             }
         });
+        */
     }
 
     ArrayList leaderBoard = new ArrayList();
     protected void ConnectToFirebaseDatabase()
     {
+        /*
        FirebaseDatabase.DefaultInstance.GetReference("Leaders").OrderByChild("score").ValueChanged += (object sender2, ValueChangedEventArgs e2) => {
             if (e2.DatabaseError != null) 
             {
@@ -462,11 +470,12 @@ public class FirebaseManager : MonoBehaviour
             }
         };
         writeNewUser("abc99", "mango", "mango@gmail.com");
+        */
     }
 
     void Getdata()
     {
-        DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("Leaders");
+        //DatabaseReference reference = FirebaseDatabase.DefaultInstance.GetReference("Leaders");
     }
     #endregion
   

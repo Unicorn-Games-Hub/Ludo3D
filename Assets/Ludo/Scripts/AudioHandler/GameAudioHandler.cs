@@ -56,9 +56,10 @@ public class GameAudioHandler : MonoBehaviour
 
     IEnumerator CheckForAppodealAds()
     {
-        ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
-        demo.ShowRewardedVideo();
+        // ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
+        // demo.ShowRewardedVideo();
         yield return new WaitForEndOfFrame();
+        /*
         if(demo.isRewardVideoAdsLoaded)
         {
             demo.ShowRewardedVideo();
@@ -72,6 +73,7 @@ public class GameAudioHandler : MonoBehaviour
         {
             demo.showInterstitial();
         }
+        */
     }
 
     #region UI

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+
 public class GameController : MonoBehaviour
 {
     public static GameController instance;
@@ -1260,6 +1261,8 @@ public class GameController : MonoBehaviour
                     {
                         GameAudioHandler.instance.PlayDefeatSound();
                     }
+                    
+                   
                 }
             }
             else
