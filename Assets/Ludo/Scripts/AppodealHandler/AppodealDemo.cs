@@ -6,6 +6,7 @@ using ConsentManager.Api;
 using ConsentManager.Common;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace ConsentManager.ConsentManagerDemo.Scripts
 {
@@ -31,6 +32,7 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
         public Consent currentConsent;
 
         public bool enableTestAds=false;
+
 
         private void Awake()
         {
@@ -215,18 +217,34 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
             Appodeal.setSegmentFilter("newInt", 1234567890);
             Appodeal.setSegmentFilter("newDouble", 123.123456789);
             Appodeal.setSegmentFilter("newString", "newStringFromSDK");
+
+            showBanner();
+            CacheInterstitial();
+            CacheRewardVideo();
         }
+
+        #region caching ads
+        void CacheInterstitial()
+        {
+            Appodeal.cache(Appodeal.INTERSTITIAL);
+            showInterstitial();
+        }
+
+        void CacheRewardVideo()
+        {
+            Appodeal.cache(Appodeal.REWARDED_VIDEO);
+        }
+        #endregion
 
         #region show ads
         public void showInterstitial()
         {
-            if (Appodeal.canShow(Appodeal.INTERSTITIAL) && !Appodeal.isPrecache(Appodeal.INTERSTITIAL))
+            if (Appodeal.canShow(Appodeal.INTERSTITIAL))
             {
-                Appodeal.show(Appodeal.INTERSTITIAL);
-            }
-            else
-            {
-                Appodeal.cache(Appodeal.INTERSTITIAL);
+                if(SceneManager.GetActiveScene()==SceneManager.GetSceneByName("Ludo"))
+                {
+                    Appodeal.show(Appodeal.INTERSTITIAL);
+                }
             }
         }
 
@@ -234,11 +252,10 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
         {
             if(Appodeal.canShow(Appodeal.REWARDED_VIDEO))
             {
-                Appodeal.show(Appodeal.REWARDED_VIDEO);
-            }
-            else
-            {
-                Appodeal.cache(Appodeal.REWARDED_VIDEO);
+                if(SceneManager.GetActiveScene()==SceneManager.GetSceneByName("Ludo"))
+                {
+                    Appodeal.show(Appodeal.REWARDED_VIDEO);
+                }
             }
         }
 
@@ -383,18 +400,16 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
         {
             if (!isPrecache)
             {
+
             }
             else
             {
                 Debug.Log("Appodeal. Interstitial loaded. isPrecache - true");
             }
-
-            Debug.Log("onInterstitialLoaded");
         }
 
         public void onInterstitialFailedToLoad()
         {
-            Debug.Log("onInterstitialFailedToLoad");
         }
 
         public void onInterstitialShowFailed()
@@ -428,12 +443,10 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
 
         public void onRewardedVideoLoaded(bool isPrecache)
         {
-            print("onRewardedVideoLoaded");
         }
 
         public void onRewardedVideoFailedToLoad()
         {
-            print("onRewardedVideoFailedToLoad");
         }
 
         public void onRewardedVideoShowFailed()
@@ -453,6 +466,7 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
 
         public void onRewardedVideoFinished(double amount, string name)
         {
+            
             print("onRewardedVideoFinished. Reward: " + amount + " " + name);
         }
 

@@ -7,7 +7,6 @@ public class IngameUIHandler : MonoBehaviour
 {
     public GameObject settingsUI;
     public GameObject permissionUI;
-    [SerializeField]private string sceneName;
 
     public void ShowSettingsUI()
     {
@@ -40,7 +39,7 @@ public class IngameUIHandler : MonoBehaviour
         {
             AnalyticsTracker.instance.TrackSessionEndAfterGameExit();
         }
-        SceneManager.LoadScene(sceneName);
+        SceneManager.LoadScene("Home");
     }
 
     void PlayClickSound()

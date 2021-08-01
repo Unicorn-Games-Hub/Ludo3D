@@ -113,7 +113,7 @@ public class LeaderboardHandler : MonoBehaviour
             continueBtn.SetActive(false);
             otherBtn.SetActive(true);
             ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
-            demo.showRewardedVideo(); 
+            demo.showRewardedVideo();
         }
         leaderboardUI.GetComponent<Animator>().SetBool("showLB",true);
     }

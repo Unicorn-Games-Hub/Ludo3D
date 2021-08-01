@@ -5,7 +5,9 @@ using UnityEngine;
 public class GameAudioHandler : MonoBehaviour
 {
     public static GameAudioHandler instance;
-    private AudioSource ad;
+
+    public AudioSource uiAd;
+    public AudioSource ad;
 
     [Header("UI")]
     public AudioClip buttonSound;
@@ -35,7 +37,6 @@ public class GameAudioHandler : MonoBehaviour
     [Header("Confetti")]
     public AudioClip confettiExplosion;
 
-
     void Awake()
     {
         if(instance!=null)
@@ -48,39 +49,13 @@ public class GameAudioHandler : MonoBehaviour
         }
     }
 
-    void Start()
-    {
-        ad=GetComponent<AudioSource>();
-        StartCoroutine(CheckForAppodealAds());
-    }
-
-    IEnumerator CheckForAppodealAds()
-    {
-        ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
-        demo.showRewardedVideo();
-        yield return new WaitForEndOfFrame();
-        // if(demo.isRewardVideoAdsLoaded)
-        // {
-        //     demo.showRewardedVideo();
-        // }
-        // else
-        // {
-        //     demo.showInterstitial();
-        // }
-        // yield return new WaitForEndOfFrame();
-        // if(demo.isInterstitialAdsLoaded)
-        // {
-        //     demo.showInterstitial();
-        // }
-    }
-
     #region UI
     public void PlayButtonClickedSound()
     {
         if(PlayerPrefs.GetInt("Ludo-Sound")==0)
         {
-            ad.clip=buttonSound;
-            ad.Play();
+            uiAd.clip=buttonSound;
+            uiAd.Play();
         }
     }
     #endregion
@@ -110,8 +85,8 @@ public class GameAudioHandler : MonoBehaviour
     {
         if(PlayerPrefs.GetInt("Ludo-Sound")==0)
         {
-            ad.clip=null;
-            ad.Play();
+            uiAd.clip=null;
+            uiAd.Play();
         }
     }
 
