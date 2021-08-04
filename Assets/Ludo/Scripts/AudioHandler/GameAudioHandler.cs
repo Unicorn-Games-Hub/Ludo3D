@@ -8,6 +8,7 @@ public class GameAudioHandler : MonoBehaviour
 
     public AudioSource uiAd;
     public AudioSource ad;
+    public AudioSource respawnAd;
 
     [Header("UI")]
     public AudioClip buttonSound;
@@ -166,8 +167,8 @@ public class GameAudioHandler : MonoBehaviour
     {
         if(PlayerPrefs.GetInt("Ludo-Sound")==0)
         {
-            ad.clip=respawnSound;
-            ad.Play();
+            respawnAd.clip=respawnSound;
+            respawnAd.Play();
         }
     }
     #endregion

@@ -106,7 +106,7 @@ public class GameController : MonoBehaviour
     [Header("Dice Position During Roll")]
     public Transform ludoDice;
     public Vector3[] diceInitialPos;
-    private float diceMoveSpeed=15f;
+    private float diceMoveSpeed=25f;
     private Vector3 newDicePosition=Vector3.zero;
     private bool moveDice=false;
 
@@ -359,7 +359,7 @@ public class GameController : MonoBehaviour
     IEnumerator WaitBeforeUpdatingTurn()
     {
         highLights[turnCounter].StopAnimation();
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.3f);
         if(currentDiceValue!=rollChanceAt)
         {
             if(bonusTurnCounter==0)
@@ -378,7 +378,7 @@ public class GameController : MonoBehaviour
         }
         turnCounter=gamePlayersList[curTurn];
         UpdateDicePositionOnBoard();
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.2f);
         HandleDiceRoll(turnCounter);
     }
     #endregion
@@ -849,7 +849,6 @@ public class GameController : MonoBehaviour
         UpdateCharacterRotation(charFromHome);
         UpdateTurn();
         Defensive(charFromHome);
-
         //for counter
         HandlePlayerNumIndicator(charFromHome.GetComponent<Coin>());
     }
@@ -1161,7 +1160,7 @@ public class GameController : MonoBehaviour
 
     IEnumerator UpdateTurnAfterCutting()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.2f);
         HandleDiceRoll(turnCounter);
     }
     #endregion

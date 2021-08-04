@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class IndicatorRotator : MonoBehaviour
 {
-    private float rotationSpeed=100f;
+    private float rotationSpeed=200f;
     private float rotAngle=0f;
 
     // Update is called once per frame
