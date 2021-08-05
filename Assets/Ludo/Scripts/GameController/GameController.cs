@@ -550,29 +550,31 @@ public class GameController : MonoBehaviour
         {
             clickableTempCoin.indicator.SetActive(true);
         }
+        clickableTempCoin.StartScaleAnimation();
     }
 
     void HandleDiceRoll(int turnValue)
     {
         //handling 6 probablity from here
         Dice.instance.UpdateDiceProbablity(players[turnCounter].noOfRoundsWithoutCoinOut);
-        
         if(players[turnValue].player==playerType.Human)
         {
             Dice.instance.canRollDice=true;
+            highLights[turnCounter].HighLight();
+            Dice.instance.StartDiceHighlights(players[turnCounter].coinColor,turnCounter);
         }
         else if(players[turnValue].player==playerType.Bot)
         {
             Dice.instance.canRollDice=false;
             StartCoroutine(HandleBotTurn());
         }
-        diceMat.color=players[turnCounter].coinColor;
-        highLights[turnCounter].HighLight();
+        Dice.instance.UpdateDiceMaterial(players[turnCounter].coinColor);
     }
 
     public void StopBlinkingAnimation()
     {
         highLights[turnCounter].StopAnimation();
+        Dice.instance.StopDiceHighLight();
     }
     #endregion
 
@@ -625,8 +627,9 @@ public class GameController : MonoBehaviour
     {
         for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
         {
-            generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().isClickable=false;
-            generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().indicator.SetActive(false);
+            generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().HideIndicator();
+            // generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().isClickable=false;
+            // generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().indicator.SetActive(false);
         }
     }
 

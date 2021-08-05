@@ -147,6 +147,11 @@ MonoBehaviour:
   diceThrowForce: 10
   canRollDice: 0
   currentDiceValue: 2
+  diceNormalColor:
+  - {r: 0.6933962, g: 1, b: 0.7329581, a: 1}
+  - {r: 1, g: 0.6462264, b: 0.65464956, a: 1}
+  - {r: 0.72659314, g: 0.82009727, b: 0.9811321, a: 1}
+  - {r: 1, g: 0.91173893, b: 0.740566, a: 1}
   diceStates: 0
   enableDebugging: 1
   minDebugVal: 6
@@ -505,7 +510,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &186344612
 RectTransform:
   m_ObjectHideFlags: 0

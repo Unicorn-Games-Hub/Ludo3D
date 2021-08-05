@@ -34,6 +34,12 @@ public class Dice : MonoBehaviour
    [Range(1,6)]
    public int currentDiceValue=1;
 
+   [Header("Dice")]
+   private Material diceMat;
+   private Color normalColor;
+
+   public Color[] diceNormalColor;
+
    public enum states
    {
        idle,
@@ -65,6 +71,7 @@ public class Dice : MonoBehaviour
         currentDiceValue=Random.Range(1,7);
         RotateDiceToCorrectFace();
         diceStates=states.idle;
+        diceMat=GetComponent<MeshRenderer>().material;
    }
 
    void Update()
@@ -198,4 +205,34 @@ public class Dice : MonoBehaviour
     }
     #endregion
 
+    #region HighLightAnimation
+    private Color initialColor;
+    private Color highlightedColor;
+    public void UpdateDiceMaterial(Color dicecolor)
+    {
+        diceMat.color=dicecolor;
+        initialColor=dicecolor;
+    }
+
+    public void tweenOnUpdateCallBack(Color newColorValue)
+    {
+        diceMat.color=newColorValue;
+    }
+
+    public void StartDiceHighlights(Color newcol,int pIndex)
+    {
+        normalColor=diceNormalColor[pIndex];
+        iTween.ValueTo(gameObject, iTween.Hash("name", "sp1","from", newcol, "to", normalColor,"onupdate", 
+        "tweenOnUpdateCallBack","loopType", iTween.LoopType.pingPong, "easetype", iTween.EaseType.linear, "time", .4f, "delay", 0.2f));
+    }
+
+    public void StopDiceHighLight()
+    {
+        iTween.StopByName(gameObject, "sp1");
+        iTween.ValueTo(gameObject, iTween.Hash("name", "sp1",
+           "from", diceMat.color, "to", initialColor,
+           "onupdate", "tweenOnUpdateCallBack",
+           "easetype", iTween.EaseType.easeOutSine, "time", 0.4f));
+    }
+    #endregion
 }

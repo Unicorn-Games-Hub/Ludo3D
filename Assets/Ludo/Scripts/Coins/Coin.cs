@@ -29,6 +29,16 @@ public class Coin : MonoBehaviour
     // private int playerCounter=1;
     public GameObject indicator;
 
+    private Vector3 initialScale;
+    private float s1,s2;
+
+    void Start()
+    {
+        initialScale=transform.localScale;
+        s1=initialScale.x;
+        s2=s1+0.4f;
+    }
+
 
     public void HandleCoinInfo(int Id,Vector3 coinPos)
     {
@@ -70,11 +80,40 @@ public class Coin : MonoBehaviour
     }
 
     #region number of player indicator
+    public void HideIndicator()
+    {
+        isClickable=false;
+        indicator.SetActive(false);
+        StopScaleAnimation();
+    }
+
     public void UpdateIndicatorInfo(int playerCounter)
     {
         Debug.Log("Total coins at my positions is : "+playerCounter);
         //playerCounterText.text=playerCounter.ToString();
         //indicatorUI.SetActive(true);
+    }
+    #endregion
+
+    #region animating scale
+    public void StartScaleAnimation()
+    {
+        iTween.ValueTo(gameObject, iTween.Hash("name", "objScale","from", s1, "to", s2,"onupdate", 
+        "UpdateScale","loopType", iTween.LoopType.pingPong, "easetype", iTween.EaseType.linear, "time", .4f, "delay", 0.05f));
+    }
+
+    public void StopScaleAnimation()
+    {
+        iTween.StopByName(gameObject, "objScale");
+        iTween.ValueTo(gameObject, iTween.Hash("name", "objScale",
+           "from", s2, "to", s1,
+           "onupdate", "UpdateScale",
+           "easetype", iTween.EaseType.easeOutSine, "time", 0.1f));
+    }
+
+    void UpdateScale(float scaleValue)
+    {
+        transform.localScale=new Vector3(scaleValue,scaleValue,scaleValue);
     }
     #endregion
 }
