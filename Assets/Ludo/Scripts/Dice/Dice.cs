@@ -224,6 +224,9 @@ public class Dice : MonoBehaviour
         normalColor=diceNormalColor[pIndex];
         iTween.ValueTo(gameObject, iTween.Hash("name", "sp1","from", newcol, "to", normalColor,"onupdate", 
         "tweenOnUpdateCallBack","loopType", iTween.LoopType.pingPong, "easetype", iTween.EaseType.linear, "time", .4f, "delay", 0.2f));
+
+        iTween.ValueTo(gameObject, iTween.Hash("name", "scaleAnim","from", 0.9f, "to", 0.8f,"onupdate", 
+        "tweenScaleCallback","loopType", iTween.LoopType.pingPong, "easetype", iTween.EaseType.linear, "time", .1f, "delay", 0.05f));
     }
 
     public void StopDiceHighLight()
@@ -233,6 +236,17 @@ public class Dice : MonoBehaviour
            "from", diceMat.color, "to", initialColor,
            "onupdate", "tweenOnUpdateCallBack",
            "easetype", iTween.EaseType.easeOutSine, "time", 0.4f));
+
+           iTween.StopByName(gameObject, "scaleAnim");
+        iTween.ValueTo(gameObject, iTween.Hash("name", "scaleAnim",
+           "from", 0.9f, "to", 0.8f,
+           "onupdate", "tweenScaleCallback",
+           "easetype", iTween.EaseType.easeOutSine, "time", 0.4f));
+    }
+
+    void tweenScaleCallback(float tempScale)
+    {
+        transform.localScale=new Vector3(tempScale,tempScale,tempScale);
     }
     #endregion
 }

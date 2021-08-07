@@ -24,6 +24,10 @@ public class LeaderboardHandler : MonoBehaviour
     public Sprite[] playerIcons;
     public Sprite[] botIcons;
 
+    [Header("Rate us")]
+    public string appUrl="https://play.google.com/store/apps/details?id=com.UnicornGames.Ludo";
+    public GameObject rateusUI;
+
     void Awake()
     {
         if(instance!=null)
@@ -39,6 +43,13 @@ public class LeaderboardHandler : MonoBehaviour
     void Start()
     {
         leaderboardUI.SetActive(false);
+        rateusUI.SetActive(false);
+        if(GameDataHolder.instance!=null)
+        {
+            GameDataHolder.instance.rateUsShownCounter++;
+        }
+
+        ShowRateUsUI();
     }
 
     #region updating rank
@@ -146,5 +157,48 @@ public class LeaderboardHandler : MonoBehaviour
     {
         Application.Quit();
     }
+    #endregion
+
+    #region Rating
+    public void ShowRateUsUI()
+    {
+        if(PlayerPrefs.GetInt("Ludo_rateus_value")==0)
+        {
+            if(GameDataHolder.instance!=null)
+            {
+                if(GameDataHolder.instance.rateUsShownCounter>=2&&!GameDataHolder.instance.rateusShown)
+                {
+                    rateusUI.SetActive(true);
+                }
+            }
+        }
+    }
+
+    public void RateUsClicked()
+    {
+        if(string.IsNullOrEmpty(appUrl))
+        {
+            if(Application.internetReachability != NetworkReachability.NotReachable)
+            {
+                Application.OpenURL(appUrl);
+                PlayerPrefs.SetInt("Ludo_rateus_value",1);
+            }
+        }
+
+        if(GameDataHolder.instance!=null)
+        {
+            GameDataHolder.instance.rateusShown=true;
+        }
+    }
+
+    public void RemindMeLaterClicked()
+    {
+        rateusUI.SetActive(false);
+        if(GameDataHolder.instance!=null)
+        {
+            GameDataHolder.instance.rateusShown=true;
+        }
+    }
+
     #endregion
 }

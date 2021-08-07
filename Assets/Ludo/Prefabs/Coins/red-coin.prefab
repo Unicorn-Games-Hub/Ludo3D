@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 741795938111328210}
   - component: {fileID: 693936221984766964}
   - component: {fileID: -6288455817146827633}
-  - component: {fileID: 1450019671481300003}
+  - component: {fileID: 4257344718561285720}
   m_Layer: 7
   m_Name: red-coin
   m_TagString: Untagged
@@ -42,7 +42,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8066037642721746420}
-  m_Mesh: {fileID: -3587183258065531440, guid: 8d66d77e9b0c94f698cf9f4cb4bc803a, type: 3}
+  m_Mesh: {fileID: -4810843563418668540, guid: 2b99503b5bd5c43eab4dbdc99c5f1bfa, type: 3}
 --- !u!23 &693936221984766964
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -62,8 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 76213ad341b6c42089d3cf4895b2fed7, type: 2}
-  - {fileID: 2100000, guid: 217ecbb55cd6d4fc88c439cef75b08bc, type: 2}
+  - {fileID: 2100000, guid: 8231c318bb3b543a8972a7b6c56d7d4b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -99,6 +98,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   stepCounter: 0
+  stepsMovedTillNow: 0
   isClickable: 0
   atBase: 0
   isReadyForHome: 0
@@ -118,7 +118,7 @@ MonoBehaviour:
   - 0
   maxValueAmongAll: 0
   indicator: {fileID: 7690785798454993117}
---- !u!64 &1450019671481300003
+--- !u!64 &4257344718561285720
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -131,7 +131,7 @@ MeshCollider:
   serializedVersion: 4
   m_Convex: 1
   m_CookingOptions: 30
-  m_Mesh: {fileID: -3587183258065531440, guid: 8d66d77e9b0c94f698cf9f4cb4bc803a, type: 3}
+  m_Mesh: {fileID: -4810843563418668540, guid: 2b99503b5bd5c43eab4dbdc99c5f1bfa, type: 3}
 --- !u!1001 &7517142059680025861
 PrefabInstance:
   m_ObjectHideFlags: 0

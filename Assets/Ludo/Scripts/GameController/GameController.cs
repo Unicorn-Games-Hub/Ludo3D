@@ -16,9 +16,6 @@ public class GameController : MonoBehaviour
     [Header("Home Path")]
     public Transform[] homePaths;
 
-    [Header("Start Position")]
-    public Transform[] startPoints;
-
     [Header("Start Rotation")]
     public Vector3[] startRotations;
 
@@ -151,7 +148,7 @@ public class GameController : MonoBehaviour
     public modelType playerModel;
 
     [Header("Materials for metallic art style")]
-    public Material[] bodyMat;
+    public Material boardMat;
     [Range(0f,1f)]
     public float metallicValue=0f;
     //for selecting board art style
@@ -164,6 +161,9 @@ public class GameController : MonoBehaviour
 
     //keeping track of human
     private List<int> totalHumanPlayers=new List<int>();
+
+    //0 for default and 1 for metallic
+    public Material[] charBodyMat;
 
     void Awake()
     {
@@ -820,7 +820,7 @@ public class GameController : MonoBehaviour
                     }
                     else if(animState==statusType.Defend)
                     {
-                        Debug.Log("time for defending animation");
+                        // Debug.Log("time for defending animation");
                     }
                     else
                     {
@@ -1112,7 +1112,7 @@ public class GameController : MonoBehaviour
         if(currentDiceValue==6)
         {
             bonusTurnCounter++;
-            Debug.Log("Cut due to 6");
+            // Debug.Log("Cut due to 6");
         }
         StartCoroutine(UpdateTurnAfterCutting());
     }
@@ -1190,7 +1190,7 @@ public class GameController : MonoBehaviour
         if(currentDiceValue==6)
         {
             bonusTurnCounter++;
-            Debug.Log("home reached due to 6");
+            // Debug.Log("home reached due to 6");
         }
 
         int count=0;
@@ -1246,7 +1246,7 @@ public class GameController : MonoBehaviour
                 if(coin.id==totalHumanPlayers[0])
                 {
                     //human won the game lets show winner ui
-                    Debug.Log("Human won the game lets show game end ui and compute completed percentage of each bots");
+                    // Debug.Log("Human won the game lets show game end ui and compute completed percentage of each bots");
                     ShowLudoLeaderboard(1);
                     if(GameAudioHandler.instance!=null)
                     {
@@ -1256,7 +1256,7 @@ public class GameController : MonoBehaviour
                 else
                 {
                     //bot won lets show the leaderboard
-                    Debug.Log("Bot won the game lets show leaderboard ui");
+                    // Debug.Log("Bot won the game lets show leaderboard ui");
                     ShowLudoLeaderboard(0);
                     if(GameAudioHandler.instance!=null)
                     {
@@ -1280,18 +1280,15 @@ public class GameController : MonoBehaviour
                     //lets see if all human player completed or not
                     if(remainingHuman==0)
                     {
-                        Debug.Log("Only one player not able to move coins to home so lets show game end UI");
                         ShowLudoLeaderboard(1);
                     }
                     else
                     {
-                        Debug.Log("not all human reached home so lets show leaderboard ui");
                         ShowLudoLeaderboard(0);
                     }
                 }
                 else
                 {
-                    Debug.Log("Only one player not able to move coins to home so lets show game end UI");
                     ShowLudoLeaderboard(1);
                 }
             }
@@ -1313,7 +1310,6 @@ public class GameController : MonoBehaviour
 
         foreach(var v in SortedList)
         {
-            Debug.Log("#"+rankIndex+" is : "+v.colorName);
             rankIndex++;
         }
 
@@ -1344,7 +1340,6 @@ public class GameController : MonoBehaviour
 
     void ShowPlayerRank()
     {
-        Debug.Log("Congratulations ,"+players[winnersList[0]].colorName+" won the game");
         ShowLudoLeaderboard(1);
     }
 
@@ -1372,7 +1367,7 @@ public class GameController : MonoBehaviour
         }
         tp=tp/generatedCoinsHolder.GetChild(coinToCompute.id).childCount;
         players[coinToCompute.id].winningChance=tp;
-        Debug.Log("winning percentage of "+players[coinToCompute.id].colorName+" is :"+tp.ToString("F2")+"%");
+        // Debug.Log("winning percentage of "+players[coinToCompute.id].colorName+" is :"+tp.ToString("F2")+"%");
     }
 
     float GetTravelledPercentage(Coin tempCurCoin)
@@ -1416,7 +1411,7 @@ public class GameController : MonoBehaviour
                     movableAICoins.Add(coinThatCutsOpponent[i]);
                 }
             }
-            Debug.Log("There is high probablity that current coin can cut the opponent coin");
+            // Debug.Log("There is high probablity that current coin can cut the opponent coin");
             break;
 
             case BotPriority.takeOut:
@@ -1439,7 +1434,7 @@ public class GameController : MonoBehaviour
                 }
             }
 
-            Debug.Log("There is high probablity that current coin can be moved to safe zone");
+            // Debug.Log("There is high probablity that current coin can be moved to safe zone");
             break;
 
             case BotPriority.home:
@@ -1450,11 +1445,11 @@ public class GameController : MonoBehaviour
                     movableAICoins.Add(possibleAIHomeCoins[i]);
                 }
             }
-            Debug.Log("There is high probablity that current coin can reach home");
+            // Debug.Log("There is high probablity that current coin can reach home");
             break;
 
             case BotPriority.move:
-            Debug.Log("Coins avaliable for movement");
+            // Debug.Log("Coins avaliable for movement");
             break;
 
             case BotPriority.nothing:
@@ -2126,7 +2121,7 @@ public class GameController : MonoBehaviour
             if(coinsAtThisPosCount<2)
             {
                 UpdateTemporarySafeZone(newTempPosition.gameObject,originalPathMat);
-                Debug.Log("Reset Successful..");
+                // Debug.Log("Reset Successful..");
             }
         }
     }
@@ -2193,19 +2188,37 @@ public class GameController : MonoBehaviour
     #region art style
     void HandleGameArtStyle()
     {
-        if(boardArtStyle==boardStyle. board_default)
+        if(boardArtStyle==boardStyle.board_default)
         {
-            metallicValue=0f;
+            UpdateCharSmoothness(0);
+            boardMat.SetFloat ("_Glossiness", 0f);
+            boardMat.SetFloat ("_Metallic", 0f);
         }
-    
-        UpdateGameArtStyle();
-    }
-    void UpdateGameArtStyle()
-    {
-        for(int i=0;i<bodyMat.Length;i++)
+        else
         {
-            bodyMat[i].SetFloat ("_Glossiness", metallicValue);
-            bodyMat[i].SetFloat ("_Metallic", 0.2f);
+            UpdateCharSmoothness(1);
+            boardMat.SetFloat ("_Glossiness", 0.3f);
+            boardMat.SetFloat ("_Metallic", 0.4f);
+        }
+    }
+
+    void UpdateCharSmoothness(int metallic_ID)
+    {
+        if(playerModel==modelType.character)
+        {
+            for(int i=0;i<charBodyMat.Length;i++)
+            {
+                if(metallic_ID==1)
+                {
+                    charBodyMat[i].SetFloat ("_Glossiness",0.35f);
+                    charBodyMat[i].SetFloat ("_Metallic", 0.7f);
+                }
+                else
+                {
+                    charBodyMat[i].SetFloat ("_Glossiness",0f);
+                    charBodyMat[i].SetFloat ("_Metallic",0f);
+                }
+            }
         }
     }
     #endregion

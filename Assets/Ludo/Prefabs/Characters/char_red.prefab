@@ -1487,6 +1487,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   stepCounter: 0
+  stepsMovedTillNow: 0
   isClickable: 0
   atBase: 0
   isReadyForHome: 0
@@ -2081,6 +2082,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 209813273865301464, guid: 94fafdf670d7742c2a5f9f777ab96ebf, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 209813273865301464, guid: 94fafdf670d7742c2a5f9f777ab96ebf, type: 3}
+      propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 209813273865301467, guid: 94fafdf670d7742c2a5f9f777ab96ebf, type: 3}

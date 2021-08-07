@@ -8,6 +8,9 @@ public class GameDataHolder : MonoBehaviour
 
     public int[] playerIndex= new int[4];
 
+    public int rateUsShownCounter=0;
+    public bool rateusShown=false;
+
     void Awake()
     {
         if(instance!=null)
