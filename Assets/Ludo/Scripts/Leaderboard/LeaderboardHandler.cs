@@ -123,8 +123,6 @@ public class LeaderboardHandler : MonoBehaviour
         {
             continueBtn.SetActive(false);
             otherBtn.SetActive(true);
-            ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
-            demo.showRewardedVideo();
         }
         leaderboardUI.GetComponent<Animator>().SetBool("showLB",true);
     }
@@ -142,15 +140,24 @@ public class LeaderboardHandler : MonoBehaviour
         yield return new WaitForSeconds(2f);
         leaderboardUI.SetActive(false);
     }
-
+    
     public void Home()
     {
+        TimeForRewardVideoAds();
         SceneManager.LoadScene("Home");
     }
 
     public void Restart()
     {
+        TimeForRewardVideoAds();
         SceneManager.LoadScene("Ludo");
+    }
+
+
+    void TimeForRewardVideoAds()
+    {
+        ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
+        demo.TryToShowCachedAds();
     }
 
     public void Exit()
@@ -189,6 +196,7 @@ public class LeaderboardHandler : MonoBehaviour
         {
             GameDataHolder.instance.rateusShown=true;
         }
+        rateusUI.SetActive(false);
     }
 
     public void RemindMeLaterClicked()

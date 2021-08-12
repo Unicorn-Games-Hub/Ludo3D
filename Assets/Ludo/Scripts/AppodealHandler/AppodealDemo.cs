@@ -219,20 +219,30 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
             Appodeal.setSegmentFilter("newString", "newStringFromSDK");
 
             showBanner();
-            CacheInterstitial();
-            CacheRewardVideo();
+            TryAdsCaching();
         }
 
         #region caching ads
-        void CacheInterstitial()
-        {
-            Appodeal.cache(Appodeal.INTERSTITIAL);
-            showInterstitial();
-        }
-
-        void CacheRewardVideo()
+        void TryAdsCaching()
         {
             Appodeal.cache(Appodeal.REWARDED_VIDEO);
+            Appodeal.cache(Appodeal.INTERSTITIAL);
+            TryToShowCachedAds();
+        }
+
+        public void TryToShowCachedAds()
+        {
+            if(SceneManager.GetActiveScene()==SceneManager.GetSceneByName("Ludo"))
+            {
+                if(Appodeal.canShow(Appodeal.REWARDED_VIDEO))
+                {
+                    Appodeal.show(Appodeal.REWARDED_VIDEO);
+                }
+                else if(Appodeal.canShow(Appodeal.INTERSTITIAL))
+                {
+                    Appodeal.show(Appodeal.INTERSTITIAL);
+                }
+            } 
         }
         #endregion
 
@@ -241,10 +251,7 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
         {
             if (Appodeal.canShow(Appodeal.INTERSTITIAL))
             {
-                if(SceneManager.GetActiveScene()==SceneManager.GetSceneByName("Ludo"))
-                {
-                    Appodeal.show(Appodeal.INTERSTITIAL);
-                }
+                Appodeal.show(Appodeal.INTERSTITIAL);
             }
         }
 
@@ -252,10 +259,7 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
         {
             if(Appodeal.canShow(Appodeal.REWARDED_VIDEO))
             {
-                if(SceneManager.GetActiveScene()==SceneManager.GetSceneByName("Ludo"))
-                {
-                    Appodeal.show(Appodeal.REWARDED_VIDEO);
-                }
+               Appodeal.show(Appodeal.REWARDED_VIDEO);
             }
         }
 

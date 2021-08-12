@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System;
 
 public class Coin : MonoBehaviour
 {
@@ -73,10 +74,7 @@ public class Coin : MonoBehaviour
   
     public void ResetPriorityValues()
     {
-        for(int i=0;i<priorityValues.Length;i++)
-        {
-            priorityValues[i]=0f;
-        }
+        Array.Clear(priorityValues, 0, priorityValues.Length);
     }
 
     #region number of player indicator
@@ -89,7 +87,6 @@ public class Coin : MonoBehaviour
 
     public void UpdateIndicatorInfo(int playerCounter)
     {
-        Debug.Log("Total coins at my positions is : "+playerCounter);
         //playerCounterText.text=playerCounter.ToString();
         //indicatorUI.SetActive(true);
     }
@@ -105,10 +102,7 @@ public class Coin : MonoBehaviour
     public void StopScaleAnimation()
     {
         iTween.StopByName(gameObject, "objScale");
-        iTween.ValueTo(gameObject, iTween.Hash("name", "objScale",
-           "from", s2, "to", s1,
-           "onupdate", "UpdateScale",
-           "easetype", iTween.EaseType.easeOutSine, "time", 0.1f));
+        transform.localScale=initialScale;
     }
 
     void UpdateScale(float scaleValue)

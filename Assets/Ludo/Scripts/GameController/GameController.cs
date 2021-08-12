@@ -1384,12 +1384,11 @@ public class GameController : MonoBehaviour
     #region New AI Behaviour
     IEnumerator HandleBotTurn()
     {
-        //lets reset the weightage of each coins
-        for(int i=0;i<generatedCoinsHolder.GetChild(turnCounter).childCount;i++)
+        for(int i=0;i<generatedCoinsHolder.childCount;i++)
         {
             generatedCoinsHolder.GetChild(turnCounter).GetChild(i).GetComponent<Coin>().ResetPriorityValues();
         }
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.3f);
         StartCoroutine(Dice.instance.RolltheDice());
     }
 
@@ -1696,7 +1695,6 @@ public class GameController : MonoBehaviour
         return false;
     }
 
-    //
     public class opponentsCoinsInfo
     {
         public Coin curTurnCoin;
@@ -1710,21 +1708,28 @@ public class GameController : MonoBehaviour
         coinsBehindMe.Clear();
         coinsInfrontOfMe.Clear();
 
+        Coin highestMovedCoin=movableAICoins[0];
+        int totalCloseRangecoins=0;
+
+        yield return new WaitForEndOfFrame();
+
         //totalOpponentOutCoins give information about all the opponents coins which are outside the base and which are not inside home lane
 
         for(int i=0;i<movableAICoins.Count;i++)
         {
+            //lets get current position index of my coin
+            int myCoinTempIndex=movableAICoins[i].stepCounter+players[movableAICoins[i].id].initialPosIndex;
+            if(myCoinTempIndex>coinPathContainer.childCount-1)
+            {
+                myCoinTempIndex=myCoinTempIndex-coinPathContainer.childCount;
+            }
+            
             //lets find out percentage of present saftey, future saftey,future kill potential
             for(int j=0;j<totalOpponentOutCoins.Count;j++)
             {
-                //lets get current position index of my current coin and opponent coin
-                int myCoinTempIndex=movableAICoins[i].stepCounter+players[movableAICoins[i].id].initialPosIndex;
+                //lets get current position index of opponent coin
                 int opponentCoinTempIndex=totalOpponentOutCoins[j].stepCounter+players[totalOpponentOutCoins[j].id].initialPosIndex;
 
-                if(myCoinTempIndex>coinPathContainer.childCount-1)
-                {
-                    myCoinTempIndex=myCoinTempIndex-coinPathContainer.childCount;
-                }
                 if(opponentCoinTempIndex>coinPathContainer.childCount-1)
                 {
                     opponentCoinTempIndex=opponentCoinTempIndex-coinPathContainer.childCount;
@@ -1735,11 +1740,15 @@ public class GameController : MonoBehaviour
                     //some of the opponents coins are behind me
                     if((myCoinTempIndex-opponentCoinTempIndex)<6)
                     {
-                        //there is high possiblity that opponent coin can cut my coin
-                        opponentsCoinsInfo tempBehindCoins= new opponentsCoinsInfo();
-                        tempBehindCoins.curTurnCoin=movableAICoins[i];
-                        tempBehindCoins.possibleOpponentCoins.Add(totalOpponentOutCoins[j]);
-                        coinsBehindMe.Add(tempBehindCoins);
+                        if(!movableAICoins[i].isSafe)
+                        {
+                            //there is high possiblity that opponent coin can cut my coin
+                            opponentsCoinsInfo tempBehindCoins= new opponentsCoinsInfo();
+                            tempBehindCoins.curTurnCoin=movableAICoins[i];
+                            tempBehindCoins.possibleOpponentCoins.Add(totalOpponentOutCoins[j]);
+                            coinsBehindMe.Add(tempBehindCoins);
+                            totalCloseRangecoins++;
+                        }
                     }
                 }
                 else if(opponentCoinTempIndex>myCoinTempIndex)
@@ -1747,13 +1756,22 @@ public class GameController : MonoBehaviour
                     //some of the opponents coins are infront of me
                     if((opponentCoinTempIndex-myCoinTempIndex)<6)
                     {
-                        //there is high possiblity that my coin can cut opponents coin
-                        opponentsCoinsInfo tempfrontCoins= new opponentsCoinsInfo();
-                        tempfrontCoins.curTurnCoin=movableAICoins[i];
-                        tempfrontCoins.possibleOpponentCoins.Add(totalOpponentOutCoins[j]);
-                        coinsInfrontOfMe.Add(tempfrontCoins);
+                        if(!movableAICoins[i].isSafe)
+                        {
+                            //there is high possiblity that my coin can cut opponents coin
+                            opponentsCoinsInfo tempfrontCoins= new opponentsCoinsInfo();
+                            tempfrontCoins.curTurnCoin=movableAICoins[i];
+                            tempfrontCoins.possibleOpponentCoins.Add(totalOpponentOutCoins[j]);
+                            coinsInfrontOfMe.Add(tempfrontCoins);
+                            totalCloseRangecoins++;
+                        }
                     }
                 }
+            }
+
+            if(highestMovedCoin.stepCounter<movableAICoins[i].stepCounter)
+            {
+                highestMovedCoin=movableAICoins[i];
             }
 
             //lets compute the journey percentage
@@ -1793,13 +1811,33 @@ public class GameController : MonoBehaviour
         }
 
         Coin highestPriorityCoin=movableAICoins[0];
-        for(int i=0;i<movableAICoins.Count;i++)
+        
+        if(totalCloseRangecoins==0)
         {
-           if(movableAICoins[i].GetMaxWeightPercentage()>highestPriorityCoin.GetMaxWeightPercentage())
+            if(highestMovedCoin.isSafe&&movableAICoins.Count>1)
+            {   
+                movableAICoins.Remove(highestMovedCoin);
+            }  
+            highestPriorityCoin=movableAICoins[Random.Range(0,movableAICoins.Count)]; 
+        }
+        else
+        {
+            for(int i=0;i<movableAICoins.Count;i++)
             {
-                highestPriorityCoin=movableAICoins[i];
+                if(movableAICoins[i].GetMaxWeightPercentage()>highestPriorityCoin.GetMaxWeightPercentage())
+                {
+                    highestPriorityCoin=movableAICoins[i];
+                }
             }
         }
+    
+        // for(int i=0;i<movableAICoins.Count;i++)
+        // {
+        //    if(movableAICoins[i].GetMaxWeightPercentage()>highestPriorityCoin.GetMaxWeightPercentage())
+        //     {
+        //         highestPriorityCoin=movableAICoins[i];
+        //     }
+        // }
         yield return new WaitForEndOfFrame();
         StartCoroutine(UpdateCoinPosition(highestPriorityCoin));
     }
