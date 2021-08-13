@@ -1810,6 +1810,7 @@ public class GameController : MonoBehaviour
             coinsInfrontOfMe[i].curTurnCoin.ComputeWeightage(100,cutPossiblityWeight,1);
         }
 
+        //calculation for the new highest priority coin
         Coin highestPriorityCoin=movableAICoins[0];
         
         if(totalCloseRangecoins==0)
@@ -1817,29 +1818,60 @@ public class GameController : MonoBehaviour
             if(highestMovedCoin.isSafe&&movableAICoins.Count>1)
             {   
                 movableAICoins.Remove(highestMovedCoin);
-            }  
-            highestPriorityCoin=movableAICoins[Random.Range(0,movableAICoins.Count)]; 
+            }
+            highestPriorityCoin=GetNewAiCoinForMovement();
         }
         else
         {
-            for(int i=0;i<movableAICoins.Count;i++)
-            {
-                if(movableAICoins[i].GetMaxWeightPercentage()>highestPriorityCoin.GetMaxWeightPercentage())
-                {
-                    highestPriorityCoin=movableAICoins[i];
-                }
-            }
+            highestPriorityCoin=GetHighPriorityCoin();
         }
-    
-        // for(int i=0;i<movableAICoins.Count;i++)
-        // {
-        //    if(movableAICoins[i].GetMaxWeightPercentage()>highestPriorityCoin.GetMaxWeightPercentage())
-        //     {
-        //         highestPriorityCoin=movableAICoins[i];
-        //     }
-        // }
+
         yield return new WaitForEndOfFrame();
         StartCoroutine(UpdateCoinPosition(highestPriorityCoin));
+    }
+
+    Coin GetHighPriorityCoin()
+    {
+        Coin tempHighCoin=movableAICoins[0];
+        for(int i=0;i<movableAICoins.Count;i++)
+        {
+           if(movableAICoins[i].GetMaxWeightPercentage()>tempHighCoin.GetMaxWeightPercentage())
+            {
+                tempHighCoin=movableAICoins[i];
+            }
+        }
+        return tempHighCoin;
+    }
+
+    Coin GetNewAiCoinForMovement()
+    {
+        Coin tempNewCoin=movableAICoins[0];
+        List<Coin> unsafeMovableCoins=new List<Coin>();
+        for(int i=0;i<movableAICoins.Count;i++)
+        {
+            if(!movableAICoins[i].isSafe)
+            {
+                unsafeMovableCoins.Add(movableAICoins[i]);
+            }
+        }
+
+        if(unsafeMovableCoins.Count>0)
+        {
+            Coin unsafeHighCoin=unsafeMovableCoins[0];
+            for(int i=0;i<unsafeMovableCoins.Count;i++)
+            {   
+                if(unsafeMovableCoins[i].GetMaxWeightPercentage()>unsafeHighCoin.GetMaxWeightPercentage())
+                {
+                    unsafeHighCoin=unsafeMovableCoins[i];
+                }
+            }
+            tempNewCoin=unsafeHighCoin;
+        }
+        else
+        {
+            tempNewCoin=movableAICoins[Random.Range(0,movableAICoins.Count)];
+        }
+        return tempNewCoin;
     }
     #endregion
 
