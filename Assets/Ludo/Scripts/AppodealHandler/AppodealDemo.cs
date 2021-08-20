@@ -17,9 +17,9 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
         IPermissionGrantedListener
     {
         #if UNITY_EDITOR && !UNITY_ANDROID && !UNITY_IPHONE
-                public static string appKey = "";
+            public static string appKey = "";
         #elif UNITY_ANDROID
-            public static string appKey = "a4d74cb47efe8df4ca24afae6af650aa655d7a5108bd3de2";
+            public static string appKey ="2265263c3f13e00e7c7338b6ab64a3a056b88b485f198684"; //"a4d74cb47efe8df4ca24afae6af650aa655d7a5108bd3de2";
         #elif UNITY_IPHONE
             public static string appKey = "466de0d625e01e8811c588588a42a55970bc7c132649eede";
         #else

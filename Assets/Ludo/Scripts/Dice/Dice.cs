@@ -24,7 +24,7 @@ public class Dice : MonoBehaviour
     public float diceThrowForce=50f;
     private bool startDiceAnimation=false;
     private float x;
-    private float diceRollMultiplier=10f;
+    private float diceRollMultiplier=15f;
 
     [Header("Dice Roll Controller")]
     public bool canRollDice=false;
@@ -138,7 +138,7 @@ public class Dice : MonoBehaviour
        GameController.instance.StopBlinkingAnimation();
        currentDiceValue=GetRandomDiceValue(currentAttempts);
         startDiceAnimation=true;
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.6f);
         startDiceAnimation=false;
         yield return new WaitForEndOfFrame();
         RotateDiceToCorrectFace();

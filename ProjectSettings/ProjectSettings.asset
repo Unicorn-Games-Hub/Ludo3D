@@ -12,7 +12,7 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: Unicorn Games
+  companyName: KaruwaApps
   productName: Ludo
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
@@ -127,7 +127,7 @@ PlayerSettings:
     16:10: 1
     16:9: 1
     Others: 1
-  bundleVersion: 4.7
+  bundleVersion: 1.2.2
   preloadedAssets: []
   metroInputSource: 0
   wsaTransparentSwapchain: 0
@@ -146,15 +146,15 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.UnicornGames.Ludo
+    Android: com.karuwaapps.ludo
   buildNumber:
     Standalone: 0
     iPhone: 0
     tvOS: 0
-  overrideDefaultApplicationIdentifier: 0
-  AndroidBundleVersionCode: 9
+  overrideDefaultApplicationIdentifier: 1
+  AndroidBundleVersionCode: 3
   AndroidMinSdkVersion: 28
-  AndroidTargetSdkVersion: 0
+  AndroidTargetSdkVersion: 30
   AndroidPreferredInstallLocation: 1
   aotOptions: 
   stripEngineCode: 1
@@ -238,8 +238,8 @@ PlayerSettings:
   AndroidTargetArchitectures: 3
   AndroidSplashScreenScale: 0
   androidSplashScreen: {fileID: 0}
-  AndroidKeystoreName: /Users/goops17/Downloads/UnicornGames/Board games/Ludo-Secrets/ludo3dkey.keystore
-  AndroidKeyaliasName: ludo3d
+  AndroidKeystoreName: /Users/goops17/Downloads/UnicornGames/Game-Secrets/Ludo_karuwaApps/ludo_secret.keystore
+  AndroidKeyaliasName: ludo
   AndroidBuildApkPerCpuArchitecture: 0
   AndroidTVCompatibility: 0
   AndroidIsGame: 1
