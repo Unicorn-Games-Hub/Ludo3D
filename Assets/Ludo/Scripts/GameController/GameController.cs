@@ -346,7 +346,7 @@ public class GameController : MonoBehaviour
         int randomTurn=Random.Range(0,gamePlayersList.Count);
         curTurn=randomTurn;
         turnCounter=gamePlayersList[randomTurn];
-        HandleDiceRoll(turnCounter);
+        StartCoroutine(HandleDiceRoll(turnCounter));
         //updating dice position inside board
        UpdateDicePositionOnBoard();
     }
@@ -355,7 +355,7 @@ public class GameController : MonoBehaviour
     {
         StartCoroutine(WaitBeforeUpdatingTurn());
     }
-
+    
     IEnumerator WaitBeforeUpdatingTurn()
     {
         highLights[turnCounter].StopAnimation();
@@ -379,7 +379,7 @@ public class GameController : MonoBehaviour
         turnCounter=gamePlayersList[curTurn];
         UpdateDicePositionOnBoard();
         yield return new WaitForSeconds(0.2f);
-        HandleDiceRoll(turnCounter);
+        StartCoroutine(HandleDiceRoll(turnCounter));
     }
     #endregion
 
@@ -553,10 +553,21 @@ public class GameController : MonoBehaviour
         clickableTempCoin.StartScaleAnimation();
     }
 
-    void HandleDiceRoll(int turnValue)
+    IEnumerator HandleDiceRoll(int turnValue)
     {
+        //only check if coins are out of the base
+        if(players[turnCounter].outCoins.Count>0)
+        {
+            List<int> possibleRollList=FindOutPossibleCutOutComes();
+            yield return new WaitForEndOfFrame();
+            if(possibleRollList.Count>0)
+            {
+                Dice.instance.UpdateCutProbablity(possibleRollList);
+            }
+        }
         //handling 6 probablity from here
         Dice.instance.UpdateDiceProbablity(players[turnCounter].noOfRoundsWithoutCoinOut);
+
         if(players[turnValue].player==playerType.Human)
         {
             Dice.instance.canRollDice=true;
@@ -577,6 +588,65 @@ public class GameController : MonoBehaviour
         Dice.instance.StopDiceHighLight();
     }
     #endregion
+
+    //for decreasing the chance of cutting opponent coin
+    List<int> FindOutPossibleCutOutComes()
+    {
+        List<Coin> tempUnsafeCoins=new List<Coin>();
+        List<int> possibleCutPoint=new List<int>();
+
+        for(int i=0;i<gamePlayersList.Count;i++)
+        {
+            if(gamePlayersList[i]!=turnCounter)
+            {
+                for(int j=0;j<players[gamePlayersList[i]].outCoins.Count;j++)
+                {
+                    Coin playerOutCoin=players[gamePlayersList[i]].outCoins[j].GetComponent<Coin>();
+
+                    if(!playerOutCoin.isSafe&&!playerOutCoin.onWayToHome)
+                    {
+                        if(!tempUnsafeCoins.Contains(playerOutCoin))
+                        {
+                            tempUnsafeCoins.Add(playerOutCoin);
+                        }
+                    }
+                }
+            }
+        }
+
+        for(int i=0;i<players[turnCounter].outCoins.Count;i++)
+        {
+            for(int j=0;j<tempUnsafeCoins.Count;j++)
+            {
+                Coin pCoin=players[turnCounter].outCoins[i].GetComponent<Coin>();
+                Coin oCoin=tempUnsafeCoins[j];
+                
+                int pCoinNewPosIndex=pCoin.stepCounter+players[pCoin.id].initialPosIndex;
+                int oCoinPosIndex=oCoin.stepCounter+players[oCoin.id].initialPosIndex;
+
+                if(pCoinNewPosIndex>coinPathContainer.childCount-1)
+                {
+                    pCoinNewPosIndex=pCoinNewPosIndex-coinPathContainer.childCount;
+                }
+
+                if(oCoinPosIndex>coinPathContainer.childCount-1)
+                {
+                    oCoinPosIndex=oCoinPosIndex-coinPathContainer.childCount;
+                }
+
+                int tempRollNum=oCoinPosIndex-pCoinNewPosIndex;
+
+                if(tempRollNum>0&&tempRollNum<=6)
+                {
+                    if(!possibleCutPoint.Contains(tempRollNum))
+                    {
+                        possibleCutPoint.Add(tempRollNum);
+                    }
+                }
+            }
+        }
+        return possibleCutPoint;
+    }
 
     #region Gameplay
     void Update()
@@ -906,7 +976,7 @@ public class GameController : MonoBehaviour
 
     void OneStepCompleted()
     {
-        HandleDiceRoll(turnCounter);
+        StartCoroutine(HandleDiceRoll(turnCounter));
     }
 
     private Coin ocToCut=null;
@@ -1163,8 +1233,8 @@ public class GameController : MonoBehaviour
 
     IEnumerator UpdateTurnAfterCutting()
     {
-        yield return new WaitForSeconds(0.2f);
-        HandleDiceRoll(turnCounter);
+        yield return new WaitForSeconds(1f);
+        StartCoroutine(HandleDiceRoll(turnCounter));
     }
     #endregion
 
@@ -1296,7 +1366,7 @@ public class GameController : MonoBehaviour
         }
         else
         {
-            HandleDiceRoll(turnCounter);
+            StartCoroutine(HandleDiceRoll(turnCounter));
         }
         UpdateDicePositionOnBoard();
     }
@@ -2092,7 +2162,6 @@ public class GameController : MonoBehaviour
     #region Player Indicator
     void HandlePlayerNumIndicator(Coin recentlyMovedCoin)
     {
-        /*
         GameObject center=null;
         if(!recentlyMovedCoin.onWayToHome)
         {
@@ -2113,7 +2182,6 @@ public class GameController : MonoBehaviour
         Collider[] hitColliders = Physics.OverlapSphere(centerPos, 0.1f);
         List<Coin> coinsAtSimilarPosition=new List<Coin>();
 
-        //
         List<Coin> diffCoins=new List<Coin>();
 
         foreach (var h in hitColliders)
@@ -2129,7 +2197,7 @@ public class GameController : MonoBehaviour
             }
         }
         
-        Debug.Log("Total coins at location : "+center.name+" is "+coinsAtSimilarPosition.Count);
+        //Debug.Log("Total coins at location : "+center.name+" is "+coinsAtSimilarPosition.Count);
 
         if(diffCoins.Count>0)
         {
@@ -2146,18 +2214,17 @@ public class GameController : MonoBehaviour
             }
         }
 
-        if(!safePosIndexList.Contains(recentlyMovedCoin.stepCounter))
-        {
-            if(coinsAtSimilarPosition.Count>1)
-            {
-                UpdateTemporarySafeZone(center,tempSafeZoneMat);
-            }
-            else
-            {
-                UpdateTemporarySafeZone(center,originalPathMat);
-            }
-        } 
-        */
+        // if(!safePosIndexList.Contains(recentlyMovedCoin.stepCounter))
+        // {
+        //     if(coinsAtSimilarPosition.Count>1)
+        //     {
+        //         UpdateTemporarySafeZone(center,tempSafeZoneMat);
+        //     }
+        //     else
+        //     {
+        //         UpdateTemporarySafeZone(center,originalPathMat);
+        //     }
+        // } 
     }
 
     void UpdateTemporarySafeZone(GameObject previousSafeZone,Material tempMat)

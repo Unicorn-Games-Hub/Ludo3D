@@ -136,7 +136,28 @@ public class Dice : MonoBehaviour
        }
        //from here we will stop blinking animation
        GameController.instance.StopBlinkingAnimation();
-       currentDiceValue=GetRandomDiceValue(currentAttempts);
+
+       if(handleDiceProbablity)
+       {
+            switch(cutProbablity)
+            {
+                case difficultyType.low:
+                currentDiceValue=GetLowCutProbablity();
+                break;
+                case difficultyType.medium:
+                currentDiceValue=GetMediumCutProbablity();
+                break;
+                case difficultyType.high:
+                currentDiceValue=GetHighCutProbablity();
+                break;
+            }
+            handleDiceProbablity=false;
+       }
+       else
+       {
+           currentDiceValue=GetRandomDiceValue(currentAttempts);
+       }
+
         startDiceAnimation=true;
         yield return new WaitForSeconds(0.6f);
         startDiceAnimation=false;
@@ -146,6 +167,7 @@ public class Dice : MonoBehaviour
         rb.drag=40f;
         canRollDice=false;
         GameController.instance.HandleObtainedDiceValue(currentDiceValue);
+        currentAttempts=0;
    }
 
    void RotateDiceToCorrectFace()
@@ -182,6 +204,7 @@ public class Dice : MonoBehaviour
        {
             numToReplace=3;
        }
+
         int[] newArray=GetProbablityArray(numToReplace);
         int newIndex=Random.Range(0,newArray.Length);
         int newDiceValue=newArray[newIndex];
@@ -202,6 +225,57 @@ public class Dice : MonoBehaviour
             }
         }
         return outComeArray;
+    }
+    #endregion
+
+    #region probablity of cutting
+    public enum difficultyType
+    {
+        low,
+        medium,
+        high
+    }
+    public difficultyType cutProbablity;
+
+    public List<int> defaultOutComeList=new List<int>();
+    private List<int> outcomeList=new List<int>();
+
+    private bool handleDiceProbablity=false;
+
+    public void UpdateCutProbablity(List<int> tempOutList)
+    {
+        outcomeList=tempOutList;
+        handleDiceProbablity=true;
+    }
+
+    int GetLowCutProbablity()
+    {
+        List<int> newProbablityList=defaultOutComeList;
+        for(int i=0;i<outcomeList.Count;i++)
+        {
+            if(newProbablityList.Contains(outcomeList[i]))
+            {
+                newProbablityList.Remove(outcomeList[i]);
+            }
+        }
+
+        int n0=Random.Range(0,newProbablityList.Count);
+        int n0Value=newProbablityList[n0];
+        return n0Value;
+    }
+
+    int GetMediumCutProbablity()
+    {
+        int n1=Random.Range(0,defaultOutComeList.Count);
+        int n1Value=defaultOutComeList[n1];
+        return n1Value;
+    }
+
+    int GetHighCutProbablity()
+    {
+        int n2=Random.Range(0,defaultOutComeList.Count);
+        int n2Value=defaultOutComeList[n2];
+        return n2Value;
     }
     #endregion
 
