@@ -9,6 +9,7 @@ public class GameAudioHandler : MonoBehaviour
     public AudioSource uiAd;
     public AudioSource ad;
     public AudioSource respawnAd;
+    public AudioSource attackDefendAd;
 
     [Header("UI")]
     public AudioClip buttonSound;
@@ -104,8 +105,8 @@ public class GameAudioHandler : MonoBehaviour
     {
         if(PlayerPrefs.GetInt("Ludo-Sound")==0)
         {
-            ad.clip=attackSound;
-            ad.Play();
+            attackDefendAd.clip=attackSound;
+            attackDefendAd.Play();
         }
     }
 
@@ -113,8 +114,8 @@ public class GameAudioHandler : MonoBehaviour
     {
         if(PlayerPrefs.GetInt("Ludo-Sound")==0)
         {
-            ad.clip=defendSound;
-            ad.Play();
+            attackDefendAd.clip=defendSound;
+            attackDefendAd.Play();
         }
     }   
 
@@ -122,8 +123,8 @@ public class GameAudioHandler : MonoBehaviour
     {
         if(PlayerPrefs.GetInt("Ludo-Sound")==0)
         {
-            ad.clip=partFallingSound;
-            ad.Play();
+            attackDefendAd.clip=partFallingSound;
+            attackDefendAd.Play();
         }
     }
 

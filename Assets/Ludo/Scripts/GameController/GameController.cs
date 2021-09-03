@@ -93,10 +93,6 @@ public class GameController : MonoBehaviour
     [Header("Coin Safe Pos Index")]
     public List<int> safePosIndexList=new List<int>();
 
-    //Refrence to the dice material
-    public Material diceMat;
-
-   
     [Header("Ingame player indicator")]
     public Transform playerIndicators;
 
@@ -347,7 +343,6 @@ public class GameController : MonoBehaviour
         curTurn=randomTurn;
         turnCounter=gamePlayersList[randomTurn];
         StartCoroutine(HandleDiceRoll(turnCounter));
-        //updating dice position inside board
        UpdateDicePositionOnBoard();
     }
 
@@ -450,7 +445,6 @@ public class GameController : MonoBehaviour
                         UpdateTurn();
                     }
                 }
-                
                 //for increasing the probablity of 6
                 players[turnCounter].noOfRoundsWithoutCoinOut=0;
             }
@@ -890,7 +884,7 @@ public class GameController : MonoBehaviour
                     }
                     else if(animState==statusType.Defend)
                     {
-                        // Debug.Log("time for defending animation");
+                        StartCoroutine(TimeToDefendAttack(coin,ocToDefend));
                     }
                     else
                     {
@@ -974,17 +968,60 @@ public class GameController : MonoBehaviour
         Idle(coin1.transform);
     }
 
+    IEnumerator TimeToDefendAttack(Coin attackerCoin,Coin defenderCoin)
+    {
+        Quaternion opCoinOriginalRot=defenderCoin.transform.rotation;
+        defenderCoin.transform.LookAt(attackerCoin.transform);
+        DefendTheAttack(defenderCoin.transform);
+        yield return new WaitForSeconds(0.5f);
+        Attack(attackerCoin.transform);
+        if(GameAudioHandler.instance!=null)
+        {
+            GameAudioHandler.instance.PlayCharacterDefendSound();
+        }
+        yield return new WaitForSeconds(2f);
+        int tempCoinNewStepCount1=attackerCoin.stepCounter+players[attackerCoin.id].initialPosIndex+1;
+        if(tempCoinNewStepCount1>coinPathContainer.childCount-1)
+        {
+            tempCoinNewStepCount1=tempCoinNewStepCount1-coinPathContainer.childCount;
+        }
+        Vector3 newstepPos=new Vector3(coinPathContainer.GetChild(tempCoinNewStepCount1).position.x,attackerCoin.transform.position.y,coinPathContainer.GetChild(tempCoinNewStepCount1).position.z);
+
+        iTween.MoveTo(attackerCoin.transform.gameObject, iTween.Hash("position",newstepPos, 
+            "speed", coinMoveSpeed, 
+            "easetype", iTween.EaseType.linear,
+            "oncomplete", "OneStepCompleted", 
+            "oncompletetarget", this.gameObject
+        ));
+
+        //lets increment the step counter of coin by 1
+        attackerCoin.stepCounter++;
+        attackerCoin.stepsMovedTillNow++;
+        //rotating character
+        UpdateCharacterRotation(attackerCoin.transform);
+        Walk(attackerCoin.transform);
+        yield return new WaitForSeconds(0.3f);
+        defenderCoin.transform.rotation=opCoinOriginalRot;
+        Idle(defenderCoin.transform);
+        Idle(attackerCoin.transform);
+    }
+
     void OneStepCompleted()
     {
         StartCoroutine(HandleDiceRoll(turnCounter));
     }
 
     private Coin ocToCut=null;
+    private Coin ocToDefend=null;
     void  CheckForCutAndDefend(Coin newC1)
     {
         ocToCut=null;
+        ocToDefend=null;
         List<Coin> avaliableOpponentCoins=new List<Coin>();
         List<Coin> opCoinsAtTargetPos=new List<Coin>();
+
+        List<Coin> tempDefendableCoins=new List<Coin>();
+        List<Coin> tempMultiCoins=new List<Coin>();
 
         for(int i=0;i<gamePlayersList.Count;i++)
         {
@@ -993,11 +1030,19 @@ public class GameController : MonoBehaviour
                 if(newC1.id!=players[gamePlayersList[i]].playerID)
                 {
                     Coin tempCoin1=players[gamePlayersList[i]].outCoins[j].GetComponent<Coin>();
-                    if(!tempCoin1.isSafe&&!tempCoin1.onWayToHome&&!tempCoin1.atHome)
+                    if(!tempCoin1.onWayToHome&&!tempCoin1.atHome)
                     {
-                        if(!avaliableOpponentCoins.Contains(tempCoin1))
+                        if(!tempCoin1.isSafe)
                         {
-                            avaliableOpponentCoins.Add(tempCoin1);
+                            if(!avaliableOpponentCoins.Contains(tempCoin1))
+                            {
+                                avaliableOpponentCoins.Add(tempCoin1);
+                            }
+                        }
+                        //store every opponent coin
+                        if(!tempDefendableCoins.Contains(tempCoin1))
+                        {
+                            tempDefendableCoins.Add(tempCoin1);
                         }
                     }
                 }
@@ -1009,7 +1054,6 @@ public class GameController : MonoBehaviour
         {
             int opCoinPosIndex=avaliableOpponentCoins[i].stepCounter+players[avaliableOpponentCoins[i].id].initialPosIndex;
             int newC1PosIndex=newC1.stepCounter+players[newC1.id].initialPosIndex+currentDiceValue;
-
             if(opCoinPosIndex>coinPathContainer.childCount-1)
             {
                 opCoinPosIndex=opCoinPosIndex-coinPathContainer.childCount;
@@ -1029,15 +1073,39 @@ public class GameController : MonoBehaviour
             }
         }
 
+        for(int i=0;i<tempDefendableCoins.Count;i++)
+        {
+            int tempOpPosIndex=tempDefendableCoins[i].stepCounter+players[tempDefendableCoins[i].id].initialPosIndex;
+            int curCoinTempPos=newC1.stepCounter+players[newC1.id].initialPosIndex+currentDiceValue;
+            if(tempOpPosIndex>coinPathContainer.childCount-1)
+            {
+                tempOpPosIndex=tempOpPosIndex-coinPathContainer.childCount;
+            }
+
+            if(curCoinTempPos>coinPathContainer.childCount-1)
+            {
+                curCoinTempPos=curCoinTempPos-coinPathContainer.childCount;
+            }
+
+            if(tempOpPosIndex==curCoinTempPos)
+            {
+                if(!tempMultiCoins.Contains(tempDefendableCoins[i]))
+                {
+                    tempMultiCoins.Add(tempDefendableCoins[i]);
+                }
+            }
+        }
+
         if(opCoinsAtTargetPos.Count==1)
         {
             ocToCut=opCoinsAtTargetPos[0];
             animState=statusType.Cut;
         }
-        // else if(opCoinsAtTargetPos.Count>1)
-        // {
-        //     animState=statusType.Defend;
-        // }
+        else if(tempMultiCoins.Count>0)
+        {
+            ocToDefend=tempMultiCoins[Random.Range(0,tempMultiCoins.Count)];
+            animState=statusType.Defend;
+        }
         else
         {
             animState=statusType.None;
@@ -1177,7 +1245,6 @@ public class GameController : MonoBehaviour
                 generatedCoinsHolder.GetChild(turnCounter).GetChild(j).GetComponent<Coin>().isReadyForHome=true;
             }
         }
-
         //lets check if cut happened due to 6 or not
         if(currentDiceValue==6)
         {
@@ -2172,12 +2239,7 @@ public class GameController : MonoBehaviour
             }
             center=coinPathContainer.GetChild(blockIndex).gameObject;
         }
-        else
-        {
-            //disable for home lane coin
-            //center=coinPathContainer.GetChild(recentlyMovedCoin.stepCounter).gameObject;
-        }
-
+       
         Vector3 centerPos=new Vector3(center.transform.position.x,0.2f,center.transform.position.z);
         Collider[] hitColliders = Physics.OverlapSphere(centerPos, 0.1f);
         List<Coin> coinsAtSimilarPosition=new List<Coin>();
@@ -2196,8 +2258,6 @@ public class GameController : MonoBehaviour
                 }
             }
         }
-        
-        //Debug.Log("Total coins at location : "+center.name+" is "+coinsAtSimilarPosition.Count);
 
         if(diffCoins.Count>0)
         {
@@ -2213,18 +2273,6 @@ public class GameController : MonoBehaviour
                 }
             }
         }
-
-        // if(!safePosIndexList.Contains(recentlyMovedCoin.stepCounter))
-        // {
-        //     if(coinsAtSimilarPosition.Count>1)
-        //     {
-        //         UpdateTemporarySafeZone(center,tempSafeZoneMat);
-        //     }
-        //     else
-        //     {
-        //         UpdateTemporarySafeZone(center,originalPathMat);
-        //     }
-        // } 
     }
 
     void UpdateTemporarySafeZone(GameObject previousSafeZone,Material tempMat)
@@ -2320,6 +2368,19 @@ public class GameController : MonoBehaviour
             }
         }
     }
+
+
+    void DefendTheAttack(Transform currentChar)
+    {
+        if(playerModel==modelType.character)
+        {
+            if(CharAnimationHandler.instance!=null)
+            {
+                CharAnimationHandler.instance.PlayDefendAttackAnimation(currentChar);
+            }
+        }
+    }
+
     #endregion
 
     #region art style

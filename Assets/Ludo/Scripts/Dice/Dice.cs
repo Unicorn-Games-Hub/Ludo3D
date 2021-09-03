@@ -21,24 +21,34 @@ public class Dice : MonoBehaviour
    private Vector3 differenceVector;
 
     [Header("Dice Behaviour")]
-    public float diceThrowForce=50f;
+    [Range(5f,50f)]
+    public float diceThrowForce=25f;
     private bool startDiceAnimation=false;
     private float x;
-    private float diceRollMultiplier=15f;
+    private float diceRollMultiplier=10f;
 
     [Header("Dice Roll Controller")]
     public bool canRollDice=false;
+    private Animation diceAnim;
+    public AnimationClip rollAnim;
+    private string rollAnimName;
+    [Range(1f,5f)]
+    public float rollSpeed=1f;
+
 
    //array for dice face rotation
    private Vector2[] diceFaceArray={new Vector2(180f,0f),new Vector2(270f,0f),new Vector2(0f,90f),new Vector2(0f,270f),new Vector2(90f,0f),new Vector2(0f,0f)};
+   [HideInInspector]
    [Range(1,6)]
    public int currentDiceValue=1;
 
    [Header("Dice")]
-   private Material diceMat;
+   public Transform ludoDice;
+   public Material diceMat;
+   private Color diceMatCol;
    private Color normalColor;
-
    public Color[] diceNormalColor;
+    private bool transparencyChanged=false;
 
    public enum states
    {
@@ -71,7 +81,8 @@ public class Dice : MonoBehaviour
         currentDiceValue=Random.Range(1,7);
         RotateDiceToCorrectFace();
         diceStates=states.idle;
-        diceMat=GetComponent<MeshRenderer>().material;
+        diceAnim=ludoDice.GetComponent<Animation>();
+        rollAnimName=rollAnim.name;
    }
 
    void Update()
@@ -100,14 +111,12 @@ public class Dice : MonoBehaviour
             }
             else if(Input.GetMouseButtonUp(0)&&isDragging)
             {
-                differenceVector=finalDicePos-initialDicePos;
-                if(differenceVector.magnitude>0f)
-                {
-                    rb.AddForce(differenceVector.normalized * diceThrowForce, ForceMode.Impulse);
-                }
+                rb.velocity=(finalDicePos-initialDicePos).normalized*diceThrowForce;
+                //rb.AddForce (((finalDicePos-initialDicePos).normalized) * (Vector3.Distance (finalDicePos, initialDicePos)) * diceThrowForce * rb.mass);
                 StartCoroutine(RolltheDice());
                 isDragging=false;
                 diceStates=states.rolling;
+                UpdateDragForce();
             }
        }
       
@@ -116,17 +125,24 @@ public class Dice : MonoBehaviour
             curMousePos=Camera.main.ScreenToViewportPoint(Input.mousePosition);
             tempPos=GetMousePosAsWorldPos()+offset;
             finalDicePos=tempPos;
-            tempPos.x=Mathf.Clamp(tempPos.x,-2f,2f);
-            tempPos.z=Mathf.Clamp(tempPos.z,-2.5f,3f);
+            tempPos.x=Mathf.Clamp(tempPos.x,-2.4f,2.4f);
+            tempPos.z=Mathf.Clamp(tempPos.z,-2.4f,2.4f);
             transform.position=Vector3.Lerp(transform.position,new Vector3(tempPos.x,transform.position.y,tempPos.z),Time.deltaTime*dragSensitivity);
         }
 
         if(startDiceAnimation)
         {
-            x+=diceRollMultiplier;
-           transform.rotation=Quaternion.Euler(x,0f,x);
-        }
+            //x+=diceRollMultiplier;
+            // transform.rotation=Quaternion.Euler(x,0f,x);
+        }        
    }
+
+   void UpdateDragForce()
+   {
+        rb.drag=5f;
+        rb.angularDrag=5f;
+   }
+
 
    public IEnumerator RolltheDice()
    {
@@ -157,14 +173,18 @@ public class Dice : MonoBehaviour
        {
            currentDiceValue=GetRandomDiceValue(currentAttempts);
        }
-
-        startDiceAnimation=true;
+        diceAnim.clip=rollAnim;
+        diceAnim[rollAnimName].speed=rollSpeed;
+        diceAnim.Play();
+        AnimateDiceScale(true);
         yield return new WaitForSeconds(0.6f);
+        diceAnim.Stop();
         startDiceAnimation=false;
         yield return new WaitForEndOfFrame();
         RotateDiceToCorrectFace();
+        AnimateDiceScale(false);
         diceStates=states.idle;
-        rb.drag=40f;
+        transparencyChanged=false;
         canRollDice=false;
         GameController.instance.HandleObtainedDiceValue(currentDiceValue);
         currentAttempts=0;
@@ -172,7 +192,9 @@ public class Dice : MonoBehaviour
 
    void RotateDiceToCorrectFace()
    {
-        transform.rotation=Quaternion.Euler(diceFaceArray[currentDiceValue-1].x,0f,diceFaceArray[currentDiceValue-1].y);
+        rb.velocity=Vector3.zero;
+        rb.angularVelocity=Vector3.zero;
+        ludoDice.rotation=Quaternion.Euler(diceFaceArray[currentDiceValue-1].x,0f,diceFaceArray[currentDiceValue-1].y);
    }
 
     private Vector3 GetMousePosAsWorldPos()
@@ -299,7 +321,7 @@ public class Dice : MonoBehaviour
         iTween.ValueTo(gameObject, iTween.Hash("name", "sp1","from", newcol, "to", normalColor,"onupdate", 
         "tweenOnUpdateCallBack","loopType", iTween.LoopType.pingPong, "easetype", iTween.EaseType.linear, "time", .4f, "delay", 0.2f));
 
-        iTween.ValueTo(gameObject, iTween.Hash("name", "scaleAnim","from", 0.9f, "to", 0.8f,"onupdate", 
+        iTween.ValueTo(gameObject, iTween.Hash("name", "scaleAnim","from", 1f, "to", 1.1f,"onupdate", 
         "tweenScaleCallback","loopType", iTween.LoopType.pingPong, "easetype", iTween.EaseType.linear, "time", .1f, "delay", 0.05f));
     }
 
@@ -313,14 +335,49 @@ public class Dice : MonoBehaviour
 
            iTween.StopByName(gameObject, "scaleAnim");
         iTween.ValueTo(gameObject, iTween.Hash("name", "scaleAnim",
-           "from", 0.9f, "to", 0.8f,
+           "from", 1.1f, "to", 1f,
            "onupdate", "tweenScaleCallback",
            "easetype", iTween.EaseType.easeOutSine, "time", 0.4f));
     }
 
     void tweenScaleCallback(float tempScale)
     {
-        transform.localScale=new Vector3(tempScale,tempScale,tempScale);
+        ludoDice.localScale=new Vector3(tempScale,tempScale,tempScale);
+    }
+    #endregion
+
+    void AnimateDiceScale(bool value)
+    {
+        if(value)
+        {
+            iTween.ScaleTo(gameObject, iTween.Hash("x", 1.1, "y", 1.1,"z",1.1, "time", 0.5f));
+        }
+        else
+        {
+            iTween.ScaleTo(gameObject, iTween.Hash("x", 1, "y", 1,"z",1, "time", 0.5f));
+        }
+    }
+
+    #region changing transparency of the dice
+    void OnTriggerEnter(Collider col)
+    {
+        if(col.gameObject.layer==LayerMask.NameToLayer("Coin")||col.gameObject.layer==LayerMask.NameToLayer("OppCoin"))
+        {
+            if(diceStates==states.idle)
+            {
+                FadeOutDiceColor();
+            }
+        }
+    }
+
+    void FadeOutDiceColor()
+    {
+        if(!transparencyChanged)
+        {
+            diceMatCol=diceMat.color;
+            diceMat.color=new Color(diceMatCol.r,diceMatCol.g,diceMatCol.b,0.4f);
+            transparencyChanged=true;
+        }
     }
     #endregion
 }
