@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class GameModeSelectionHandler : MonoBehaviour
 {
     public static GameModeSelectionHandler instance;
-    
     public Sprite[] playerIndicator;
     public Sprite[] botIndicator;
     public GameObject[] playerUI;
@@ -35,6 +34,7 @@ public class GameModeSelectionHandler : MonoBehaviour
            {
                tempPlayerIndex=0;
                playerUI[i].GetComponent<Image>().sprite=playerIndicator[i];
+               playerUI[i].GetComponent<PlayerSelector>().nameText.text="Human";
            }
            else
            {
@@ -42,11 +42,13 @@ public class GameModeSelectionHandler : MonoBehaviour
                {
                     playerUI[randomPlayer].GetComponent<Image>().sprite=playerIndicator[randomPlayer];
                     tempPlayerIndex=0;
+                    playerUI[i].GetComponent<PlayerSelector>().nameText.text="Human";
                }
                else
                {
                     tempPlayerIndex=1;
                     playerUI[i].GetComponent<Image>().sprite=botIndicator[i];
+                    playerUI[i].GetComponent<PlayerSelector>().nameText.text="Bot";
                }
            }
             GameDataHolder.instance.playerIndex[i]=tempPlayerIndex;

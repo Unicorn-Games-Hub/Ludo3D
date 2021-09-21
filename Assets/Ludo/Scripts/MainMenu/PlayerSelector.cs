@@ -1,13 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerSelector : MonoBehaviour
 {
     public int colorIndex=0;
-
     public int playerID=0;
-    
+    public Text nameText;
+    private string[] playerName={"Human","Bot"};
+
     public void UpdatePlayerType()
     {
         if(playerID==0)
@@ -23,5 +23,6 @@ public class PlayerSelector : MonoBehaviour
         {
             HomeMenuHandler.instance.PlayButtonClickSound();
         }
+        nameText.text=playerName[playerID];
     }
 }

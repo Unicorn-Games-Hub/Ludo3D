@@ -21,6 +21,9 @@ public class HomeMenuHandler : MonoBehaviour
 
     public Button[] avaliablePlayers;
 
+    //
+    public Animator homeAnim;
+
     [Header("Number of players")]
     public Sprite[] selectionIndicator;
     public GameObject[] playerSelectionUI;
@@ -54,6 +57,9 @@ public class HomeMenuHandler : MonoBehaviour
 
     void Start()
     {
+        Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 0;
+        
         //4 players at default
         UpdateSelectionUI(4);
         if(FirebaseHandler.instance!=null)
@@ -61,20 +67,21 @@ public class HomeMenuHandler : MonoBehaviour
            FirebaseHandler.instance.TrackOpenFortheFirstTime();
         }
         onboardingUI.SetActive(false);
-        permissionUI.SetActive(false);
+        //permissionUI.SetActive(false);
     }
 
-    void Update()
-    {
-        if(uiToMove!=null)
-        {
-            homeScreenUI.GetComponent<RectTransform>().anchoredPosition=Vector3.Lerp(homeScreenUI.GetComponent<RectTransform>().anchoredPosition,-uiToMove.anchoredPosition,Time.deltaTime*moveSpeed);
-        }
-    }
+    // void Update()
+    // {
+    //     if(uiToMove!=null)
+    //     {
+    //         homeScreenUI.GetComponent<RectTransform>().anchoredPosition=Vector3.Lerp(homeScreenUI.GetComponent<RectTransform>().anchoredPosition,-uiToMove.anchoredPosition,Time.deltaTime*moveSpeed);
+    //     }
+    // }
 
     #region Home button events
     public void PlayAgainstHuman()
     {
+        PlayerPrefs.SetInt("total_against_human",PlayerPrefs.GetInt("total_against_human")+1);
         modeIndex=0;
         ShowGameModeUI();
         PlayButtonClickSound();
@@ -82,6 +89,7 @@ public class HomeMenuHandler : MonoBehaviour
 
     public void PlayAgainstBot()
     {
+        PlayerPrefs.SetInt("total_against_cpu",PlayerPrefs.GetInt("total_against_cpu")+1);
         modeIndex=1;
         ShowGameModeUI();
         PlayButtonClickSound();
@@ -89,7 +97,9 @@ public class HomeMenuHandler : MonoBehaviour
 
     public void ShowSettingsUI()
     {
-        settigsUI.SetActive(true);
+        PlayerPrefs.SetInt("total_settings_clicked",PlayerPrefs.GetInt("total_settings_clicked")+1);
+        settigsUI.GetComponent<Animator>().SetBool("settings_show",true);
+        //settigsUI.SetActive(true);
         uiToMove=settigsUI.GetComponent<RectTransform>();
         if(FirebaseHandler.instance!=null)
         {
@@ -103,7 +113,8 @@ public class HomeMenuHandler : MonoBehaviour
     #region Settings buttons events
     public void CloseSettingsUI()
     {
-        uiToMove=homeUI.GetComponent<RectTransform>();
+        settigsUI.GetComponent<Animator>().SetBool("settings_show",false);
+        //uiToMove=homeUI.GetComponent<RectTransform>();
         PlayButtonClickSound();
     }
     #endregion
@@ -237,7 +248,8 @@ public class HomeMenuHandler : MonoBehaviour
 
     void ShowGameModeUI()
     {
-        uiToMove=gameModeUI.GetComponent<RectTransform>();
+        homeAnim.SetBool("showSelection",true);
+        //uiToMove=gameModeUI.GetComponent<RectTransform>();
         GameModeSelectionHandler.instance.UpdatePlayerSprite(modeIndex);
 
         if(FirebaseHandler.instance!=null)
@@ -248,12 +260,14 @@ public class HomeMenuHandler : MonoBehaviour
             }
             else
             {
+                //
                 FirebaseHandler.instance.TrackVsBotPlay();
             }
         }
     }
     public void CloseGameModeUI()
     {
+        homeAnim.SetBool("showSelection",false);
         uiToMove=homeUI.GetComponent<RectTransform>();
         PlayButtonClickSound();
     }
@@ -267,7 +281,7 @@ public class HomeMenuHandler : MonoBehaviour
         // }
         // else
         // {
-           Play(); 
+        Play(); 
         // }
         PlayButtonClickSound();
     }
@@ -284,8 +298,7 @@ public class HomeMenuHandler : MonoBehaviour
         if(PlayerPrefs.GetInt("Ludo-Onboarding")==0)
         {
             PlayerPrefs.SetInt("Ludo-Onboarding",1);
-        }
-        
+        }    
         SceneManager.LoadScene("Ludo");
     }
     #endregion
@@ -293,14 +306,19 @@ public class HomeMenuHandler : MonoBehaviour
     #region permission
     public void CloseTheGame()
     {
+        HandlePermissionAnimation(true);
         PlayButtonClickSound();
-        permissionUI.SetActive(true);
     }
 
     public void ContinuePlaying()
     {
+        HandlePermissionAnimation(false);
         PlayButtonClickSound();
-        permissionUI.SetActive(false);
+    }
+
+    void HandlePermissionAnimation(bool permissionValue)
+    {
+        permissionUI.GetComponent<Animator>().SetBool("askPermission",permissionValue);
     }
 
     public void QuitTheGame()

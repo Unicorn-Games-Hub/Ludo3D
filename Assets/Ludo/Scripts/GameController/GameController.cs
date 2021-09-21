@@ -161,6 +161,7 @@ public class GameController : MonoBehaviour
     //0 for default and 1 for metallic
     public Material[] charBodyMat;
 
+
     void Awake()
     {
         if(instance!=null)
@@ -176,7 +177,9 @@ public class GameController : MonoBehaviour
     #region player initialization
     void Start()
     {
-        Application.targetFrameRate=60;
+        Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 0;
+        
         HandleGameData();
         if(GameDataHolder.instance!=null)
         {
@@ -275,13 +278,6 @@ public class GameController : MonoBehaviour
         else
         {
             allowDiceMoveTowardsPlayers=true;
-        }
-        
-        //tracking no of games played
-        if(AnalyticsTracker.instance!=null)
-        {
-            AnalyticsTracker.instance.TrackNumberOfGamesPlayed();
-            AnalyticsTracker.instance.TrackSessionAfterGameStart();
         }
     }
 
@@ -1443,13 +1439,6 @@ public class GameController : MonoBehaviour
     void FindPlayersRank()
     {
         List<infoHolder> SortedList = players.OrderByDescending(o=>o.winningChance).ToList();
-        int rankIndex=1;
-
-        foreach(var v in SortedList)
-        {
-            rankIndex++;
-        }
-
         if(LeaderboardHandler.instance!=null)
         {
             if(SortedList[0].player==playerType.Bot)
@@ -1468,10 +1457,10 @@ public class GameController : MonoBehaviour
             {
                 p4=1;
             }
-           LeaderboardHandler.instance.UpdateFirstRank(SortedList[0].playerID,SortedList[0].colorName,p1,SortedList[0].winningChance);
-           LeaderboardHandler.instance.UpdateSecondRank(SortedList[1].playerID,SortedList[1].colorName,p2,SortedList[1].winningChance);
-           LeaderboardHandler.instance.UpdateThirdRank(SortedList[1].playerID,SortedList[2].colorName,p3,SortedList[2].winningChance);
-           LeaderboardHandler.instance.UpdateFourthRank(SortedList[2].playerID,SortedList[3].colorName,p4,SortedList[3].winningChance);
+            LeaderboardHandler.instance.UpdateFirstRank(SortedList[0].playerID,SortedList[0].colorName,p1,SortedList[0].winningChance);
+            LeaderboardHandler.instance.UpdateSecondRank(SortedList[1].playerID,SortedList[1].colorName,p2,SortedList[1].winningChance);
+            LeaderboardHandler.instance.UpdateThirdRank(SortedList[1].playerID,SortedList[2].colorName,p3,SortedList[2].winningChance);
+            LeaderboardHandler.instance.UpdateFourthRank(SortedList[2].playerID,SortedList[3].colorName,p4,SortedList[3].winningChance);
         }
     }
 

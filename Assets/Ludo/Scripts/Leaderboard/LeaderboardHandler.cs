@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System;
 
 public class LeaderboardHandler : MonoBehaviour
 {
@@ -28,6 +29,10 @@ public class LeaderboardHandler : MonoBehaviour
     public string appUrl="https://play.google.com/store/apps/details?id=com.UnicornGames.Ludo";
     public GameObject rateusUI;
 
+    //time span
+    private ulong gameStartTime;
+    private bool rankShown=false;
+
     void Awake()
     {
         if(instance!=null)
@@ -44,12 +49,97 @@ public class LeaderboardHandler : MonoBehaviour
     {
         leaderboardUI.SetActive(false);
         rateusUI.SetActive(false);
+        // if(GameDataHolder.instance!=null)
+        // {
+        //     GameDataHolder.instance.rateUsShownCounter++;
+        // }
+
+        //tracking total number of players
+        int totalPlayers=0;
+        int totalHumans=0;
+        int totalBots=0;
         if(GameDataHolder.instance!=null)
         {
-            GameDataHolder.instance.rateUsShownCounter++;
+            GameDataHolder.instance.initialAdsShowCounter++;
+            for(int i=0;i<GameDataHolder.instance.playerIndex.Length;i++)
+            {
+                if(GameDataHolder.instance.playerIndex[i]!=2)
+                {
+                    totalPlayers++;
+                }
+                if(GameDataHolder.instance.playerIndex[i]==0)
+                {
+                    totalHumans++;
+                }
+                if(GameDataHolder.instance.playerIndex[i]==1)
+                {
+                    totalBots++;
+                }
+            }
+
+            if(totalHumans==totalPlayers)
+            {
+                PlayerPrefs.SetInt("total_player_vs_player",PlayerPrefs.GetInt("total_player_vs_player")+1);
+            }
+            else if(totalHumans==1)
+            {
+                PlayerPrefs.SetInt("total_player_vs_bots",PlayerPrefs.GetInt("total_player_vs_bots")+1);
+            }
+            else if(totalHumans>1&&totalPlayers>totalHumans)
+            {
+                PlayerPrefs.SetInt("total_player_vs_mixed",PlayerPrefs.GetInt("total_player_vs_mixed")+1);
+            }
+
+            if(!GameDataHolder.instance.isSessionStarted)
+            {
+                PlayerPrefs.SetInt("adsClickedThisSession",0);
+                PlayerPrefs.SetInt("adsThisSession",0);
+                GameDataHolder.instance.isSessionStarted=true;
+            }
         }
 
-        ShowRateUsUI();
+        //increment total games played
+        PlayerPrefs.SetInt("total_games_played",PlayerPrefs.GetInt("total_games_played")+1);
+        int matchPlayedTillNow=PlayerPrefs.GetInt("total_games_played");
+
+        if(Application.internetReachability==NetworkReachability.NotReachable)
+        {
+            PlayerPrefs.SetInt("total_offline_play",PlayerPrefs.GetInt("total_offline_play")+1);
+            
+        }
+        else if(Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork)
+        {
+            PlayerPrefs.SetInt("total_online_play",PlayerPrefs.GetInt("total_online_play")+1);
+        }
+
+        if(!PlayerPrefs.HasKey("milestone_target"))
+        {
+            PlayerPrefs.SetInt("milestone_target",10);
+        }
+
+        //
+        
+
+        if(FirebaseHandler.instance!=null)
+        {
+            FirebaseHandler.instance.TrackNumberOfPlayers(totalPlayers);
+            FirebaseHandler.instance.TrackNumberOfGamesPlayed(matchPlayedTillNow);
+            FirebaseHandler.instance.TrackGamesPlayedOffline(PlayerPrefs.GetInt("total_offline_play"));
+            FirebaseHandler.instance.TrackGamesPlayedOffline(PlayerPrefs.GetInt("total_online_play"));
+            //
+            if(matchPlayedTillNow>=PlayerPrefs.GetInt("milestone_target"))
+            {
+                FirebaseHandler.instance.TrackSessionMileStone();
+                PlayerPrefs.SetInt("milestone_target",PlayerPrefs.GetInt("milestone_target")+10);
+            }
+        }
+
+        if(AnalyticsTracker.instance!=null)
+        {
+            AnalyticsTracker.instance.TrackNumberOfGamesPlayed(matchPlayedTillNow);
+            AnalyticsTracker.instance.TrackSessionAfterGameStart();
+        }
+        gameStartTime=(ulong)System.DateTime.Now.Ticks;
     }
 
     #region updating rank
@@ -60,6 +150,7 @@ public class LeaderboardHandler : MonoBehaviour
         if(botValue==0)
         {
             lbInfoList[0].iconImage.sprite=playerIcons[id];
+            HandleGameEnd("First");
         }
         else
         {
@@ -74,6 +165,7 @@ public class LeaderboardHandler : MonoBehaviour
         if(botValue==0)
         {
             lbInfoList[1].iconImage.sprite=playerIcons[id];
+            HandleGameEnd("Second");
         }
         else
         {
@@ -88,6 +180,7 @@ public class LeaderboardHandler : MonoBehaviour
         if(botValue==0)
         {
             lbInfoList[2].iconImage.sprite=playerIcons[id];
+            HandleGameEnd("Third");
         }
         else
         {
@@ -102,10 +195,28 @@ public class LeaderboardHandler : MonoBehaviour
         if(botValue==0)
         {
             lbInfoList[3].iconImage.sprite=playerIcons[id];
+            HandleGameEnd("Fourth");
         }
         else
         {
             lbInfoList[3].iconImage.sprite=botIcons[id];
+        }
+    }
+
+    void HandleGameEnd(string gameRank)
+    {
+        if(!rankShown)
+        {
+            ulong newDiff=(ulong)System.DateTime.Now.Ticks-gameStartTime;
+            ulong spentTimeSpan=newDiff/TimeSpan.TicksPerMillisecond;
+            float timeSpent=(float)spentTimeSpan/1000f;
+            float sessionTime=timeSpent/60f;
+            
+            if(FirebaseHandler.instance!=null)
+            {
+                FirebaseHandler.instance.TrackGameEnd(sessionTime.ToString("F2"),gameRank,"online");
+            }
+            rankShown=true;
         }
     }
     #endregion
@@ -153,11 +264,10 @@ public class LeaderboardHandler : MonoBehaviour
         SceneManager.LoadScene("Ludo");
     }
 
-
     void TimeForRewardVideoAds()
     {
         ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo demo=new ConsentManager.ConsentManagerDemo.Scripts.AppodealDemo();
-        demo.TryToShowCachedAds();
+        demo.TryToShowCachedAds(1);
     }
 
     public void Exit()
@@ -169,6 +279,7 @@ public class LeaderboardHandler : MonoBehaviour
     #region Rating
     public void ShowRateUsUI()
     {
+        /*
         if(PlayerPrefs.GetInt("Ludo_rateus_value")==0)
         {
             if(GameDataHolder.instance!=null)
@@ -179,6 +290,7 @@ public class LeaderboardHandler : MonoBehaviour
                 }
             }
         }
+        */
     }
 
     public void RateUsClicked()

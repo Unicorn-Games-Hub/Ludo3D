@@ -33,6 +33,9 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
 
         public bool enableTestAds=false;
 
+        [Header("Banner Ads Settings")]
+        public bool showBannerAds=false;
+
 
         private void Awake()
         {
@@ -218,7 +221,12 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
             Appodeal.setSegmentFilter("newDouble", 123.123456789);
             Appodeal.setSegmentFilter("newString", "newStringFromSDK");
 
-            showBanner();
+            if(showBannerAds)
+            {
+                showBanner();
+            }
+            
+            //caching ads
             TryAdsCaching();
         }
 
@@ -227,22 +235,57 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
         {
             Appodeal.cache(Appodeal.REWARDED_VIDEO);
             Appodeal.cache(Appodeal.INTERSTITIAL);
-            TryToShowCachedAds();
+            TryToShowCachedAds(0);
         }
 
-        public void TryToShowCachedAds()
+        string adcallPosition="";
+        string adName="";
+        private bool eligibleForAds=false;
+        public void TryToShowCachedAds(int posId)
         {
+            switch(posId)
+            {
+                case 0:
+                eligibleForAds=false;
+                adcallPosition="start";
+                break;
+                case 1:
+                eligibleForAds=true;
+                adcallPosition="end";
+                break;
+                default:
+                adcallPosition="";
+                break;
+            }
+           
             if(SceneManager.GetActiveScene()==SceneManager.GetSceneByName("Ludo"))
             {
-                if(Appodeal.canShow(Appodeal.REWARDED_VIDEO))
+                if(GameDataHolder.instance!=null&&posId==0)
                 {
-                    Appodeal.show(Appodeal.REWARDED_VIDEO);
+                    if(GameDataHolder.instance.initialAdsShowCounter>=2)
+                    {
+                        eligibleForAds=true;
+                    }
                 }
-                else if(Appodeal.canShow(Appodeal.INTERSTITIAL))
+                if(eligibleForAds)
                 {
-                    Appodeal.show(Appodeal.INTERSTITIAL);
+                    if(Appodeal.canShow(Appodeal.REWARDED_VIDEO))
+                    {
+                        adName="reward_video";
+                        Appodeal.show(Appodeal.REWARDED_VIDEO);
+                    }
+                    else if(Appodeal.canShow(Appodeal.INTERSTITIAL))
+                    {
+                        adName="interstitial";
+                        Appodeal.show(Appodeal.INTERSTITIAL);
+                    }
                 }
             } 
+
+            if(FirebaseHandler.instance!=null)
+            {
+                FirebaseHandler.instance.TrackAdLoad(adName,adcallPosition);
+            }
         }
         #endregion
 
@@ -423,17 +466,23 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
 
         public void onInterstitialShown()
         {
-            Debug.Log("onInterstitialShown");
+            if(FirebaseHandler.instance!=null)
+            {
+                FirebaseHandler.instance.TrackInerstitialAds();
+            }
+
+            CountTotalAdsShown(0);
         }
 
         public void onInterstitialClosed()
         {
-            Debug.Log("onInterstitialClosed");
+            TrackAdsClosed();
         }
 
         public void onInterstitialClicked()
         {
             Debug.Log("onInterstitialClicked");
+            CountTotalAdsClicked(0);
         }
 
         public void onInterstitialExpired()
@@ -460,12 +509,16 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
 
         public void onRewardedVideoShown()
         {
-            print("onRewardedVideoShown");
+            if(FirebaseHandler.instance!=null)
+            {
+                FirebaseHandler.instance.TrackRewardVideoAds();
+            }
+            CountTotalAdsShown(1);
         }
 
         public void onRewardedVideoClosed(bool finished)
         {
-            print($"onRewardedVideoClosed. Finished - {finished}");
+            TrackAdsClosed();
         }
 
         public void onRewardedVideoFinished(double amount, string name)
@@ -482,6 +535,7 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
         public void onRewardedVideoClicked()
         {
             print("onRewardedVideoClicked");
+            CountTotalAdsClicked(1);
         }
 
         #endregion
@@ -542,5 +596,60 @@ namespace ConsentManager.ConsentManagerDemo.Scripts
         }
 
         #endregion PermissionGrantedListener
+
+        #region counting total ads shown
+        void CountTotalAdsShown(int adIndex)
+        {
+            PlayerPrefs.SetInt("total_ads_shown",PlayerPrefs.GetInt("total_ads_shown")+1);
+            if(adIndex==0)
+            {
+                PlayerPrefs.SetInt("interstitial_shown",PlayerPrefs.GetInt("interstitial_shown")+1);
+            }
+            else if(adIndex==1)
+            {
+                PlayerPrefs.SetInt("reward_video_shown",PlayerPrefs.GetInt("reward_video_shown")+1);
+            }
+
+            if(!PlayerPrefs.HasKey("ads_mileStone"))
+            {
+                PlayerPrefs.SetInt("ads_mileStone",30);
+            }
+            if(PlayerPrefs.GetInt("total_ads_shown")>=PlayerPrefs.GetInt("ads_mileStone"))
+            {
+                if(FirebaseHandler.instance!=null)
+                {
+                    FirebaseHandler.instance.TrackAdMileStone();
+                }
+                PlayerPrefs.SetInt("ads_mileStone",PlayerPrefs.GetInt("ads_mileStone")+30);
+            }
+            PlayerPrefs.SetInt("adsThisSession",PlayerPrefs.GetInt("adsThisSession")+1);
+        }
+        #endregion
+
+        #region  counting total ads clicked
+        void CountTotalAdsClicked(int adIndex)
+        {
+            PlayerPrefs.SetInt("total_ads_clicked",PlayerPrefs.GetInt("total_ads_clicked")+1);
+            if(adIndex==0)
+            {
+                PlayerPrefs.SetInt("interstitial_clicked",PlayerPrefs.GetInt("interstitial_clicked")+1);
+            }
+            else if(adIndex==1)
+            {
+                PlayerPrefs.SetInt("reward_clicked",PlayerPrefs.GetInt("reward_clicked")+1);
+            }
+            PlayerPrefs.SetInt("adsClickedThisSession",PlayerPrefs.GetInt("adsClickedThisSession")+1);
+        }
+        #endregion
+
+        #region Tracking ads closed
+        void TrackAdsClosed()
+        {
+            if(FirebaseHandler.instance!=null)
+            {
+                FirebaseHandler.instance.TrackAdLoad(adName,adcallPosition);
+            }
+        }
+        #endregion
     }
 }

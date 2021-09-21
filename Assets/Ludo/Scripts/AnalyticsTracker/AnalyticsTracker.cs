@@ -200,12 +200,11 @@ public class AnalyticsTracker : MonoBehaviour
         }
     }
 
-    public void TrackNumberOfGamesPlayed()
+    public void TrackNumberOfGamesPlayed(int totalGameNumber)
     {
-        PlayerPrefs.SetInt("total_games_played",PlayerPrefs.GetInt("total_games_played")+1);
         if(GameAnalyticsHandler.instance!=null)
         {
-            GameAnalyticsHandler.instance.TrackTotalGamesPlayed(PlayerPrefs.GetInt("total_games_played"));
+            GameAnalyticsHandler.instance.TrackTotalGamesPlayed(totalGameNumber);
         }
     }
 

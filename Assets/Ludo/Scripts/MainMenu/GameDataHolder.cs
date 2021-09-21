@@ -11,6 +11,10 @@ public class GameDataHolder : MonoBehaviour
     public int rateUsShownCounter=0;
     public bool rateusShown=false;
 
+    public int initialAdsShowCounter=0;
+
+    public bool isSessionStarted=false;
+
     void Awake()
     {
         if(instance!=null)
