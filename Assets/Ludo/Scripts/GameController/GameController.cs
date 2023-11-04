@@ -216,8 +216,9 @@ public class GameController : MonoBehaviour
             boardArtStyle=boardStyle.board_metallic;
         }
         HandleGameArtStyle();
-    }
 
+       
+    }
     void HandleGameData()
     {
         //player type

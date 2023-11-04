@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
+
 
 public class HomeMenuHandler : MonoBehaviour
 {
@@ -42,7 +44,9 @@ public class HomeMenuHandler : MonoBehaviour
    [Header("Game Audio")]
    public AudioSource gameAudio;
    public AudioClip btnClickSound;
-  
+
+    public GameObject loadingscreen;
+
    void Awake()
    {
        if(instance!=null)
@@ -54,29 +58,47 @@ public class HomeMenuHandler : MonoBehaviour
            instance=this;
        }
    }
-
+    static bool check;
     void Start()
     {
+
+
+        if (!check)
+        {
+            check = true;
+            loadingscreen.SetActive(true);
+            loadingscreen.transform.GetChild(2).GetChild(0).GetComponent<Image>().DOFillAmount(1, 5).OnComplete(()=> {
+                loadingscreen.SetActive(false);
+
+            });
+        }
+
+
         Application.targetFrameRate = 60;
         QualitySettings.vSyncCount = 0;
         
         //4 players at default
         UpdateSelectionUI(4);
-        if(FirebaseHandler.instance!=null)
+        if (FirebaseHandler.instance != null)
         {
-           FirebaseHandler.instance.TrackOpenFortheFirstTime();
+            FirebaseHandler.instance.TrackOpenFortheFirstTime();
         }
         onboardingUI.SetActive(false);
-        //permissionUI.SetActive(false);
+        permissionUI.SetActive(false);
+
+
+       
+          //  ADScript.Instance.ShowBanner();
+        
     }
 
-    // void Update()
-    // {
-    //     if(uiToMove!=null)
-    //     {
-    //         homeScreenUI.GetComponent<RectTransform>().anchoredPosition=Vector3.Lerp(homeScreenUI.GetComponent<RectTransform>().anchoredPosition,-uiToMove.anchoredPosition,Time.deltaTime*moveSpeed);
-    //     }
-    // }
+    //void Update()
+    //{
+    //    if (uiToMove != null)
+    //    {
+    //        homeScreenUI.GetComponent<RectTransform>().anchoredPosition = Vector3.Lerp(homeScreenUI.GetComponent<RectTransform>().anchoredPosition, -uiToMove.anchoredPosition, Time.deltaTime * moveSpeed);
+    //    }
+    //}
 
     #region Home button events
     public void PlayAgainstHuman()
@@ -89,21 +111,62 @@ public class HomeMenuHandler : MonoBehaviour
 
     public void PlayAgainstBot()
     {
+        
+        //ADScript.Instance.ShowIntestitial();
         PlayerPrefs.SetInt("total_against_cpu",PlayerPrefs.GetInt("total_against_cpu")+1);
         modeIndex=1;
         ShowGameModeUI();
         PlayButtonClickSound();
     }
 
+    public GameObject conectionLost, Connecting;
+    public void PlayAgainstMultiplayer()
+    {
+
+        //ADScript.Instance.ShowIntestitial();
+        if (Application.internetReachability == NetworkReachability.NotReachable)
+        {
+            conectionLost.SetActive(true);
+            conectionLost.GetComponent<DOTweenAnimation>().DORestart();
+            Invoke("offConectionlosttxt", 2f);
+
+        }
+        else
+        {
+            Connecting.SetActive(true);
+            //Connecting.GetComponent<DOTweenAnimation>().DORestart();
+            Invoke("offConectingtxt", Random.Range(5,10));
+
+        }
+
+
+       
+    }
+    void offConectionlosttxt()
+    {
+        conectionLost.SetActive(false);
+
+    }
+    void offConectingtxt()
+    {
+
+        Connecting.SetActive(false);
+
+        PlayerPrefs.SetInt("total_against_cpu", PlayerPrefs.GetInt("total_against_cpu") + 1);
+        modeIndex = 2;
+        ShowGameModeUI();
+        PlayButtonClickSound();
+
+    }
     public void ShowSettingsUI()
     {
         PlayerPrefs.SetInt("total_settings_clicked",PlayerPrefs.GetInt("total_settings_clicked")+1);
         settigsUI.GetComponent<Animator>().SetBool("settings_show",true);
         //settigsUI.SetActive(true);
         uiToMove=settigsUI.GetComponent<RectTransform>();
-        if(FirebaseHandler.instance!=null)
+        if (FirebaseHandler.instance != null)
         {
-           FirebaseHandler.instance.TrackSettings();
+            FirebaseHandler.instance.TrackSettings();
         }
         PlayButtonClickSound();
     }
@@ -171,7 +234,8 @@ public class HomeMenuHandler : MonoBehaviour
             {
                 GameDataHolder.instance.playerIndex[i]=2;
             }
-            avaliablePlayers[i].interactable=false;
+           // avaliablePlayers[i].interactable=false;
+            avaliablePlayers[i].gameObject.SetActive(false);
         }
             
             
@@ -220,7 +284,9 @@ public class HomeMenuHandler : MonoBehaviour
                     GameDataHolder.instance.playerIndex[playerIds[i]]=0;
                 }
             }
-            avaliablePlayers[playerIds[i]].interactable=true;
+            //avaliablePlayers[playerIds[i]].interactable=true;
+            avaliablePlayers[playerIds[i]].gameObject.SetActive(true);
+
         }
 
         //lets check game start is valid or not
@@ -252,16 +318,25 @@ public class HomeMenuHandler : MonoBehaviour
         //uiToMove=gameModeUI.GetComponent<RectTransform>();
         GameModeSelectionHandler.instance.UpdatePlayerSprite(modeIndex);
 
-        if(FirebaseHandler.instance!=null)
+        if (FirebaseHandler.instance != null)
         {
-            if(modeIndex==0)
+            if (modeIndex == 0)
             {
                 FirebaseHandler.instance.TrackVsHumanPlay();
             }
             else
             {
-                //
+                if (modeIndex == 2)
+                {
+                    FirebaseHandler.instance.TrackVsmultiPlay();
+
+                }
+                else
+                {
                 FirebaseHandler.instance.TrackVsBotPlay();
+
+                }
+                //
             }
         }
     }
@@ -271,7 +346,7 @@ public class HomeMenuHandler : MonoBehaviour
         uiToMove=homeUI.GetComponent<RectTransform>();
         PlayButtonClickSound();
     }
-
+    static int count;
     public void StartTheGame()
     {
         // if(PlayerPrefs.GetInt("Ludo-Onboarding")==0)
@@ -281,11 +356,78 @@ public class HomeMenuHandler : MonoBehaviour
         // }
         // else
         // {
-        Play(); 
-        // }
-        PlayButtonClickSound();
+
+        if (modeIndex == 2)
+        {
+            if (Application.internetReachability == NetworkReachability.NotReachable)
+            {
+                conectionLost.SetActive(true);
+                conectionLost.GetComponent<DOTweenAnimation>().DORestart();
+                Invoke("offConectionlosttxt", 2f);
+
+            }
+            else
+            {
+                // Connecting.SetActive(true);
+                //Connecting.GetComponent<DOTweenAnimation>().DORestart();
+                //  Invoke("offConectingtxt", 1f);
+                count += 1;
+                if (count > 1)
+                {
+                    if (Gley.MobileAds.API.IsRewardedVideoAvailable())
+                    {
+                        ADScript.Instance.ShowRewardedVideo();
+                    }
+                    else
+                    {
+                        ADScript.Instance.ShowIntestitial();
+
+                    }
+                }
+                FirebaseHandler.instance.TrackNumberOfGamesPlayed(count);
+                Play();
+                // }
+                PlayButtonClickSound();
+            }
+        }
+        else
+        {
+            count += 1;
+            if (count > 1)
+            {
+                ADScript.Instance.ShowIntestitial();
+            }
+            FirebaseHandler.instance.TrackNumberOfGamesPlayed(count);
+            Play();
+            // }
+            PlayButtonClickSound();
+        }
     }
 
+    public GameObject rewardedIcon;
+
+    private void Update()
+    {
+        if (modeIndex == 2&& count > 0)
+        {
+            if (Gley.MobileAds.API.IsRewardedVideoAvailable())
+            {
+                if(!rewardedIcon.activeInHierarchy)
+                rewardedIcon.SetActive(true);
+            }
+            else
+            {
+                if(rewardedIcon.activeInHierarchy)
+                rewardedIcon.SetActive(false);
+
+            }
+        }
+        else
+        {
+            if (rewardedIcon.activeInHierarchy)
+                rewardedIcon.SetActive(false);
+        }
+    }
     public void CloseOnboardingUI()
     {
         gameModeUI.SetActive(true);
@@ -323,6 +465,8 @@ public class HomeMenuHandler : MonoBehaviour
 
     public void QuitTheGame()
     {
+        ADScript.Instance.ShowIntestitial();
+
         Application.Quit();
     }
     #endregion

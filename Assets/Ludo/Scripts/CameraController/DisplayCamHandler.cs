@@ -85,7 +85,7 @@ public class DisplayCamHandler : MonoBehaviour
             gameCam.transform.position=mode2dPos;
             gameCam.transform.rotation=Quaternion.Euler(90f,0f,0f);
             Camera.main.orthographic = true;
-            gameCam.orthographicSize=5.7f;
+            gameCam.orthographicSize=6f;
             modeIndex=1;
         }
         UpdateIndicatorPositions(modeIndex);

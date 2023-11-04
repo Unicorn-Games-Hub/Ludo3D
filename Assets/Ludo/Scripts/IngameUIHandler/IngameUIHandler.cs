@@ -39,10 +39,13 @@ public class IngameUIHandler : MonoBehaviour
     public void Exit()
     {
         PlayClickSound();
-        if(AnalyticsTracker.instance!=null)
-        {
-            AnalyticsTracker.instance.TrackSessionEndAfterGameExit();
-        }
+        ADScript.Instance.ShowIntestitial();
+        FirebaseHandler.instance.TrackInerstitialAds();
+
+        //if(AnalyticsTracker.instance!=null)
+        //{
+        //    AnalyticsTracker.instance.TrackSessionEndAfterGameExit();
+        //}
         SceneManager.LoadScene("Home");
     }
 

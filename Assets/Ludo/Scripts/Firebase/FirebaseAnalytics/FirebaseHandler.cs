@@ -31,6 +31,10 @@ public class FirebaseHandler : MonoBehaviour
     {
         Firebase.Analytics.FirebaseAnalytics.LogEvent("app_open");
     }
+    public void TrackNumOfGamePlay(int numOfGames)
+    {
+        Firebase.Analytics.FirebaseAnalytics.LogEvent("Game_Start","number", "numOfGames");
+    }
 
     #region Home Screen
     public void TrackVsHumanPlay()
@@ -41,6 +45,10 @@ public class FirebaseHandler : MonoBehaviour
     public void TrackVsBotPlay()
     {
        Firebase.Analytics.FirebaseAnalytics.LogEvent("button_cpu","HumanvsCpu","vsBotClicked");
+    }
+    public void TrackVsmultiPlay()
+    {
+        Firebase.Analytics.FirebaseAnalytics.LogEvent("button_multiplayer", "HumanvsMultiplayer", "vsMultiplayerClicked");
     }
 
     public void TrackNumberOfPlayers(int noOfPlayers)
@@ -70,7 +78,9 @@ public class FirebaseHandler : MonoBehaviour
             new Firebase.Analytics.Parameter("gameplay_time",timeSpent),
             new Firebase.Analytics.Parameter("player_rank",rank),
             new Firebase.Analytics.Parameter("online_status",onlineStatus)
+            
         });
+        ADScript.Instance.ShowIntestitial();
     }
 
     public void TrackAdLoad(string adType,string adPos)

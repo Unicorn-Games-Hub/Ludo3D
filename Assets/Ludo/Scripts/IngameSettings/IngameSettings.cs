@@ -40,12 +40,12 @@ public class IngameSettings : MonoBehaviour
         }
         UpdateSoundToggle();
 
-        if(FirebaseHandler.instance!=null)
+        if (FirebaseHandler.instance != null)
         {
             FirebaseHandler.instance.TrackGameSfx(PlayerPrefs.GetInt("Ludo-Sound"));
         }
 
-        if(GameAudioHandler.instance!=null)
+        if (GameAudioHandler.instance!=null)
         {
             GameAudioHandler.instance.PlayButtonClickedSound();
         }
@@ -63,11 +63,11 @@ public class IngameSettings : MonoBehaviour
         }
         UpdateMusicToggle();
 
-        if(FirebaseHandler.instance!=null)
+        if (FirebaseHandler.instance != null)
         {
             FirebaseHandler.instance.TrackGameMusic(PlayerPrefs.GetInt("Ludo-Music"));
         }
-        if(GameAudioHandler.instance!=null)
+        if (GameAudioHandler.instance!=null)
         {
             GameAudioHandler.instance.PlayButtonClickedSound();
         }
@@ -90,11 +90,11 @@ public class IngameSettings : MonoBehaviour
         }
         UpdateVibrationToggle();
 
-        if(FirebaseHandler.instance!=null)
+        if (FirebaseHandler.instance != null)
         {
             FirebaseHandler.instance.TrackGameVibration(PlayerPrefs.GetInt("Ludo-Vibration"));
         }
-        if(GameAudioHandler.instance!=null)
+        if (GameAudioHandler.instance!=null)
         {
             GameAudioHandler.instance.PlayButtonClickedSound();
         }

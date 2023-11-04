@@ -8,6 +8,10 @@ public class PlayerSelector : MonoBehaviour
     public Text nameText;
     private string[] playerName={"Human","Bot"};
 
+
+
+
+
     public void UpdatePlayerType()
     {
         if(playerID==0)

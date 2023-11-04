@@ -110,10 +110,10 @@ public class OnboardingUIHandler : MonoBehaviour
     {
         PlayerPrefs.SetInt("LudoBoard-Type",boardId);
         UpdateBoardCheckMark();
-        if(AnalyticsTracker.instance!=null)
-        {
-            AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoBoard-Type"));
-        }
+        //if(AnalyticsTracker.instance!=null)
+        //{
+        //    AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoBoard-Type"));
+        //}
 
         if(HomeMenuHandler.instance!=null)
         {
@@ -136,10 +136,10 @@ public class OnboardingUIHandler : MonoBehaviour
     {
         PlayerPrefs.SetInt("LudoPlayer-Type",charId);
         UpdatePlayerCheckMark();
-        if(AnalyticsTracker.instance!=null)
-        {
-            AnalyticsTracker.instance.TrackLudoPlayer(PlayerPrefs.GetInt("LudoPlayer-Type"));
-        }
+        //if(AnalyticsTracker.instance!=null)
+        //{
+        //    AnalyticsTracker.instance.TrackLudoPlayer(PlayerPrefs.GetInt("LudoPlayer-Type"));
+        //}
 
         if(HomeMenuHandler.instance!=null)
         {
@@ -179,10 +179,10 @@ public class OnboardingUIHandler : MonoBehaviour
         }
         UpdateCutSceneSprite();
 
-        if(AnalyticsTracker.instance!=null)
-        {
-            AnalyticsTracker.instance.TrackCutSceneAnimationStatus(PlayerPrefs.GetInt("Ludo-CutScene"));
-        }
+        //if(AnalyticsTracker.instance!=null)
+        //{
+        //    AnalyticsTracker.instance.TrackCutSceneAnimationStatus(PlayerPrefs.GetInt("Ludo-CutScene"));
+        //}
 
         if(HomeMenuHandler.instance!=null)
         {
@@ -220,10 +220,10 @@ public class OnboardingUIHandler : MonoBehaviour
         }
         UpdateArtStyleSprite();
 
-        if(AnalyticsTracker.instance!=null)
-        {
-            AnalyticsTracker.instance.TrackLudoArtStyle(PlayerPrefs.GetInt("ludo_board_artStyle"));
-        }
+        //if(AnalyticsTracker.instance!=null)
+        //{
+        //    AnalyticsTracker.instance.TrackLudoArtStyle(PlayerPrefs.GetInt("ludo_board_artStyle"));
+        //}
     }
 
     void UpdateArtStyleSprite()

@@ -29,10 +29,10 @@ public class SettingsOption : MonoBehaviour
         }
         UpdateOptionSprite();
 
-        if(AnalyticsTracker.instance!=null)
-        {
-            AnalyticsTracker.instance.HandleLudoSettings(optionName);
-        }
+        //if(AnalyticsTracker.instance!=null)
+        //{
+        //    AnalyticsTracker.instance.HandleLudoSettings(optionName);
+        //}
 
         if(HomeMenuHandler.instance!=null)
         {

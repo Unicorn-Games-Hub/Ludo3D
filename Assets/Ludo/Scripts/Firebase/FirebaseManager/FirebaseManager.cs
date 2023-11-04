@@ -223,10 +223,10 @@ public class FirebaseManager : MonoBehaviour
        }
 
        //
-       if(AnalyticsTracker.instance!=null)
-       {
-           AnalyticsTracker.instance.TrackCrossPromotionShown();
-       }
+       //if(AnalyticsTracker.instance!=null)
+       //{
+       //    AnalyticsTracker.instance.TrackCrossPromotionShown();
+       //}
     }
 
     IEnumerator LoadGameIcons()

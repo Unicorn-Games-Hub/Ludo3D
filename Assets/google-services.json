@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "456481289122",
-    "project_id": "ludo-karuwa",
-    "storage_bucket": "ludo-karuwa.appspot.com"
+    "project_number": "873493849137",
+    "project_id": "c-ludo",
+    "storage_bucket": "c-ludo.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:456481289122:android:4a1822e6c6eff31bf9f8fb",
+        "mobilesdk_app_id": "1:873493849137:android:0929075d6049527773e110",
         "android_client_info": {
-          "package_name": "com.karuwaapps.ludo"
+          "package_name": "com.ludo.game.ug"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "456481289122-temaqajqngbvm5jj5jsgcb4q5hbdap97.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBOIfPjfy8dFL43janjfuTVlN2MbCMerkk"
+          "current_key": "AIzaSyCqWab3EHCTpMyuksCuEl6X0-Dv6EwuCl0"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "456481289122-temaqajqngbvm5jj5jsgcb4q5hbdap97.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

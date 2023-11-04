@@ -30,6 +30,25 @@ public class PlayerTurnTimer : MonoBehaviour
                 playerImage.sprite=playerIcon[1];
                 playerNameText.text="Bot";
             }
+
+            if (myMannager.Instance.isMultiPlayer)
+            {
+                playerImage.sprite = playerIcon[0];
+
+                playerNameText.text=myMannager.Instance.names[Id];
+                if (myMannager.Instance.flags[Id] != null)
+                {
+                    transform.GetChild(1).gameObject.SetActive(true);
+
+                    transform.GetChild(1).GetComponent<Image>().sprite = myMannager.Instance.flags[Id];
+                }
+                else
+                {
+                   // myturn = true;
+                }
+
+
+            }
         }
     }
 
@@ -48,5 +67,9 @@ public class PlayerTurnTimer : MonoBehaviour
                 myturn=false;
             }
         }
+
+
+
+
     }
 }

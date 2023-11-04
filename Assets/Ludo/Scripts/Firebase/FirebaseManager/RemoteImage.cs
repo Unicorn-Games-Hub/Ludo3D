@@ -16,10 +16,10 @@ public class RemoteImage : MonoBehaviour
     
     public void GoToUrl()
     {
-        if(AnalyticsTracker.instance!=null)
-        {
-            AnalyticsTracker.instance.TrackCrossPromoLinkClicked();
-        }
+        //if(AnalyticsTracker.instance!=null)
+        //{
+        //    AnalyticsTracker.instance.TrackCrossPromoLinkClicked();
+        //}
         Application.OpenURL(gameUrl);
     }
 

@@ -37,7 +37,10 @@ public class SettingsUIHandler : MonoBehaviour
         UpdatePlayerSelection();
         UpdateBoardSelection();
         HandleSettingsUI(0);
-    }   
+
+        HandlePlayerTypleIndexValue(1);
+
+    }
 
     #region Updating toggle and on off value of text
     void UpdateSoundToggle()
@@ -108,12 +111,12 @@ public class SettingsUIHandler : MonoBehaviour
         }
         UpdateSoundToggle();
 
-        if(FirebaseHandler.instance!=null)
+        if (FirebaseHandler.instance != null)
         {
             FirebaseHandler.instance.TrackGameSfx(PlayerPrefs.GetInt("Ludo-Sound"));
         }
 
-        if(HomeMenuHandler.instance!=null)
+        if (HomeMenuHandler.instance!=null)
         {
             HomeMenuHandler.instance.PlayButtonClickSound();
         }
@@ -131,11 +134,11 @@ public class SettingsUIHandler : MonoBehaviour
         }
         UpdateMusicToggle();
 
-        if(FirebaseHandler.instance!=null)
+        if (FirebaseHandler.instance != null)
         {
             FirebaseHandler.instance.TrackGameMusic(PlayerPrefs.GetInt("Ludo-Music"));
         }
-        if(HomeMenuHandler.instance!=null)
+        if (HomeMenuHandler.instance!=null)
         {
             HomeMenuHandler.instance.PlayButtonClickSound();
         }
@@ -153,11 +156,11 @@ public class SettingsUIHandler : MonoBehaviour
         }
         UpdateVibrationToggle();
 
-        if(FirebaseHandler.instance!=null)
+        if (FirebaseHandler.instance != null)
         {
             FirebaseHandler.instance.TrackGameVibration(PlayerPrefs.GetInt("Ludo-Vibration"));
         }
-        if(HomeMenuHandler.instance!=null)
+        if (HomeMenuHandler.instance!=null)
         {
             HomeMenuHandler.instance.PlayButtonClickSound();
         }
@@ -199,10 +202,10 @@ public class SettingsUIHandler : MonoBehaviour
     {
         PlayerPrefs.SetInt("LudoPlayer-Type",pId);
         UpdatePlayerSelection();
-        if(AnalyticsTracker.instance!=null)
-        {
-            AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoPlayer-Type"));
-        }
+        //if(AnalyticsTracker.instance!=null)
+        //{
+        //    AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoPlayer-Type"));
+        //}
 
         if(HomeMenuHandler.instance!=null)
         {
@@ -251,10 +254,10 @@ public class SettingsUIHandler : MonoBehaviour
         PlayerPrefs.SetInt("LudoBoard-Type",bId);
         UpdateBoardSelection();
         //
-        if(AnalyticsTracker.instance!=null)
-        {
-            AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoBoard-Type"));
-        }
+        //if(AnalyticsTracker.instance!=null)
+        //{
+        //    AnalyticsTracker.instance.TrackLudoBoard(PlayerPrefs.GetInt("LudoBoard-Type"));
+        //}
 
         if(HomeMenuHandler.instance!=null)
         {
